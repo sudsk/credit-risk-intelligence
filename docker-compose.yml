@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Frontend
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_WS_URL=ws://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      - backend
+
+  # Backend API
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=true
+      - CORS_ORIGINS=http://localhost:5173
+      - AGENT_ORCHESTRATOR_URL=http://orchestrator:8080
+      - MCP_SERVER_URL=http://mcp-servers:8001
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - mcp-servers
+
+  # MCP Servers
+  mcp-servers:
+    build: ./mcp-servers
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./mcp-servers:/app
+    command: python main.py
+
+  # Agent Orchestrator
+  orchestrator:
+    build: ./agents
+    ports:
+      - "8080:8080"
+    environment:
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - VERTEX_AI_LOCATION=${VERTEX_AI_LOCATION}
+      - GEMINI_MODEL=gemini-2.0-flash-exp
+      - MCP_SERVER_URL=http://mcp-servers:8001
+      - BACKEND_API_URL=http://backend:8000
+    volumes:
+      - ./agents:/app
+      - ~/.config/gcloud:/root/.config/gcloud:ro
+    command: python -m orchestrator.main
+
+volumes:
+  node_modules:
