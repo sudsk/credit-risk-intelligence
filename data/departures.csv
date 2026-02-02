@@ -1,0 +1,31 @@
+sme_id,employee_name,title,seniority,joined_date,left_date,tenure_months,detected_at,reason,replacement_hired
+0142,Sarah Johnson,Chief Technology Officer,C-Level,2019-03-15,2024-11-14,68,2024-11-14T09:23:17Z,Profile updated: Open to new opportunities,FALSE
+0142,Mike Chen,VP Sales,VP,2020-01-10,2024-11-05,58,2024-11-05T14:12:43Z,Moved to competitor,FALSE
+0142,David Park,Senior Software Engineer,Senior,2021-06-01,2024-10-28,40,2024-10-28T11:15:22Z,New role at different company,TRUE
+0531,Jessica Williams,Account Manager,Manager,2021-06-01,2024-10-28,40,2024-10-28T11:45:22Z,Profile updated: new role,FALSE
+0531,David Brown,Senior Account Manager,Senior,2020-09-15,2024-11-08,50,2024-11-08T16:33:11Z,Freelance consultant,FALSE
+0287,Rachel Green,Store Manager,Manager,2022-03-10,2024-10-15,31,2024-10-15T10:22:18Z,Better opportunity,TRUE
+0456,Tom Wilson,Regional Sales Director,Director,2019-07-20,2024-10-20,63,2024-10-20T14:55:33Z,Retired,FALSE
+0789,Lisa Anderson,Operations Manager,Manager,2021-11-05,2024-11-02,36,2024-11-02T09:18:45Z,Relocated,TRUE
+1812,Mark Roberts,Head Chef,Senior,2020-04-15,2024-10-25,42,2024-10-25T13:27:11Z,Started own restaurant,FALSE
+2690,Emma Davis,Project Manager,Manager,2021-08-20,2024-11-01,39,2024-11-01T11:42:29Z,New role in tech,FALSE
+2690,James Wilson,Construction Supervisor,Senior,2020-12-10,2024-10-18,34,2024-10-18T15:33:52Z,Better compensation,TRUE
+4012,Sophie Taylor,Senior Architect,Senior,2019-09-25,2024-10-28,49,2024-10-28T10:15:18Z,Career change,FALSE
+5001,Oliver Martin,Site Manager,Manager,2020-06-15,2024-11-05,53,2024-11-05T14:22:35Z,Health reasons,TRUE
+6212,Grace Thompson,Project Engineer,Manager,2021-02-20,2024-10-22,44,2024-10-22T09:48:27Z,Promotion elsewhere,FALSE
+7645,Lucas Brown,Safety Officer,Senior,2020-10-05,2024-10-30,48,2024-10-30T12:35:44Z,Better work-life balance,TRUE
+8856,Isabella Jones,Construction Manager,Manager,2019-12-12,2024-11-03,47,2024-11-03T11:18:56Z,Larger projects,FALSE
+9956,Noah Williams,Senior Engineer,Senior,2020-08-18,2024-10-26,50,2024-10-26T13:42:19Z,International opportunity,FALSE
+0234,Ava Johnson,Procurement Manager,Manager,2021-04-22,2024-10-19,42,2024-10-19T10:55:33Z,Career advancement,TRUE
+1489,Ethan Davis,Site Supervisor,Senior,2022-01-10,2024-11-07,34,2024-11-07T14:27:48Z,Closer to home,TRUE
+3467,Mia Wilson,Marketing Director,Director,2020-05-15,2024-10-24,41,2024-10-24T09:33:22Z,Agency opportunity,FALSE
+5556,Liam Anderson,Creative Director,Director,2021-03-08,2024-10-29,43,2024-10-29T15:18:44Z,Startup venture,FALSE
+7201,Charlotte Taylor,Account Executive,Manager,2022-02-14,2024-11-04,32,2024-11-04T11:42:17Z,Larger agency,TRUE
+0912,Benjamin Martin,Senior Developer,Senior,2021-07-20,2024-10-31,39,2024-10-31T10:25:38Z,Better tech stack,TRUE
+1378,Amelia Thompson,Product Manager,Manager,2020-11-12,2024-10-27,35,2024-10-27T13:47:55Z,Bigger company,FALSE
+2478,Henry Brown,Software Architect,Senior,2021-09-05,2024-11-06,38,2024-11-06T09:58:29Z,Remote opportunity,TRUE
+3134,Emily Jones,Tech Lead,Senior,2022-04-18,2024-10-23,30,2024-10-23T14:32:41Z,Career growth,FALSE
+4234,William Davis,Senior Engineer,Senior,2021-12-10,2024-10-28,34,2024-10-28T11:15:53Z,Better compensation,TRUE
+6101,Sofia Wilson,Development Manager,Manager,2020-08-25,2024-11-02,38,2024-11-02T10:48:27Z,Leadership role,FALSE
+7423,Alexander Anderson,Frontend Lead,Senior,2021-06-30,2024-10-25,40,2024-10-25T15:22:19Z,Product company,TRUE
+8523,Victoria Taylor,Backend Developer,Senior,2022-03-15,2024-10-30,31,2024-10-30T09:37:44Z,Higher salary,FALSE

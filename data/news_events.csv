@@ -1,0 +1,71 @@
+sme_id,event_date,event_type,severity,title,summary,source,sentiment_score,impact_score,verified
+0142,2024-11-14,departure,critical,CTO Departure Detected,LinkedIn shows CTO Sarah Johnson departed. No replacement hire detected. Sales Director also left within 2-week window.,LinkedIn API,-0.85,14,TRUE
+0142,2024-11-05,departure,critical,VP Sales Departure,VP Sales Mike Chen moved to competitor. Lost 2 major clients in past 30 days.,LinkedIn API,-0.72,8,TRUE
+0142,2024-10-20,customer_loss,warning,Major Client Loss,Lost Enterprise Corp ($180K annual contract). Client cited delivery delays and quality concerns.,CRM Data,-0.65,6,TRUE
+0531,2024-11-08,departure,warning,Account Manager Departure,Senior Account Manager David Brown left to become freelance consultant.,LinkedIn API,-0.55,5,TRUE
+0531,2024-10-28,departure,warning,Account Manager Exit,Jessica Williams departed for competitor agency.,LinkedIn API,-0.52,4,TRUE
+0531,2024-10-15,reputation,warning,Review Score Decline,Trustpilot score declined from 4.2 to 3.1 stars over 90 days. Multiple complaints about service quality.,Trustpilot API,-0.68,7,TRUE
+0445,2024-11-10,regulation,critical,Hemp Ban Legislation,Parliamentary committee recommends hemp products ban. Vote scheduled Dec 1. Company derives 42% revenue from hemp products.,Gov.uk Scraping,0.15,15,TRUE
+0672,2024-10-22,regulation,warning,Potential Regulatory Impact,Company may be affected by upcoming hemp legislation. Monitoring parliamentary discussions.,News Aggregation,0.05,8,TRUE
+0287,2024-11-02,payment_delay,warning,Supplier Payment Delays,3 suppliers reporting late payments (avg 47 days vs normal 30 days). Overdraft facility 85% utilized.,Trade Data,-0.48,6,TRUE
+0287,2024-10-18,inventory,info,Inventory Buildup,Inventory levels up 32% QoQ. May indicate slowing sales or supply chain overcorrection.,Banking Data,-0.25,3,TRUE
+1812,2024-10-25,departure,warning,Head Chef Departure,Head Chef Mark Roberts left to start own restaurant. Known for signature dishes.,LinkedIn API,-0.42,5,TRUE
+1812,2024-11-08,reputation,info,Positive Review Trend,Google reviews trending positive (4.3 to 4.5 stars) over past 60 days.,Google Places API,0.55,2,TRUE
+0234,2024-11-01,contract,info,Major Contract Win,Secured £2.4M contract for residential development in Manchester.,Companies House,0.75,8,TRUE
+0456,2024-10-20,expansion,info,Store Expansion Announced,Opening 3 new retail locations in Q1 2025. Hiring 25+ staff.,Press Release,0.68,6,TRUE
+0789,2024-10-30,contract,info,Export Deal Secured,Signed agreement to export to 5 European markets. €1.2M annual value.,Trade Publication,0.72,7,TRUE
+0823,2024-11-12,award,info,Industry Recognition,Won Best Green Energy Solution Award 2024.,Industry Association,0.80,3,TRUE
+2690,2024-11-05,accident,critical,Construction Site Incident,HSE investigating accident at London site. Project temporarily halted.,HSE Website,-0.82,12,TRUE
+2690,2024-10-18,delay,warning,Project Delay Reported,Thames Gateway project 6 weeks behind schedule. Client considering penalties.,Construction News,-0.58,7,TRUE
+4012,2024-10-28,litigation,warning,Client Dispute,Former client filing claim for alleged defects. Amount disputed: £450K.,Companies House,-0.65,9,TRUE
+5001,2024-11-08,contract,info,Major Infrastructure Win,Selected for HS2 subcontract worth £8.5M over 18 months.,Gov Contract Finder,0.85,12,TRUE
+6212,2024-10-22,delay,warning,Project Overrun,Manchester office building 4 weeks late. Weather and supply chain issues cited.,Local News,-0.42,5,TRUE
+7645,2024-10-30,compliance,info,Safety Certification Renewed,Achieved ISO 45001 recertification with zero non-conformities.,Certification Body,0.70,2,TRUE
+8856,2024-11-03,contract,info,Council Contract Awarded,Won £3.2M council housing maintenance contract.,Public Procurement,0.75,7,TRUE
+9956,2024-10-26,expansion,info,International Expansion,Opening Dubai office. Targeting Middle East construction boom.,Trade Press,0.78,9,TRUE
+3467,2024-10-24,client_loss,warning,Major Client Termination,Lost largest client (22% of revenue). Client moved to larger agency.,Industry Sources,-0.70,8,TRUE
+5556,2024-10-29,expansion,info,New Service Launch,Launching AI-powered marketing analytics platform.,Press Release,0.65,5,TRUE
+7201,2024-11-04,client_win,info,Enterprise Client Signed,Secured 3-year contract with FTSE 100 retailer.,Company Announcement,0.80,9,TRUE
+0912,2024-10-31,product_launch,info,New SaaS Product,Beta launch of cloud analytics platform. 50+ companies in pilot.,TechCrunch,0.68,6,TRUE
+1378,2024-10-27,client_win,info,Government Contract,Won Home Office digital transformation project worth £890K.,G-Cloud,0.75,8,TRUE
+2478,2024-11-06,funding,info,Investment Secured,Raised £1.5M Series A from VC firm for product expansion.,Crunchbase,0.82,10,TRUE
+3134,2024-10-23,partnership,info,Strategic Partnership,Partnership with Microsoft for AI integration.,Microsoft News,0.72,7,TRUE
+4234,2024-10-28,product_issue,warning,Software Bug Reports,Multiple clients reporting critical bug in latest release. Patch in development.,GitHub Issues,-0.55,6,TRUE
+6545,2024-11-02,client_loss,warning,Churn Rate Increase,Monthly churn rate increased from 3.2% to 5.8% over past quarter.,Internal Analytics,-0.48,5,TRUE
+7423,2024-10-25,competition,info,Market Expansion,Entering fintech sector with new compliance automation product.,Industry News,0.62,6,TRUE
+3578,2024-11-10,grant,info,Green Energy Grant,Awarded £2.2M government grant for renewable energy R&D.,BEIS Announcement,0.85,8,TRUE
+5334,2024-10-28,partnership,info,Utility Partnership,Strategic partnership with National Grid for smart meter rollout.,Energy Press,0.78,9,TRUE
+6323,2024-11-01,contract,info,Solar Farm Contract,Secured 10-year O&M contract for 50MW solar farm.,Renewable Energy News,0.80,10,TRUE
+9189,2024-10-30,expansion,info,Hydrogen Pilot Project,Selected for green hydrogen pilot in Scotland.,Scottish Government,0.75,7,TRUE
+1156,2024-10-20,review,info,Michelin Recognition,Head chef receives Michelin mention. Reservations up 40%.,Michelin Guide,0.88,8,TRUE
+2912,2024-11-05,expansion,info,New Restaurant Opening,Opening flagship location in Edinburgh. £800K investment.,Hospitality News,0.70,6,TRUE
+4456,2024-10-18,health_inspection,info,Perfect Health Score,Achieved 5-star food hygiene rating on inspection.,FSA Database,0.65,2,TRUE
+6656,2024-11-02,contract,info,Corporate Catering Win,Secured exclusive catering for 3 corporate campuses.,Company Press,0.72,7,TRUE
+8412,2024-10-25,award,info,Best Restaurant Award,Won regional best restaurant award.,Local Media,0.68,4,TRUE
+1590,2024-10-15,store_opening,info,Flagship Store Launch,Opened 5000 sq ft flagship on Oxford Street.,Retail Week,0.75,7,TRUE
+2589,2024-10-20,ecommerce,info,Online Sales Surge,E-commerce sales up 85% YoY. New fulfillment center planned.,Digital Commerce,0.70,6,TRUE
+3356,2024-10-28,partnership,info,Designer Collaboration,Exclusive collection with designer Sarah Burton.,Fashion Press,0.80,8,TRUE
+3790,2024-11-01,sustainability,info,Sustainability Certification,Achieved B Corp certification.,B Lab,0.75,5,TRUE
+4678,2024-10-22,expansion,info,Market Expansion,Entering European market via France. 8 stores planned.,Retail Gazette,0.72,7,TRUE
+5112,2024-10-18,celebrity,info,Celebrity Endorsement,Endorsed by fashion influencer (2M followers).,Social Media,0.65,6,TRUE
+5990,2024-10-25,sale,info,Black Friday Record,Black Friday sales +127% vs prior year.,Company Data,0.70,5,TRUE
+6767,2024-11-03,supply_chain,warning,Supply Chain Delay,Container shipment delayed 3 weeks. May affect Christmas stock.,Logistics Provider,-0.35,4,TRUE
+7312,2024-10-28,investment,info,Store Refurbishment,£1.2M investment in store modernization program.,Company Announcement,0.68,5,TRUE
+7756,2024-10-20,partnership,info,Retail Partnership,Exclusive partnership with John Lewis.,Retail News,0.80,9,TRUE
+8089,2024-10-26,digital,info,App Launch,Launched mobile shopping app. 10K downloads in first week.,App Store,0.72,6,TRUE
+8634,2024-11-04,expansion,info,Pop-Up Success,Temporary store in Covent Garden exceeding targets.,Evening Standard,0.70,5,TRUE
+8745,2024-10-22,collaboration,info,Sustainable Fashion Line,Launching eco-friendly clothing line.,Vogue Business,0.75,7,TRUE
+9623,2024-10-19,loyalty,info,Loyalty Program Launch,New rewards program. 15K signups in 2 weeks.,Marketing Week,0.65,4,TRUE
+9734,2024-10-24,franchise,info,Franchise Expansion,Opening franchise opportunities. 20 enquiries received.,Franchise Magazine,0.70,6,TRUE
+3245,2024-10-30,automation,info,Automation Investment,£3.5M investment in robotic assembly line.,Manufacturing Today,0.75,8,TRUE
+3689,2024-11-02,quality,info,Quality Certification,ISO 9001:2015 certification achieved.,BSI,0.68,3,TRUE
+4789,2024-10-25,export,info,Export Growth,Exports to Asia up 140% YoY.,Trade Association,0.80,9,TRUE
+6878,2024-10-20,innovation,info,Patent Granted,Patent granted for proprietary manufacturing process.,IPO,0.72,6,TRUE
+7978,2024-11-01,efficiency,info,Efficiency Gains,Production efficiency improved 28% through lean manufacturing.,Industry Publication,0.70,5,TRUE
+9290,2024-10-28,contract,info,Defense Contract,Awarded MOD contract for specialized components.,Defense Procurement,0.85,12,TRUE
+2367,2024-10-22,route_expansion,info,New Route Launch,Added 5 new distribution routes covering Scottish Highlands.,Logistics News,0.68,5,TRUE
+4345,2024-10-19,fleet,info,Fleet Modernization,Purchasing 15 electric delivery vehicles.,Green Fleet,0.75,6,TRUE
+5889,2024-11-03,technology,info,Tracking System Upgrade,Implemented real-time GPS tracking across fleet.,Tech Magazine,0.70,4,TRUE
+7090,2024-10-27,contract,info,Retail Distribution Win,Secured exclusive distribution for major retailer.,Supply Chain Digest,0.80,9,TRUE
+8301,2024-10-24,partnership,info,Cross-Border Partnership,Partnership with European logistics firm for EU shipments.,Freight News,0.72,7,TRUE
+9512,2024-10-21,warehouse,info,Automated Warehouse Opening,Opened 100K sq ft automated distribution center.,Logistics Manager,0.78,8,TRUE

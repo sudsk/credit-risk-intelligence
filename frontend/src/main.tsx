@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 })
 
 // Connect WebSocket
-wsService.connect()
+// wsService.connect()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

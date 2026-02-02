@@ -58,92 +58,13 @@ What would you like to know?`,
     dispatch(setIsTyping(true))
 
     try {
-      // Send to API (mock response for demo)
-      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate API delay
-
-      // Mock AI response based on user query
-      let aiResponse = ''
-      const lowerContent = content.toLowerCase()
-
-      if (lowerContent.includes('techstart')) {
-        aiResponse = `✅ Analyzing TechStart Solutions Ltd (#0142)...
-
-📰 **NEWS INTELLIGENCE:**
-- CTO departure confirmed (LinkedIn detection: 2 hours ago)
-- Sales Director also left (within 2-week window)
-- No replacement hires detected
-- Web traffic: -42% QoQ decline
-- Lost 2 major clients in past 30 days
-
-📊 **IMPACT ASSESSMENT:**
-- Current Risk Score: 54 → 68 (+14 points)
-- Status: MEDIUM → CRITICAL
-- Exposure: €250K
-
-😟 **SENTIMENT:** NEGATIVE
-- Employee reviews declining (Glassdoor)
-- Customer sentiment: concerns about delivery delays
-- Industry chatter: leadership vacuum
-
-🎯 **RUNNING SCENARIO ANALYSIS...**
-Calculating impact if situation continues for 90 days.
-
-Processing complete! Click the '🎯 Scenarios' tab at the top to see full results.
-
-Would you like me to create a task for immediate follow-up?`
-      } else if (lowerContent.includes('interest rate') || lowerContent.includes('rate')) {
-        aiResponse = `✅ Scenario submitted!
-
-**"What if interest rates go up 1%?"**
-
-Analyzing all 1,284 SMEs with variable rate exposure...
-
-Estimated time: 15-30 seconds
-
-🔄 Processing:
-- Identified 487 SMEs with variable rate loans
-- Recalculating debt service coverage for each
-- Running ML risk model with +1% interest shock
-
-**Switch to the Scenarios tab to see real-time progress!**
-
-I'll notify you when the analysis is complete.`
-      } else if (lowerContent.includes('portfolio') || lowerContent.includes('metrics')) {
-        aiResponse = `📊 **Current Portfolio Snapshot:**
-
-**Risk Distribution:**
-- Critical Risk (80-100): 23 SMEs | €42M exposure | 12.8%
-- Medium Risk (50-79): 142 SMEs | €98M exposure | 29.9%
-- Low Risk (0-49): 1,119 SMEs | €188M exposure | 57.3%
-
-**Key Metrics:**
-- Total Portfolio: 1,284 SMEs | €328M exposure
-- Average Risk Score: 64
-- Default Probability: 2.8%
-- Portfolio Trend: ↑ Slightly deteriorating
-
-**Recent Changes (This Quarter):**
-- +5 SMEs moved to Critical
-- +8 SMEs moved to Medium
-- -13 SMEs moved to Low Risk
-
-Would you like me to drill down into any specific category or sector?`
-      } else {
-        aiResponse = `I understand you're asking about: "${content}"
-
-I can help you with:
-- **Analyzing specific SMEs** - Just mention the company name or ID
-- **Running scenarios** - Ask "what if" questions about your portfolio
-- **Portfolio insights** - Ask about metrics, trends, or specific segments
-- **Creating tasks** - I can help you create follow-up tasks
-
-Could you provide more details about what you'd like to explore?`
-      }
+      // Send to API
+      const response = await chatAPI.sendMessage(content);
 
       const assistantMessage = {
         id: `assistant_${Date.now()}`,
         role: 'assistant' as const,
-        content: aiResponse,
+        content: response.content,
         timestamp: new Date().toISOString(),
       }
       dispatch(addMessage(assistantMessage))
@@ -152,7 +73,7 @@ Could you provide more details about what you'd like to explore?`
       const errorMessage = {
         id: `error_${Date.now()}`,
         role: 'assistant' as const,
-        content: 'Sorry, I encountered an error processing your request. Please try again.',
+        content: 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date().toISOString(),
       }
       dispatch(addMessage(errorMessage))
@@ -160,7 +81,6 @@ Could you provide more details about what you'd like to explore?`
       dispatch(setIsTyping(false))
     }
   }
-
   return (
     <div className="fixed bottom-24 right-6 z-50 w-[480px] h-[640px] bg-white rounded-lg shadow-2xl border border-neutral-300 flex flex-col">
       {/* Header */}

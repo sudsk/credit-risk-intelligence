@@ -22,19 +22,19 @@ function App() {
   const chatOpen = useSelector((state: RootState) => state.chat.isOpen)
 
   // WebSocket handlers for real-time updates
-  useWebSocket('scenario_update', (scenario: Scenario) => {
-    dispatch(updateScenario(scenario))
-  })
+  //useWebSocket('scenario_update', (scenario: Scenario) => {
+  //  dispatch(updateScenario(scenario))
+  //})
 
-  useWebSocket('task_created', (task: Task) => {
-    dispatch(addTask(task))
-  })
+  //useWebSocket('task_created', (task: Task) => {
+  //  dispatch(addTask(task))
+  //})
 
   return (
     <div className="min-h-screen bg-neutral-50">
       <Header />
       <TabNavigation />
-      
+
       <main className="max-w-[1600px] mx-auto px-4 py-6">
         {/* Tab Content */}
         {activeTab === 'home' && <HomeTab />}
