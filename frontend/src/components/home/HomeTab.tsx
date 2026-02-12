@@ -1,10 +1,23 @@
 import PortfolioMetrics from './PortfolioMetrics'
 import SMEList from './SMEList'
 import SMEDetailPanel from './SMEDetailPanel'
+import SimulateFeedButton from './SimulateFeedButton' 
+import AlertToast from '../common/AlertToast' 
 
 const HomeTab = () => {
   return (
     <div className="space-y-6">
+      {/* Alert Toast - Global */}
+      <AlertToast /> {/* ADD */}
+
+      {/* Portfolio Header with Simulate Button */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-neutral-800">
+          Portfolio Overview
+        </h2>
+        <SimulateFeedButton /> {/* ADD */}
+      </div>
+      
       {/* Portfolio Metrics Cards */}
       <PortfolioMetrics />
 
