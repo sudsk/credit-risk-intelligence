@@ -172,7 +172,38 @@ export const scenariosAPI = {
           reason: 'Impact from scenario',
         })) || [],
       },
-    };
+      // ADD THIS: recommendations from backend or generate mock
+      recommendations: data.recommendations || {
+        ultraConservative: {
+          reserveIncrease: '€25M',
+          sectorAdjustments: [
+            'Reduce automotive sector exposure by 20%',
+            'Exit high-risk SMEs in affected sectors',
+            'Increase monitoring frequency to daily'
+          ],
+          timeline: 'Immediate (within 48 hours)',
+          riskMitigation: '95%',
+        },
+        conservative: {
+          reserveIncrease: '€18M',
+          sectorAdjustments: [
+            'Reduce automotive sector exposure by 15%',
+            'Review covenants for high-risk SMEs'
+          ],
+          timeline: 'Within 30 days',
+          riskMitigation: '85%',
+        },
+        moderate: {
+          reserveIncrease: '€10M',
+          sectorAdjustments: [
+            'Monitor automotive sector closely',
+            'Prepare contingency plans'
+          ],
+          timeline: 'Within 60 days',
+          riskMitigation: '70%',
+        },
+      },
+    }
   },
 
   getScenarioById: async (id: string): Promise<Scenario> => {
@@ -212,5 +243,40 @@ export const chatAPI = {
     return [];
   },
 };
+
+// Alert API
+export const alertAPI = {
+  simulateFeed: async (): Promise<Alert> => {
+    const { data } = await api.post('/api/v1/alerts/simulate')
+    return {
+      id: data.alert_id,
+      timestamp: data.timestamp,
+      severity: data.severity,
+      smeId: data.sme_id,
+      smeName: data.sme_name,
+      exposure: `€${(data.exposure / 1000).toFixed(0)}K`,
+      eventType: data.event_type,
+      eventSummary: data.summary,
+      dataSources: data.data_sources,
+      dismissed: false,
+    }
+  },
+
+  getAlertHistory: async (): Promise<Alert[]> => {
+    const { data } = await api.get('/api/v1/alerts/history')
+    return data.alerts.map((alert: any) => ({
+      id: alert.alert_id,
+      timestamp: alert.timestamp,
+      severity: alert.severity,
+      smeId: alert.sme_id,
+      smeName: alert.sme_name,
+      exposure: `€${(alert.exposure / 1000).toFixed(0)}K`,
+      eventType: alert.event_type,
+      eventSummary: alert.summary,
+      dataSources: alert.data_sources,
+      dismissed: alert.dismissed || false,
+    }))
+  },
+}
 
 export default api;
