@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, ChevronUp, TrendingUp, TrendingDown } from 'lucide-react'
 import { formatRelativeTime, formatPercent } from '@/utils/formatters'
 import { Button } from '../common/Button'
+import RecommendationsTabs from './RecommendationsTabs'
 import type { Scenario } from '@/services/types'
 
 interface ScenarioResultsProps {
@@ -126,6 +127,16 @@ const ScenarioResults = ({ scenario }: ScenarioResultsProps) => {
             </div>
           </div>
 
+          {/* ADD THIS: Recommendations Section */}
+          {scenario.recommendations && (
+            <div className="mb-4">
+              <RecommendationsTabs
+                recommendations={scenario.recommendations}
+                scenarioName={scenario.name}
+              />
+            </div>
+          )}
+          
           {/* Top Impacted SMEs */}
           <div className="mb-4">
             <h5 className="text-sm font-semibold text-neutral-700 uppercase mb-3">
