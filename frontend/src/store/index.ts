@@ -4,6 +4,7 @@ import scenariosReducer from './scenariosSlice';
 import tasksReducer from './tasksSlice';
 import chatReducer from './chatSlice';
 import uiReducer from './uiSlice';
+import alertReducer from './alertSlice'
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     tasks: tasksReducer,
     chat: chatReducer,
     ui: uiReducer,
+    alerts: alertReducer,
   },
 });
 
