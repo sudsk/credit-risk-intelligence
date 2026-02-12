@@ -103,6 +103,7 @@ export interface Scenario {
   createdAt: string;
   completedAt?: string;
   results?: ScenarioResults;
+  recommendations?: ScenarioRecommendation 
 }
 
 export interface ScenarioResults {
@@ -143,4 +144,30 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+}
+
+export interface Alert {
+  id: string
+  timestamp: string
+  severity: 'critical' | 'warning'
+  smeId: string
+  smeName: string
+  exposure: string
+  eventType: 'executive_departure' | 'payment_delay' | 'regulation' | 'sector_shock' | 'client_churn'
+  eventSummary: string
+  dataSources: string[]
+  dismissed: boolean
+}
+
+export interface RecommendationTier {
+  reserveIncrease: string
+  sectorAdjustments: string[]
+  timeline: string
+  riskMitigation: string
+}
+
+export interface ScenarioRecommendation {
+  ultraConservative: RecommendationTier
+  conservative: RecommendationTier
+  moderate: RecommendationTier
 }
