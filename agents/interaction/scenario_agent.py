@@ -124,7 +124,7 @@ Process:
 Provide clear before/after comparisons and identify top impacted SMEs.
 """
         
-        return self.client.adk.agents.create(
+        agent = self.client.agentic.create_agent(
             model=self.config.model_name,
             system_instruction=system_instruction,
             tools=tools,

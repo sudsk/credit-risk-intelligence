@@ -123,7 +123,7 @@ Analysis Framework:
 Provide clear, actionable insights with specific data points and recommendations.
 """
         
-        return self.client.adk.agents.create(
+        agent = self.client.agentic.create_agent(
             model=self.config.model_name,
             system_instruction=system_instruction,
             tools=tools,

@@ -36,6 +36,8 @@ class ChatAgent:
         
         # Create agent with tools
         self.agent = self._create_agent()
+
+        self.sessions = {}  # Store sessions by ID
         
         logger.info("Chat Agent initialized")
     
@@ -101,7 +103,7 @@ class ChatAgent:
         ]
         
         # Create and return agent
-        agent = self.client.adk.agents.create(
+        agent = self.client.agentic.create_agent(
             model=self.config.model_name,
             system_instruction=CHAT_SYSTEM_INSTRUCTION,
             tools=tools,
@@ -254,6 +256,12 @@ class ChatAgent:
             Agent's response
         """
         logger.info(f"Processing query: {user_query}")
+
+        # Get or create session
+        if session_id not in self.sessions:
+            self.sessions[session_id] = self.agent.start_session(session_id=session_id)
+        
+        session = self.sessions[session_id]
         
         try:
             # Start agent session

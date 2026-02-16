@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
-import uvicorn
+import uvicorn, httpx
 
 # Import services
 from services.portfolio_service import get_portfolio_service
@@ -325,18 +325,26 @@ async def get_scenario_templates():
 @app.post("/api/v1/chat")
 async def chat(request: ChatRequest):
     """
-    Process natural language query about the portfolio.
-    
-    Request Body:
-        {
-            "query": "Show me critical SMEs",
-            "use_claude_api": false  // Set to true if you have Claude API key
-        }
-    
-    Returns:
-        AI response with relevant data
+    Process chat via ADK Orchestrator (if enabled) or fallback to rule-based
     """
     try:
+        # Try orchestrator first
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            try:
+                orch_response = await client.post(
+                    "http://localhost:8080/orchestrate",
+                    json={
+                        "message": request.query,
+                        "session_id": "default"
+                    }
+                )
+                if orch_response.status_code == 200:
+                    data = orch_response.json()
+                    return {"answer": data["response"], "type": "adk_orchestrator"}
+            except:
+                pass  # Fallback to rule-based
+        
+        # Fallback to existing chat service
         response = await chat_service.process_query(
             request.query,
             use_claude_api=request.use_claude_api

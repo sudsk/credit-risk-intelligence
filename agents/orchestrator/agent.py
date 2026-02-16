@@ -109,7 +109,7 @@ Your role is to analyze user requests and route them to the appropriate speciali
 Route based on intent, not just keywords. Consider context and user's goal.
 """
         
-        return self.client.adk.agents.create(
+        agent = self.client.agentic.create_agent(
             model=self.config.model_name,
             system_instruction=system_instruction,
             tools=tools,

@@ -1,5 +1,5 @@
 # Google ADK v1.19.0
-google-genai[adk]==1.19.0
+google-genai[adk]==1.25.0
 
 # Google Cloud
 google-cloud-aiplatform==1.73.0
