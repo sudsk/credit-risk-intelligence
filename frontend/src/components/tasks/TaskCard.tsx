@@ -1,8 +1,6 @@
-import { CheckCircle, ExternalLink, Eye, MessageSquare, User } from 'lucide-react'
-import { formatDate } from '@/utils/formatters'
+import { CheckCircle, ExternalLink, Eye } from 'lucide-react'
 import { Button } from '../common/Button'
 import { Badge } from '../common/Badge'
-import { cn } from '@/utils/formatters'
 import type { Task } from '@/services/types'
 
 interface TaskCardProps {
@@ -13,84 +11,126 @@ interface TaskCardProps {
 }
 
 const TaskCard = ({ task, onComplete, onViewSME, onViewSource }: TaskCardProps) => {
-  const getStatusColor = (status: string) => {
+
+  const getBorderColor = (status: string) => {
     switch (status) {
-      case 'overdue':
-        return 'border-critical-60 bg-critical-50'
-      case 'due_today':
-        return 'border-warning-60 bg-warning-50'
-      case 'upcoming':
-        return 'border-primary-60 bg-white'
-      default:
-        return 'border-neutral-300 bg-white'
+      case 'overdue': return 'var(--uui-critical-60)'
+      case 'due_today': return 'var(--uui-warning-60)'
+      default: return 'var(--uui-neutral-60)'
     }
   }
 
-  const getPriorityBadge = (priority: string) => {
+  const getPriorityVariant = (priority: string) => {
     switch (priority) {
-      case 'high':
-        return <Badge variant="critical">HIGH</Badge>
-      case 'medium':
-        return <Badge variant="warning">MEDIUM</Badge>
-      case 'low':
-        return <Badge variant="info">LOW</Badge>
-      default:
-        return null
+      case 'high': return 'critical'
+      case 'medium': return 'warning'
+      case 'low': return 'info'
+      default: return 'info'
     }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    })
   }
 
   return (
-    style = {{ background: 'var(--uui-neutral-70)', border: `1px solid var(--uui-neutral-60)`, borderLeft: task.status === 'overdue' ? '3px solid var(--uui-critical-60)' : task.status === 'due_today' ? '3px solid var(--uui-warning-60)' : '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', padding: '12px' }
-}
-{/* Header */ }
-<div className="flex items-start justify-between mb-3">
-  <div className="flex-1">
-    <div className="flex items-center gap-2 mb-2">
-      <span className="text-xs font-mono text-neutral-600">
-        {task.smeId} {task.smeName}
-      </span>
-      {getPriorityBadge(task.priority)}
+    <div style={{
+      background: 'var(--uui-neutral-70)',
+      border: `1px solid var(--uui-neutral-60)`,
+      borderLeft: `3px solid ${getBorderColor(task.status)}`,
+      borderRadius: 'var(--uui-border-radius)',
+      padding: '12px',
+    }}>
+
+      {/* Header Row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '9px' }}>
+        <div style={{ flex: 1 }}>
+          {/* Client ID + Priority Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span style={{
+              fontSize: '11px',
+              color: 'var(--uui-text-tertiary)',
+              fontFamily: 'var(--uui-font-mono)',
+            }}>
+              {task.smeId} {task.smeName}
+            </span>
+            <Badge variant={getPriorityVariant(task.priority) as any}>
+              {task.priority.toUpperCase()}
+            </Badge>
+          </div>
+
+          {/* Task Title */}
+          <div style={{
+            fontSize: '13px',
+            fontWeight: 600,
+            color: 'var(--uui-text-primary)',
+            marginBottom: '4px',
+          }}>
+            {task.title}
+          </div>
+
+          {/* Meta info */}
+          <div style={{
+            fontSize: '11px',
+            color: 'var(--uui-text-tertiary)',
+            display: 'flex',
+            gap: '12px',
+            flexWrap: 'wrap' as const,
+          }}>
+            <span><strong style={{ color: 'var(--uui-text-secondary)' }}>Due:</strong> {formatDate(task.dueDate)}</span>
+            <span><strong style={{ color: 'var(--uui-text-secondary)' }}>Assigned:</strong> {task.assignee}</span>
+            <span><strong style={{ color: 'var(--uui-text-secondary)' }}>Exposure:</strong>
+              <span style={{ fontFamily: 'var(--uui-font-mono)', marginLeft: '4px' }}>{task.exposure}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Description */}
+      {task.description && (
+        <div style={{
+          fontSize: '12px',
+          color: 'var(--uui-text-secondary)',
+          marginBottom: '9px',
+          lineHeight: 1.5,
+        }}>
+          {task.description}
+        </div>
+      )}
+
+      {/* Source */}
+      <div style={{
+        fontSize: '11px',
+        color: 'var(--uui-text-tertiary)',
+        marginBottom: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        fontStyle: 'italic',
+      }}>
+        <ExternalLink size={11} />
+        <span><strong>Created from:</strong> {task.source}</span>
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' as const }}>
+        <Button variant="primary" size="sm" onClick={onComplete}>
+          <CheckCircle size={13} />
+          Mark Complete
+        </Button>
+        <Button variant="secondary" size="sm" onClick={onViewSME}>
+          <Eye size={13} />
+          View SME Details
+        </Button>
+        <Button variant="secondary" size="sm" onClick={onViewSource}>
+          <ExternalLink size={13} />
+          View Source Event
+        </Button>
+      </div>
+
     </div>
-    <h4 className="text-base font-bold text-neutral-800 mb-1">{task.title}</h4>
-    <div className="text-xs text-neutral-600">
-      <strong>Due:</strong> {formatDate(task.dueDate)} •{' '}
-      <strong>Assigned to:</strong> {task.assignee} •{' '}
-      <strong>Exposure:</strong> <span className="font-mono">{task.exposure}</span>
-    </div>
-  </div>
-</div>
-
-{/* Description */ }
-{
-  task.description && (
-    <p className="text-sm text-neutral-700 mb-3">{task.description}</p>
-  )
-}
-
-{/* Source */ }
-<div className="text-xs text-neutral-500 mb-3 flex items-center gap-1">
-  <ExternalLink className="w-3 h-3" />
-  <span>
-    <strong>Created from:</strong> {task.source}
-  </span>
-</div>
-
-{/* Actions */ }
-<div className="flex items-center gap-2">
-  <Button variant="primary" size="sm" onClick={onComplete}>
-    <CheckCircle className="w-3.5 h-3.5" />
-    Mark Complete
-  </Button>
-  <Button variant="secondary" size="sm" onClick={onViewSME}>
-    <Eye className="w-3.5 h-3.5" />
-    View SME Details
-  </Button>
-  <Button variant="secondary" size="sm" onClick={onViewSource}>
-    <ExternalLink className="w-3.5 h-3.5" />
-    View Source Event
-  </Button>
-</div>
-    </div >
   )
 }
 
