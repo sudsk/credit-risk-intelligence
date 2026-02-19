@@ -10,7 +10,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '../common/Card'
 import { Badge } from '../common/Badge'
 import { formatRelativeTime } from '@/utils/formatters'
 
-// Mock data
 const newsItems = [
   {
     id: 'news_001',
@@ -71,229 +70,172 @@ const NewsIntelligence = () => {
   const [selectedAssignee, setSelectedAssignee] = useState<{ [key: string]: string }>({})
   const [selectedPriority, setSelectedPriority] = useState<{ [key: string]: string }>({})
 
-  const handleRunScenario = (newsItem: typeof newsItems[0]) => {
-    const scenario = {
-      id: `scenario_${Date.now()}`,
-      name: `${newsItem.smeName} - ${newsItem.title}`,
-      status: 'in_progress' as const,
-      progress: 0,
-      createdAt: new Date().toISOString(),
-    }
-    dispatch(addScenario(scenario))
+  const handleRunScenario = (item: typeof newsItems[0]) => {
+    dispatch(addScenario({ id: `scenario_${Date.now()}`, name: `${item.smeName} - ${item.title}`, status: 'in_progress', progress: 0, createdAt: new Date().toISOString() }))
     dispatch(setActiveTab('scenarios'))
   }
 
-  const handleCreateTask = (newsItem: typeof newsItems[0]) => {
-    const task = {
+  const handleCreateTask = (item: typeof newsItems[0]) => {
+    dispatch(addTask({
       id: `task_${Date.now()}`,
-      title: `Follow up: ${newsItem.smeName} - ${newsItem.title}`,
-      smeId: newsItem.smeId,
-      smeName: newsItem.smeName,
-      exposure: newsItem.exposure,
-      assignee: selectedAssignee[newsItem.id] || 'Unassigned',
-      priority: (selectedPriority[newsItem.id] || 'medium') as 'high' | 'medium' | 'low',
+      title: `Follow up: ${item.smeName} - ${item.title}`,
+      smeId: item.smeId, smeName: item.smeName, exposure: item.exposure,
+      assignee: selectedAssignee[item.id] || 'Unassigned',
+      priority: (selectedPriority[item.id] || 'medium') as 'high' | 'medium' | 'low',
       dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-      status: 'upcoming' as const,
-      description: newsItem.summary,
-      source: `News Intelligence (${newsItem.timestamp})`,
+      status: 'upcoming', description: item.summary,
+      source: `News Intelligence (${item.timestamp})`,
       createdAt: new Date().toISOString(),
-    }
-    dispatch(addTask(task))
+    }))
     dispatch(setActiveTab('tasks'))
   }
 
   const handleViewSME = (smeId: string, smeName: string) => {
-    // Mock SME object - in real app would fetch from API
-    const sme = {
-      id: smeId,
-      name: smeName,
-      riskScore: 68,
-      riskCategory: 'critical' as const,
-      exposure: '€250K',
-      sector: 'Software/Technology',
-      geography: 'UK',
-      trend: 'up' as const,
-      trendValue: 14,
-    }
-    dispatch(setSelectedSME(sme))
+    dispatch(setSelectedSME({ id: smeId, name: smeName, riskScore: 68, riskCategory: 'critical', exposure: '€250K', sector: 'Software/Technology', geography: 'UK', trend: 'up', trendValue: 14 }))
     dispatch(setActiveTab('home'))
   }
 
-  const toggleExpand = (newsId: string) => {
-    setExpandedNews(expandedNews === newsId ? null : newsId)
-  }
-
-  const getSeverityBadge = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return <Badge variant="critical">CRITICAL</Badge>
-      case 'warning':
-        return <Badge variant="warning">WARNING</Badge>
-      default:
-        return <Badge variant="info">INFO</Badge>
-    }
+  const selectStyle: React.CSSProperties = {
+    width: '100%', padding: '6px 9px', fontSize: '12px',
+    background: 'var(--uui-neutral-80)',
+    border: '1px solid var(--uui-neutral-60)',
+    borderRadius: 'var(--uui-border-radius)',
+    color: 'var(--uui-text-primary)',
+    fontFamily: 'var(--uui-font)',
+    outline: 'none',
   }
 
   return (
-    <Card className="h-[calc(100vh-200px)] flex flex-col">
-      <CardHeader className="flex-shrink-0">
+    <Card style={{ height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }}>
+      <CardHeader>
         <CardTitle>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">📰</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+            <span style={{ fontSize: '20px' }}>📰</span>
             <div>
-              <div className="text-lg font-semibold">News Intelligence</div>
-              <div className="text-xs font-normal text-neutral-500">
-                AI-Generated Insights from Alternative Data
-              </div>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>News Intelligence</div>
+              <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', fontWeight: 400 }}>AI-Generated Insights from Alternative Data</div>
             </div>
           </div>
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto">
-        <div className="space-y-4">
-          {newsItems.map((item) => (
-            <div
-              key={item.id}
-              className="border-2 border-neutral-300 bg-white rounded-lg overflow-hidden hover:border-primary-60 transition-colors"
-            >
-              {/* News Header */}
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-mono text-neutral-600">
-                        {item.smeId} {item.smeName}
-                      </span>
-                      {getSeverityBadge(item.severity)}
-                    </div>
-                    <h4 className="text-base font-bold text-neutral-800 mb-1">
-                      {item.title}
-                    </h4>
-                    <div className="flex items-center gap-2 text-xs text-neutral-500">
-                      <Clock className="w-3 h-3" />
-                      <span>{formatRelativeTime(item.timestamp)}</span>
-                      <span>•</span>
-                      <span className="font-mono">{item.exposure} exposure</span>
-                    </div>
+      <CardContent style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {newsItems.map((item) => {
+            const isCritical = item.severity === 'critical'
+            const accentColor = isCritical ? 'var(--uui-critical-60)' : 'var(--uui-warning-60)'
+            const isExpanded = expandedNews === item.id
+
+            return (
+              <div key={item.id} style={{
+                background: 'var(--uui-neutral-70)',
+                border: `1px solid var(--uui-neutral-60)`,
+                borderLeft: `3px solid ${accentColor}`,
+                borderRadius: 'var(--uui-border-radius)',
+                overflow: 'hidden',
+              }}>
+                <div style={{ padding: '12px' }}>
+                  {/* Meta */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '11px', fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-tertiary)' }}>
+                      {item.smeId} {item.smeName}
+                    </span>
+                    <Badge variant={isCritical ? 'critical' : 'warning'}>
+                      {item.severity.toUpperCase()}
+                    </Badge>
                   </div>
-                </div>
 
-                <p className="text-sm text-neutral-700 mb-3">{item.summary}</p>
+                  {/* Title */}
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--uui-text-primary)', marginBottom: '6px' }}>
+                    {item.title}
+                  </div>
 
-                {/* Expanded Signals */}
-                {expandedNews === item.id && (
-                  <div className="mb-3 pt-3 border-t border-neutral-200">
-                    <div className="text-xs font-semibold text-neutral-600 uppercase mb-2">
-                      Data Signals
-                    </div>
-                    <div className="space-y-2">
-                      {item.signals.map((signal, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-start gap-2 text-xs bg-neutral-50 p-2 rounded"
-                        >
-                          <AlertCircle className="w-3 h-3 text-neutral-500 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <strong>{signal.source}:</strong> {signal.detail}
+                  {/* Time + Exposure */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--uui-text-tertiary)', marginBottom: '9px' }}>
+                    <Clock size={11} />
+                    <span>{formatRelativeTime(item.timestamp)}</span>
+                    <span>•</span>
+                    <span style={{ fontFamily: 'var(--uui-font-mono)' }}>{item.exposure} exposure</span>
+                  </div>
+
+                  {/* Summary */}
+                  <p style={{ fontSize: '13px', color: 'var(--uui-text-secondary)', marginBottom: '12px', lineHeight: 1.5 }}>
+                    {item.summary}
+                  </p>
+
+                  {/* Expanded: Signals */}
+                  {isExpanded && (
+                    <div style={{ marginBottom: '12px', paddingTop: '12px', borderTop: '1px solid var(--uui-neutral-60)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '9px' }}>
+                        Data Signals
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {item.signals.map((signal, idx) => (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '12px', background: 'var(--uui-neutral-80)', padding: '8px', borderRadius: 'var(--uui-border-radius)' }}>
+                            <AlertCircle size={12} style={{ color: 'var(--uui-text-tertiary)', marginTop: '2px', flexShrink: 0 }} />
+                            <div style={{ color: 'var(--uui-text-secondary)' }}>
+                              <strong style={{ color: 'var(--uui-text-primary)' }}>{signal.source}:</strong> {signal.detail}
+                            </div>
                           </div>
+                        ))}
+                      </div>
+                      {/* Recommendation */}
+                      <div style={{ marginTop: '9px', padding: '9px 12px', background: 'rgba(244,184,58,0.1)', border: '1px solid var(--uui-warning-60)', borderRadius: 'var(--uui-border-radius)', fontSize: '12px', color: 'var(--uui-text-secondary)' }}>
+                        <strong style={{ color: 'var(--uui-warning-70)' }}>💡 Recommendation:</strong> {item.recommendation}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Expanded: Task Creation */}
+                  {isExpanded && (
+                    <div style={{ marginBottom: '12px', paddingTop: '12px', borderTop: '1px solid var(--uui-neutral-60)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '9px' }}>
+                        Create Task
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '9px' }}>
+                        <div>
+                          <label style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', display: 'block', marginBottom: '4px' }}>Assign to</label>
+                          <select value={selectedAssignee[item.id] || ''} onChange={(e) => setSelectedAssignee({ ...selectedAssignee, [item.id]: e.target.value })} style={selectStyle}>
+                            <option value="">Select assignee...</option>
+                            <option value="John Smith">John Smith</option>
+                            <option value="Jane Doe">Jane Doe</option>
+                            <option value="Sarah Chen">Sarah Chen</option>
+                            <option value="Mike Wilson">Mike Wilson</option>
+                          </select>
                         </div>
-                      ))}
-                    </div>
-                    <div className="mt-3 p-2 bg-warning-50 border border-warning-60 rounded text-xs">
-                      <strong>💡 Recommendation:</strong> {item.recommendation}
-                    </div>
-                  </div>
-                )}
-
-                {/* Task Creation Inline Form */}
-                {expandedNews === item.id && (
-                  <div className="mb-3 pt-3 border-t border-neutral-200">
-                    <div className="text-xs font-semibold text-neutral-600 uppercase mb-2">
-                      Create Task
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="text-xs text-neutral-600 block mb-1">
-                          Assign to
-                        </label>
-                        <select
-                          value={selectedAssignee[item.id] || ''}
-                          onChange={(e) =>
-                            setSelectedAssignee({ ...selectedAssignee, [item.id]: e.target.value })
-                          }
-                          className="w-full px-2 py-1.5 text-xs border border-neutral-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-60 bg-neutral-700 text-neutral-50"
-                        >
-                          <option value="">Select assignee...</option>
-                          <option value="John Smith">John Smith</option>
-                          <option value="Jane Doe">Jane Doe</option>
-                          <option value="Sarah Chen">Sarah Chen</option>
-                          <option value="Mike Wilson">Mike Wilson</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-xs text-neutral-600 block mb-1">
-                          Priority
-                        </label>
-                        <select
-                          value={selectedPriority[item.id] || 'medium'}
-                          onChange={(e) =>
-                            setSelectedPriority({ ...selectedPriority, [item.id]: e.target.value })
-                          }
-                          className="w-full px-2 py-1.5 text-xs border border-neutral-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-60 bg-neutral-700 text-neutral-50"
-                        >
-                          <option value="high">High</option>
-                          <option value="medium">Medium</option>
-                          <option value="low">Low</option>
-                        </select>
+                        <div>
+                          <label style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', display: 'block', marginBottom: '4px' }}>Priority</label>
+                          <select value={selectedPriority[item.id] || 'medium'} onChange={(e) => setSelectedPriority({ ...selectedPriority, [item.id]: e.target.value })} style={selectStyle}>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Actions */}
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleCreateTask(item)}
-                  >
-                    📋 Create Task
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleRunScenario(item)}
-                  >
-                    🎯 Run Impact Scenario
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleViewSME(item.smeId, item.smeName)}
-                  >
-                    👁️ View SME
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => toggleExpand(item.id)}
-                  >
-                    {expandedNews === item.id ? 'Less' : 'Details'}
-                  </Button>
+                  {/* Actions */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <Button variant="secondary" size="sm" onClick={() => handleCreateTask(item)}>📋 Create Task</Button>
+                    <Button variant="secondary" size="sm" onClick={() => handleRunScenario(item)}>🎯 Run Scenario</Button>
+                    <Button variant="secondary" size="sm" onClick={() => handleViewSME(item.smeId, item.smeName)}>👁️ View SME</Button>
+                    <Button variant="secondary" size="sm" onClick={() => setExpandedNews(isExpanded ? null : item.id)}>
+                      {isExpanded ? 'Less' : 'Details'}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            )
+          })}
 
-        {/* Empty State */}
-        {newsItems.length === 0 && (
-          <div className="text-center py-12 text-neutral-500">
-            <div className="text-4xl mb-3">📰</div>
-            <p className="text-sm">No news intelligence in the last 24 hours</p>
-          </div>
-        )}
+          {newsItems.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '48px', color: 'var(--uui-text-tertiary)' }}>
+              <div style={{ fontSize: '36px', marginBottom: '12px' }}>📰</div>
+              <p style={{ fontSize: '13px' }}>No news intelligence in the last 24 hours</p>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

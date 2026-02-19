@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { X, Send } from 'lucide-react'
+import { X } from 'lucide-react'
 import { RootState } from '@/store'
 import { setIsOpen, addMessage, setIsTyping } from '@/store/chatSlice'
 import { chatAPI } from '@/services/api'
 import ChatMessage from './ChatMessage'
 import ChatInput from './ChatInput'
-import { cn } from '@/utils/formatters'
 
 const ChatModal = () => {
   const dispatch = useDispatch()
@@ -14,91 +13,51 @@ const ChatModal = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Auto-scroll to bottom when new messages arrive
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isTyping])
 
   useEffect(() => {
-    // Add initial AI greeting if no messages
     if (messages.length === 0) {
-      dispatch(
-        addMessage({
-          id: 'initial',
-          role: 'assistant',
-          content: `Hello! I'm your Credit Risk AI Assistant. I have access to your portfolio of 1,284 SMEs and can help you with:
-
-- Analyzing specific SME health and risk factors
-- Running what-if scenarios on your portfolio
-- Collecting news and sentiment for any SME
-- Creating tasks and investigations
-- Answering questions about your portfolio metrics
-
-What would you like to know?`,
-          timestamp: new Date().toISOString(),
-        })
-      )
+      dispatch(addMessage({
+        id: 'initial',
+        role: 'assistant',
+        content: `Hello! I'm your Credit Risk AI Assistant. I have access to your portfolio of 1,284 SMEs and can help you with:\n\n- Analyzing specific SME health and risk factors\n- Running what-if scenarios on your portfolio\n- Collecting news and sentiment for any SME\n- Creating tasks and investigations\n- Answering questions about your portfolio metrics\n\nWhat would you like to know?`,
+        timestamp: new Date().toISOString(),
+      }))
     }
   }, [])
 
-  const handleClose = () => {
-    dispatch(setIsOpen(false))
-  }
+  const handleClose = () => dispatch(setIsOpen(false))
 
   const handleSendMessage = async (content: string) => {
-    // Add user message
-    const userMessage = {
-      id: `user_${Date.now()}`,
-      role: 'user' as const,
-      content,
-      timestamp: new Date().toISOString(),
-    }
-    dispatch(addMessage(userMessage))
-
-    // Show typing indicator
+    dispatch(addMessage({ id: `user_${Date.now()}`, role: 'user', content, timestamp: new Date().toISOString() }))
     dispatch(setIsTyping(true))
-
     try {
-      // Send to API
-      const response = await chatAPI.sendMessage(content);
-
-      const assistantMessage = {
-        id: `assistant_${Date.now()}`,
-        role: 'assistant' as const,
-        content: response.content,
-        timestamp: new Date().toISOString(),
-      }
-      dispatch(addMessage(assistantMessage))
-    } catch (error) {
-      console.error('Failed to send message:', error)
-      const errorMessage = {
-        id: `error_${Date.now()}`,
-        role: 'assistant' as const,
-        content: 'Sorry, I encountered an error. Please try again.',
-        timestamp: new Date().toISOString(),
-      }
-      dispatch(addMessage(errorMessage))
+      const response = await chatAPI.sendMessage(content)
+      dispatch(addMessage({ id: `assistant_${Date.now()}`, role: 'assistant', content: response.content, timestamp: new Date().toISOString() }))
+    } catch {
+      dispatch(addMessage({ id: `error_${Date.now()}`, role: 'assistant', content: 'Sorry, I encountered an error. Please try again.', timestamp: new Date().toISOString() }))
     } finally {
       dispatch(setIsTyping(false))
     }
   }
+
   return (
     <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1001, width: '420px', height: '600px', background: 'var(--uui-surface-main)', borderRadius: 'var(--uui-border-radius)', border: '1px solid var(--uui-neutral-60)', boxShadow: 'var(--uui-shadow-level-3)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
       {/* Header */}
       <div style={{ padding: '12px 18px', background: 'var(--uui-neutral-70)', borderBottom: '1px solid var(--uui-neutral-60)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-            <span className="text-lg">🤖</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--uui-neutral-60)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
+            🤖
           </div>
           <div>
-            <h3 className="font-semibold">Credit Risk AI Assistant</h3>
-            <p className="text-xs text-white text-opacity-90">Always here to help</p>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>Credit Risk AI Assistant</div>
+            <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>Always here to help</div>
           </div>
         </div>
-        <button
-          onClick={handleClose}
-          className="w-8 h-8 rounded hover:bg-white hover:bg-opacity-20 flex items-center justify-center transition-colors"
-        >
-          <X className="w-5 h-5" />
+        <button onClick={handleClose} style={{ width: '28px', height: '28px', borderRadius: 'var(--uui-border-radius)', background: 'var(--uui-neutral-60)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--uui-text-primary)' }}>
+          <X size={16} />
         </button>
       </div>
 
@@ -107,16 +66,18 @@ What would you like to know?`,
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
+
+        {/* Typing indicator */}
         {isTyping && (
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary-60 flex items-center justify-center flex-shrink-0">
-              <span className="text-sm">🤖</span>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--uui-primary-60)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>
+              🤖
             </div>
-            <div className="bg-white rounded-lg px-4 py-3 max-w-[85%]">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div style={{ padding: '10px 14px', background: 'var(--uui-neutral-70)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)' }}>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {[0, 150, 300].map((delay) => (
+                  <span key={delay} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--uui-text-tertiary)', display: 'inline-block', animation: 'bounce 1.4s infinite', animationDelay: `${delay}ms` }} />
+                ))}
               </div>
             </div>
           </div>
@@ -124,7 +85,6 @@ What would you like to know?`,
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <ChatInput onSend={handleSendMessage} disabled={isTyping} />
     </div>
   )

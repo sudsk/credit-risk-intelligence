@@ -5,14 +5,15 @@ import { Card, CardHeader, CardTitle, CardContent } from '../common/Card'
 import { Button } from '../common/Button'
 import { Download, Filter } from 'lucide-react'
 
+const FILTERS = ['all', 'alert', 'info', 'success', 'warning'] as const
+type FilterType = typeof FILTERS[number]
+
 const ActivitiesTab = () => {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'alert' | 'info' | 'success' | 'warning'>('all')
+  const [filter, setFilter] = useState<FilterType>('all')
 
-  useEffect(() => {
-    loadActivities()
-  }, [])
+  useEffect(() => { loadActivities() }, [])
 
   const loadActivities = async () => {
     try {
@@ -26,69 +27,53 @@ const ActivitiesTab = () => {
     }
   }
 
-  const filteredActivities = filter === 'all'
-    ? activities
-    : activities.filter(a => a.type === filter)
-
-  const handleExportLog = () => {
-    // Mock export functionality
-    console.log('Exporting activity log...')
-  }
+  const filteredActivities = filter === 'all' ? activities : activities.filter(a => a.type === filter)
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
       {/* Filters */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-neutral-500" />
-          <span className="text-sm text-neutral-600">Filter:</span>
-          <div className="flex gap-2">
-            {['all', 'alert', 'info', 'success', 'warning'].map((filterType) => (
-              <button
-                key={filterType}
-                onClick={() => setFilter(filterType as any)}
-                style={{
-                  padding: '4px 12px', fontSize: '11px', fontWeight: 600,
-                  borderRadius: 'var(--uui-border-radius)', border: 'none', cursor: 'pointer',
-                  background: filter === filterType ? 'var(--uui-primary-60)' : 'var(--uui-neutral-60)',
-                  color: filter === filterType ? 'white' : 'var(--uui-text-primary)',
-                  fontFamily: 'var(--uui-font)',
-                }}
-              >
-                {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+          <Filter size={16} style={{ color: 'var(--uui-text-tertiary)' }} />
+          <span style={{ fontSize: '13px', color: 'var(--uui-text-tertiary)' }}>Filter:</span>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            {FILTERS.map((f) => (
+              <button key={f} onClick={() => setFilter(f)} style={{
+                padding: '4px 12px', fontSize: '11px', fontWeight: 600,
+                borderRadius: 'var(--uui-border-radius)', border: 'none', cursor: 'pointer',
+                background: filter === f ? 'var(--uui-primary-60)' : 'var(--uui-neutral-60)',
+                color: filter === f ? 'white' : 'var(--uui-text-primary)',
+                fontFamily: 'var(--uui-font)',
+              }}>
+                {f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
           </div>
         </div>
-        <Button variant="secondary" size="sm" onClick={handleExportLog}>
-          <Download className="w-4 h-4" />
+        <Button variant="secondary" size="sm" onClick={() => console.log('Exporting...')}>
+          <Download size={14} />
           Export Audit Log
         </Button>
       </div>
 
-      {/* Activity Feed */}
+      {/* Feed */}
       <Card>
         <CardHeader>
           <CardTitle>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🔔</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+              <span style={{ fontSize: '20px' }}>🔔</span>
               <div>
-                <div className="text-lg font-semibold">System Activity Feed</div>
-                <div className="text-xs font-normal text-neutral-500">
-                  Real-time audit trail of all system actions
-                </div>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>System Activity Feed</div>
+                <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', fontWeight: 400 }}>Real-time audit trail of all system actions</div>
               </div>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="text-center py-12 text-neutral-500">
-              Loading activities...
-            </div>
-          ) : (
-            <ActivityFeed activities={filteredActivities} />
-          )}
+          {isLoading
+            ? <div style={{ textAlign: 'center', padding: '48px', color: 'var(--uui-text-tertiary)' }}>Loading activities...</div>
+            : <ActivityFeed activities={filteredActivities} />
+          }
         </CardContent>
       </Card>
     </div>

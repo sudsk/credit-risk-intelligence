@@ -63,7 +63,7 @@ const TaskList = () => {
       {overdueTasks.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-critical-60">
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-critical-60)', marginBottom: '12px' }}>
               ⚠️ Overdue Tasks ({overdueTasks.length})
             </h3>
           </div>
@@ -85,7 +85,7 @@ const TaskList = () => {
       {dueTodayTasks.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-warning-60">
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-warning-60)', marginBottom: '12px' }}>
               📅 Due Today ({dueTodayTasks.length})
             </h3>
           </div>
@@ -107,7 +107,7 @@ const TaskList = () => {
       {upcomingTasks.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-primary-60">
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-primary-60)', marginBottom: '12px' }}>
               📋 Upcoming Tasks ({upcomingTasks.length})
             </h3>
           </div>
@@ -139,18 +139,11 @@ const TaskList = () => {
 
       {/* Empty State */}
       {tasks.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-lg border border-neutral-300">
-          <div className="text-4xl mb-3">📋</div>
-          <p className="text-lg font-medium text-neutral-700">No tasks yet</p>
-          <p className="text-sm text-neutral-500 mt-2">
-            Create tasks from news events or scenarios
-          </p>
-          <div className="mt-6">
-            <Button variant="primary" size="md">
-              <Plus className="w-4 h-4" />
-              Create New Task
-            </Button>
-          </div>
+        <div style={{ textAlign: 'center', padding: '48px', background: 'var(--uui-surface-main)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)' }}>
+          <div style={{ fontSize: '36px', marginBottom: '12px' }}>📋</div>
+          <p style={{ fontSize: '16px', fontWeight: 500, color: 'var(--uui-text-secondary)', marginBottom: '8px' }}>No tasks yet</p>
+          <p style={{ fontSize: '13px', color: 'var(--uui-text-tertiary)', marginBottom: '24px' }}>Create tasks from news events or scenarios</p>
+          <Button variant="primary" size="md"><Plus size={14} />Create New Task</Button>
         </div>
       )}
     </div>

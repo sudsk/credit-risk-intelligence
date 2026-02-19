@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import { useDispatch } from 'react-redux'
 import { useScenarios } from '@/hooks/useScenarios'
 import ScenarioProgress from './ScenarioProgress'
 import ScenarioResults from './ScenarioResults'
 import { Button } from '../common/Button'
-import { Plus, Play } from 'lucide-react'
+import { Play } from 'lucide-react'
 
 const ScenariosTab = () => {
-  const dispatch = useDispatch()
   const { scenarios, isLoading, createScenario } = useScenarios()
   const [newScenarioInput, setNewScenarioInput] = useState('')
 
@@ -16,7 +14,6 @@ const ScenariosTab = () => {
 
   const handleCreateScenario = async () => {
     if (!newScenarioInput.trim()) return
-
     try {
       await createScenario(newScenarioInput)
       setNewScenarioInput('')
@@ -26,60 +23,58 @@ const ScenariosTab = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
       {/* Create New Scenario */}
       <div style={{ background: 'var(--uui-surface-main)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', padding: '18px' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '18px' }}>
+        <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '18px' }}>
           🎯 Create New Scenario
-        </h3>
-        <div className="flex gap-3">
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
           <input
             type="text"
             placeholder="Describe your scenario (e.g., 'What if interest rates go up 1%?')"
             value={newScenarioInput}
             onChange={(e) => setNewScenarioInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleCreateScenario()}
-            className="flex-1 px-4 py-3 border border-neutral-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-60 bg-neutral-700 text-neutral-50"
+            style={{
+              flex: 1, padding: '10px 14px',
+              background: 'var(--uui-neutral-70)',
+              border: '1px solid var(--uui-neutral-60)',
+              borderRadius: 'var(--uui-border-radius)',
+              color: 'var(--uui-text-primary)',
+              fontSize: '13px', fontFamily: 'var(--uui-font)', outline: 'none',
+            }}
           />
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleCreateScenario}
-            disabled={!newScenarioInput.trim()}
-          >
-            <Play className="w-4 h-4" />
+          <Button variant="primary" size="lg" onClick={handleCreateScenario} disabled={!newScenarioInput.trim()}>
+            <Play size={16} />
             Run Scenario
           </Button>
         </div>
-        <p className="text-xs text-neutral-500 mt-2">
+        <p style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', marginTop: '9px' }}>
           Ask any what-if question about your portfolio. AI will analyze all 1,284 SMEs in 15-30 seconds.
         </p>
       </div>
 
-      {/* In Progress Scenarios */}
+      {/* In Progress */}
       {inProgressScenarios.length > 0 && (
         <section>
-          <h3 className="text-lg font-semibold text-neutral-800 mb-3">
+          <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '12px' }}>
             ⏳ In Progress ({inProgressScenarios.length})
-          </h3>
-          <div className="space-y-3">
-            {inProgressScenarios.map((scenario) => (
-              <ScenarioProgress key={scenario.id} scenario={scenario} />
-            ))}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+            {inProgressScenarios.map((s) => <ScenarioProgress key={s.id} scenario={s} />)}
           </div>
         </section>
       )}
 
-      {/* Completed Scenarios */}
+      {/* Completed */}
       {completedScenarios.length > 0 && (
         <section>
-          <h3 className="text-lg font-semibold text-neutral-800 mb-3">
+          <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '12px' }}>
             ✅ Completed ({completedScenarios.length})
-          </h3>
-          <div className="space-y-3">
-            {completedScenarios.map((scenario) => (
-              <ScenarioResults key={scenario.id} scenario={scenario} />
-            ))}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+            {completedScenarios.map((s) => <ScenarioResults key={s.id} scenario={s} />)}
           </div>
         </section>
       )}
@@ -87,11 +82,9 @@ const ScenariosTab = () => {
       {/* Empty State */}
       {scenarios.length === 0 && !isLoading && (
         <div style={{ textAlign: 'center', padding: '48px', background: 'var(--uui-surface-main)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)' }}>
-          <div className="text-4xl mb-3">🎯</div>
-          <p className="text-lg font-medium text-neutral-700">No scenarios yet</p>
-          <p className="text-sm text-neutral-500 mt-2">
-            Create your first scenario to analyze portfolio impact
-          </p>
+          <div style={{ fontSize: '36px', marginBottom: '12px' }}>🎯</div>
+          <p style={{ fontSize: '16px', fontWeight: 500, color: 'var(--uui-text-secondary)', marginBottom: '8px' }}>No scenarios yet</p>
+          <p style={{ fontSize: '13px', color: 'var(--uui-text-tertiary)' }}>Create your first scenario to analyze portfolio impact</p>
         </div>
       )}
     </div>
