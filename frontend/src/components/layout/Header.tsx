@@ -39,7 +39,7 @@ const Header = () => {
                 Foresight AI
               </h1>
               <p className="text-xs text-neutral-400 leading-tight">
-                SME Financial Health Monitor
+                SME Credit Risk Intelligence Platform
               </p>
             </div>
           </div>
