@@ -1,130 +1,115 @@
 import { useState } from 'react'
-import { Search, Filter } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useDispatch } from 'react-redux'
 import { usePortfolio } from '@/hooks/usePortfolio'
 import { setSelectedSME, setSearchQuery } from '@/store/portfolioSlice'
-import { cn, getRiskCategory } from '@/utils/formatters'
+
+const riskColors: Record<string, string> = {
+  critical: 'var(--uui-critical-60)',
+  medium: 'var(--uui-warning-60)',
+  stable: 'var(--uui-success-60)',
+}
+
+const scoreColors: Record<string, string> = {
+  critical: 'var(--uui-critical-70)',
+  medium: 'var(--uui-warning-70)',
+  stable: 'var(--uui-success-70)',
+}
 
 const SMEList = () => {
   const dispatch = useDispatch()
   const { smes, selectedSME, filter, searchQuery } = usePortfolio()
   const [localSearch, setLocalSearch] = useState(searchQuery)
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setLocalSearch(value)
-    dispatch(setSearchQuery(value))
-  }
-
-  const handleSMEClick = (sme: typeof smes[0]) => {
-    dispatch(setSelectedSME(sme))
-  }
-
-  const getRiskColor = (category: string) => {
-    switch (category) {
-      case 'critical':
-        return 'border-critical-60 bg-critical-50'
-      case 'medium':
-        return 'border-warning-60 bg-warning-50'
-      case 'stable':
-        return 'border-success-60 bg-success-50'
-      default:
-        return 'border-neutral-600 bg-neutral-800'
-    }
-  }
-
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'up':
-        return <span className="text-critical-60">↑</span>
-      case 'down':
-        return <span className="text-success-60">↓</span>
-      default:
-        return <span className="text-neutral-500">→</span>
-    }
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalSearch(e.target.value)
+    dispatch(setSearchQuery(e.target.value))
   }
 
   return (
-    <div className="bg-neutral-800 rounded-lg border border-neutral-600 shadow-sm h-[calc(100vh-320px)] flex flex-col">
+    <div style={{
+      background: 'var(--uui-surface-main)',
+      border: '1px solid var(--uui-neutral-60)',
+      borderRadius: 'var(--uui-border-radius)',
+      height: 'calc(100vh - 320px)',
+      display: 'flex', flexDirection: 'column',
+    }}>
       {/* Header */}
-      <div className="px-4 py-3 border-b border-neutral-600">
-        <h2 className="text-lg font-semibold text-neutral-50 mb-3">
-          SME Portfolio
-          <span className="ml-2 text-sm font-normal text-neutral-500">
-            ({smes.length} {filter !== 'all' ? filter : 'total'})
+      <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--uui-neutral-60)', background: 'var(--uui-neutral-70)' }}>
+        <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: 'var(--uui-text-primary)' }}>
+          🚨 Critical Risk SMEs ({smes.length})
+          <span style={{ marginLeft: '8px', fontSize: '11px', background: 'var(--uui-critical-60)', color: 'white', padding: '2px 8px', borderRadius: 'var(--uui-border-radius)' }}>
+            Requires Action
           </span>
-        </h2>
-
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+        </div>
+        <div style={{ position: 'relative' }}>
+          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--uui-text-tertiary)' }} />
           <input
             type="text"
-            placeholder="Search by ID, name, or sector..."
+            placeholder="Search SME by name or client ID..."
             value={localSearch}
-            onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2 text-sm border border-neutral-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-60"
+            onChange={handleSearch}
+            style={{
+              width: '100%', paddingLeft: '32px', paddingRight: '12px',
+              paddingTop: '6px', paddingBottom: '6px',
+              background: 'var(--uui-neutral-80)',
+              border: '1px solid var(--uui-neutral-60)',
+              borderRadius: 'var(--uui-border-radius)',
+              color: 'var(--uui-text-primary)',
+              fontSize: '13px', outline: 'none',
+              fontFamily: 'var(--uui-font)',
+            }}
           />
         </div>
       </div>
 
-      {/* SME List */}
-      <div className="flex-1 overflow-y-auto">
+      {/* List */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '9px' }}>
         {smes.length === 0 ? (
-          <div className="text-center py-12 text-neutral-500">
+          <div style={{ textAlign: 'center', padding: '48px', color: 'var(--uui-text-tertiary)' }}>
             No SMEs found matching your criteria
           </div>
         ) : (
-          <div className="p-2 space-y-2">
-            {smes.map((sme) => (
-              <div
-                key={sme.id}
-                onClick={() => handleSMEClick(sme)}
-                className={cn(
-                  'p-3 rounded border-2 cursor-pointer transition-all',
-                  getRiskColor(sme.riskCategory),
-                  selectedSME?.id === sme.id
-                    ? 'ring-2 ring-primary-60 shadow-md'
-                    : 'hover:shadow-md'
-                )}
-              >
-                {/* SME Header */}
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-neutral-500">
-                        {sme.id}
-                      </span>
-                      {getTrendIcon(sme.trend)}
-                      <span className="text-xs font-mono text-neutral-500">
-                        {sme.trendValue > 0 ? '+' : ''}{sme.trendValue}
-                      </span>
-                    </div>
-                    <h3 className="font-semibold text-sm text-neutral-50 mt-1">
-                      {sme.name}
-                    </h3>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold text-neutral-50">
-                      {sme.riskScore}
-                    </div>
-                    <div className="text-xs text-neutral-500">Score</div>
-                  </div>
+          smes.map((sme) => (
+            <div
+              key={sme.id}
+              onClick={() => dispatch(setSelectedSME(sme))}
+              style={{
+                background: 'var(--uui-neutral-70)',
+                border: `1px solid ${selectedSME?.id === sme.id ? 'var(--uui-primary-60)' : 'var(--uui-neutral-60)'}`,
+                borderLeft: `3px solid ${riskColors[sme.riskCategory]}`,
+                borderRadius: 'var(--uui-border-radius)',
+                padding: '12px',
+                marginBottom: '9px',
+                cursor: 'pointer',
+                boxShadow: selectedSME?.id === sme.id ? '0 0 0 2px rgba(72,164,208,0.2)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '9px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', fontFamily: 'var(--uui-font-mono)' }}>{sme.id}</div>
+                  <div style={{ fontWeight: 600, fontSize: '13px', margin: '3px 0', color: 'var(--uui-text-primary)' }}>{sme.name}</div>
                 </div>
-
-                {/* SME Details */}
-                <div className="flex items-center justify-between text-xs text-neutral-600">
-                  <div className="flex items-center gap-3">
-                    <span>💼 {sme.sector}</span>
-                    <span>📍 {sme.geography}</span>
-                  </div>
-                  <div className="font-mono font-semibold">
-                    {sme.exposure}
-                  </div>
+                <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: scoreColors[sme.riskCategory] }}>
+                  {sme.riskScore}
                 </div>
               </div>
-            ))}
-          </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '9px', fontSize: '11px' }}>
+                <div>
+                  <div style={{ color: 'var(--uui-text-tertiary)' }}>Credit Line</div>
+                  <div style={{ fontWeight: 600, color: 'var(--uui-text-primary)' }}>{sme.exposure}</div>
+                </div>
+                <div>
+                  <div style={{ color: 'var(--uui-text-tertiary)' }}>Sector</div>
+                  <div style={{ fontWeight: 600, color: 'var(--uui-text-primary)' }}>{sme.sector}</div>
+                </div>
+              </div>
+              <div style={{ height: '4px', background: 'var(--uui-neutral-60)', borderRadius: '2px', marginTop: '9px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${sme.riskScore}%`, background: riskColors[sme.riskCategory], transition: 'width 0.3s' }} />
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>

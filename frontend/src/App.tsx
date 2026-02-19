@@ -22,11 +22,11 @@ function App() {
   const chatOpen = useSelector((state: RootState) => state.chat.isOpen)
 
   return (
-    <div className="min-h-screen bg-neutral-900">
+    <div style={{ background: 'var(--uui-app-bg)', minHeight: '100vh' }}>
       <Header />
       <TabNavigation />
 
-      <main className="max-w-[1600px] mx-auto px-4 py-6">
+      <main style={{ maxWidth: '1600px', margin: '0 auto', padding: '18px' }}>
         {/* Tab Content */}
         {activeTab === 'home' && <HomeTab />}
         {activeTab === 'news' && <NewsEventsTab />}

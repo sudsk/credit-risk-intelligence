@@ -1,5 +1,4 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react'
-import { cn } from '@/utils/formatters'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
@@ -8,35 +7,39 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean
 }
 
-export const Button = ({
-  children,
-  variant = 'primary',
-  size = 'md',
-  fullWidth = false,
-  className,
-  ...props
-}: ButtonProps) => {
-  return (
-    <button
-      className={cn(
-        'rounded font-medium transition-colors inline-flex items-center justify-center gap-2',
-        // Variants
-        variant === 'primary' && 'bg-primary-60 text-white hover:bg-primary-70',
-        variant === 'secondary' && 'bg-neutral-300 text-neutral-800 hover:bg-neutral-400',
-        variant === 'danger' && 'bg-critical-60 text-white hover:bg-critical-70',
-        // Sizes
-        size === 'sm' && 'px-3 py-1.5 text-xs',
-        size === 'md' && 'px-4 py-2 text-sm',
-        size === 'lg' && 'px-6 py-3 text-base',
-        // Width
-        fullWidth && 'w-full',
-        // Disabled
-        props.disabled && 'opacity-50 cursor-not-allowed',
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  )
+const variantStyles: Record<string, React.CSSProperties> = {
+  primary: { background: 'var(--uui-primary-60)', color: 'white' },
+  secondary: { background: 'var(--uui-neutral-60)', color: 'var(--uui-text-primary)' },
+  danger: { background: 'var(--uui-critical-60)', color: 'white' },
 }
+
+const sizeStyles: Record<string, React.CSSProperties> = {
+  sm: { padding: '4px 12px', fontSize: '11px' },
+  md: { padding: '6px 12px', fontSize: '12px' },
+  lg: { padding: '9px 18px', fontSize: '14px' },
+}
+
+export const Button = ({ children, variant = 'primary', size = 'md', fullWidth = false, style, ...props }: ButtonProps) => (
+  <button
+    style={{
+      border: 'none',
+      borderRadius: 'var(--uui-border-radius)',
+      cursor: props.disabled ? 'not-allowed' : 'pointer',
+      opacity: props.disabled ? 0.5 : 1,
+      transition: 'all 0.2s',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '6px',
+      fontFamily: 'var(--uui-font)',
+      fontWeight: 600,
+      width: fullWidth ? '100%' : undefined,
+      ...variantStyles[variant],
+      ...sizeStyles[size],
+      ...style,
+    }}
+    {...props}
+  >
+    {children}
+  </button>
+)

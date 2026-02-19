@@ -3,118 +3,90 @@ import { useDispatch } from 'react-redux'
 import { usePortfolio } from '@/hooks/usePortfolio'
 import { openBreakdownModal } from '@/store/uiSlice'
 import { setFilter } from '@/store/portfolioSlice'
-import { cn, formatCurrency, formatPercent } from '@/utils/formatters'
+
+const MetricCard = ({ children, borderColor, onClick }: any) => (
+  <div onClick={onClick} style={{
+    background: 'var(--uui-surface-main)',
+    border: `1px solid var(--uui-neutral-60)`,
+    borderRadius: 'var(--uui-border-radius)',
+    padding: '18px',
+    position: 'relative',
+    cursor: 'pointer',
+    borderLeft: `3px solid ${borderColor}`,
+    transition: 'all 0.2s',
+  }}>
+    {children}
+  </div>
+)
 
 const PortfolioMetrics = () => {
   const dispatch = useDispatch()
   const { metrics, isLoading } = usePortfolio()
 
   if (isLoading || !metrics) {
-    return <div className="text-center py-12">Loading portfolio metrics...</div>
+    return <div style={{ color: 'var(--uui-text-tertiary)', padding: '48px', textAlign: 'center' }}>Loading...</div>
   }
 
-  const handleCardClick = (filter: 'critical' | 'medium' | 'stable') => {
-    dispatch(setFilter(filter))
-  }
-
-  const handleInfoClick = (
-    e: React.MouseEvent,
-    riskLevel: 'critical' | 'medium' | 'stable'
-  ) => {
-    e.stopPropagation()
-    // This will be implemented with breakdown data
-    dispatch(openBreakdownModal({ riskLevel }))
-  }
+  const label = (text: string) => (
+    <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '6px' }}>{text}</div>
+  )
+  const value = (text: string | number, color?: string) => (
+    <div style={{ fontSize: '28px', fontWeight: 600, marginBottom: '3px', color: color || 'var(--uui-text-primary)' }}>{text}</div>
+  )
+  const sub = (text: string) => (
+    <div style={{ fontSize: '12px', color: 'var(--uui-text-tertiary)', fontFamily: 'var(--uui-font-mono)' }}>{text}</div>
+  )
+  const infoBtn = (riskLevel: string) => (
+    <button onClick={(e) => { e.stopPropagation(); dispatch(openBreakdownModal({ riskLevel })) }} style={{
+      position: 'absolute', top: '18px', right: '18px',
+      width: '24px', height: '24px', borderRadius: '50%',
+      background: 'var(--uui-neutral-60)', color: 'var(--uui-text-tertiary)',
+      border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <Info size={14} />
+    </button>
+  )
 
   return (
-    <div className="grid grid-cols-5 gap-4">
-      {/* Critical Risk */}
-      <div
-        onClick={() => handleCardClick('critical')}
-        className="relative bg-neutral-800 rounded-lg border-2 border-critical-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
-      >
-        <button
-          onClick={(e) => handleInfoClick(e, 'critical')}
-          className="absolute top-4 right-4 w-6 h-6 rounded-full bg-neutral-300 hover:bg-primary-60 hover:text-white transition-all flex items-center justify-center"
-          title="View breakdown"
-        >
-          <Info className="w-3.5 h-3.5" />
-        </button>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+      <MetricCard borderColor="var(--uui-critical-60)" onClick={() => dispatch(setFilter('critical'))}>
+        {infoBtn('critical')}
+        {label('CRITICAL RISK (80-100)')}
+        {value(metrics.criticalCount, 'var(--uui-critical-70)')}
+        {sub('€42M | 12.8% | ↑ 5')}
+      </MetricCard>
 
-        <div className="text-sm text-neutral-300 mb-1">Critical Risk (80-100)</div>
-        <div className="text-3xl font-bold text-critical-60 mb-2">
-          {metrics.criticalCount}
-        </div>
-        <div className="text-xs text-neutral-300 font-mono">
-          €42M | 12.8% | <span className="text-critical-60">↑ 5</span>
-        </div>
-      </div>
+      <MetricCard borderColor="var(--uui-warning-60)" onClick={() => dispatch(setFilter('medium'))}>
+        {infoBtn('medium')}
+        {label('MEDIUM RISK (50-79)')}
+        {value(metrics.mediumCount, 'var(--uui-warning-70)')}
+        {sub('€98M | 29.9% | ↑ 8')}
+      </MetricCard>
 
-      {/* Medium Risk */}
-      <div
-        onClick={() => handleCardClick('medium')}
-        className="relative bg-neutral-800 rounded-lg border-2 border-warning-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
-      >
-        <button
-          onClick={(e) => handleInfoClick(e, 'medium')}
-          className="absolute top-4 right-4 w-6 h-6 rounded-full bg-neutral-300 hover:bg-primary-60 hover:text-white transition-all flex items-center justify-center"
-          title="View breakdown"
-        >
-          <Info className="w-3.5 h-3.5" />
-        </button>
+      <MetricCard borderColor="var(--uui-success-60)" onClick={() => dispatch(setFilter('stable'))}>
+        {infoBtn('stable')}
+        {label('LOW RISK (0-49)')}
+        {value(metrics.stableCount, 'var(--uui-success-70)')}
+        {sub('€188M | 57.3% | ↓ 13')}
+      </MetricCard>
 
-        <div className="text-sm text-neutral-300 mb-1">Medium Risk (50-79)</div>
-        <div className="text-3xl font-bold text-warning-60 mb-2">
-          {metrics.mediumCount}
-        </div>
-        <div className="text-xs text-neutral-300 font-mono">
-          €98M | 29.9% | <span className="text-warning-60">↑ 8</span>
-        </div>
-      </div>
+      <MetricCard borderColor="var(--uui-primary-60)" onClick={() => { }}>
+        {label('TOTAL PORTFOLIO')}
+        {value(metrics.totalSMEs)}
+        {sub(`${metrics.totalExposure} total exposure`)}
+      </MetricCard>
 
-      {/* Low Risk */}
-      <div
-        onClick={() => handleCardClick('stable')}
-        className="relative bg-neutral-800 rounded-lg border-2 border-success-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
-      >
-        <button
-          onClick={(e) => handleInfoClick(e, 'stable')}
-          className="absolute top-4 right-4 w-6 h-6 rounded-full bg-neutral-300 hover:bg-primary-60 hover:text-white transition-all flex items-center justify-center"
-          title="View breakdown"
-        >
-          <Info className="w-3.5 h-3.5" />
-        </button>
+      <MetricCard borderColor="var(--uui-primary-60)" onClick={() => { }}>
+        {label('DEFAULT PROBABILITY')}
+        {value(`${metrics.defaultProbability}%`)}
+        <div style={{ fontSize: '12px', color: 'var(--uui-critical-60)', fontFamily: 'var(--uui-font-mono)' }}>↑ 0.4% vs last month</div>
+      </MetricCard>
 
-        <div className="text-sm text-neutral-300 mb-1">Low Risk (0-49)</div>
-        <div className="text-3xl font-bold text-success-60 mb-2">
-          {metrics.stableCount}
-        </div>
-        <div className="text-xs text-neutral-300 font-mono">
-          €188M | 57.3% | <span className="text-success-60">↓ 13</span>
-        </div>
-      </div>
-
-      {/* Total Portfolio */}
-      <div className="bg-neutral-800 rounded-lg border border-neutral-600 p-4">
-        <div className="text-sm text-neutral-300 mb-1">Total Portfolio</div>
-        <div className="text-3xl font-bold text-neutral-800 mb-2">
-          {metrics.totalSMEs}
-        </div>
-        <div className="text-xs text-neutral-300 font-mono">
-          {formatCurrency(metrics.totalExposure)}
-        </div>
-      </div>
-
-      {/* Default Probability */}
-      <div className="bg-neutral-800 rounded-lg border border-neutral-600 p-4">
-        <div className="text-sm text-neutral-300 mb-1">Default Probability</div>
-        <div className="text-3xl font-bold text-neutral-800 mb-2">
-          {formatPercent(metrics.defaultProbability)}
-        </div>
-        <div className="text-xs text-neutral-300 font-mono">
-          Avg Score: {metrics.avgRiskScore}
-        </div>
-      </div>
+      <MetricCard borderColor="var(--uui-primary-60)" onClick={() => { }}>
+        {label('AVG CREDIT RISK SCORE')}
+        {value(metrics.avgRiskScore)}
+        {sub('↑ 3 vs last month')}
+      </MetricCard>
     </div>
   )
 }

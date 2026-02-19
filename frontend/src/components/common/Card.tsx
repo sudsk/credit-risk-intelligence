@@ -1,50 +1,43 @@
 import { ReactNode } from 'react'
-import { cn } from '@/utils/formatters'
 
 interface CardProps {
   children: ReactNode
   className?: string
-  fullWidth?: boolean
+  style?: React.CSSProperties
 }
 
-export const Card = ({ children, className, fullWidth = false }: CardProps) => {
-  return (
-    <div
-      className={cn(
-        'bg-neutral-800 rounded-lg border border-neutral-600 shadow-sm',
-        fullWidth && 'w-full',
-        className
-      )}
-    >
-      {children}
-    </div>
-  )
-}
+export const Card = ({ children, style }: CardProps) => (
+  <div style={{
+    background: 'var(--uui-surface-main)',
+    borderRadius: 'var(--uui-border-radius)',
+    border: '1px solid var(--uui-neutral-60)',
+    overflow: 'hidden',
+    ...style
+  }}>
+    {children}
+  </div>
+)
 
-interface CardHeaderProps {
-  children: ReactNode
-  className?: string
-  action?: ReactNode
-}
+export const CardHeader = ({ children, action }: { children: ReactNode; action?: ReactNode }) => (
+  <div style={{
+    padding: '12px 18px',
+    borderBottom: '1px solid var(--uui-neutral-60)',
+    background: 'var(--uui-neutral-70)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>{children}</div>
+    {action && <div>{action}</div>}
+  </div>
+)
 
-export const CardHeader = ({ children, className, action }: CardHeaderProps) => {
-  return (
-    <div
-      className={cn(
-        'px-6 py-4 border-b border-neutral-600 flex items-center justify-between bg-neutral-700',
-        className
-      )}
-    >
-      <div className="flex items-center gap-3">{children}</div>
-      {action && <div>{action}</div>}
-    </div>
-  )
-}
+export const CardTitle = ({ children }: { children: ReactNode }) => (
+  <h2 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>
+    {children}
+  </h2>
+)
 
-export const CardTitle = ({ children }: { children: ReactNode }) => {
-  return <h2 className="text-lg font-semibold text-neutral-800">{children}</h2>
-}
-
-export const CardContent = ({ children, className }: CardProps) => {
-  return <div className={cn('px-6 py-4', className)}>{children}</div>
-}
+export const CardContent = ({ children, style }: CardProps) => (
+  <div style={{ padding: '18px', ...style }}>{children}</div>
+)
