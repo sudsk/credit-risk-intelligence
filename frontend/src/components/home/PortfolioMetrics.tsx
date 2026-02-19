@@ -31,7 +31,7 @@ const PortfolioMetrics = () => {
       {/* Critical Risk */}
       <div
         onClick={() => handleCardClick('critical')}
-        className="relative bg-white rounded-lg border-2 border-critical-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
+        className="relative bg-neutral-800 rounded-lg border-2 border-critical-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
       >
         <button
           onClick={(e) => handleInfoClick(e, 'critical')}

@@ -82,7 +82,7 @@ What would you like to know?`,
     }
   }
   return (
-    <div className="fixed bottom-24 right-6 z-50 w-[480px] h-[640px] bg-white rounded-lg shadow-2xl border border-neutral-300 flex flex-col">
+    <div className="fixed bottom-24 right-6 z-50 w-[480px] h-[640px] bg-neutral-800 rounded-lg shadow-2xl border border-neutral-600 flex flex-col">
       {/* Header */}
       <div className="px-4 py-3 bg-primary-60 text-white rounded-t-lg flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ What would you like to know?`,
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-900">
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
