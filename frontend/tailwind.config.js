@@ -7,36 +7,50 @@ export default {
   theme: {
     extend: {
       colors: {
+        // EPAM Loveship Dark Theme
         primary: {
-          50: '#e3f2fd',
-          60: '#48a4d0',
-          70: '#1976d2',
+          50: '#E3F2FD',
+          60: '#48A4D0',
+          70: '#7DBCDB',
         },
         critical: {
-          50: '#ffebee',
-          60: '#e74c3c',
-          70: '#c0392b',
+          50: 'rgba(229, 98, 72, 0.15)',
+          60: '#E56248',
+          70: '#F78C77',
         },
         warning: {
-          50: '#fff3e0',
-          60: '#f39c12',
-          70: '#e67e22',
+          50: 'rgba(244, 184, 58, 0.15)',
+          60: '#F4B83A',
+          70: '#FFD06D',
         },
         success: {
-          50: '#e8f5e9',
-          60: '#27ae60',
-          70: '#229954',
+          50: 'rgba(131, 185, 24, 0.15)',
+          60: '#83B918',
+          70: '#A6D151',
         },
         neutral: {
-          50: '#f5f5f5',
-          60: '#424242',
-          70: '#2e2e2e',
-          80: '#1a1a1a',
+          50: '#FAFAFC',
+          100: '#E1E3EB',
+          200: '#ACAFBF',
+          300: '#6C6F80',
+          400: '#585B69',
+          500: '#474A59',
+          600: '#383B4A',
+          700: '#303240',
+          800: '#272833',
+          900: '#1D1E26',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Source Sans Pro', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
         mono: ['Roboto Mono', 'monospace'],
+      },
+      borderRadius: {
+        DEFAULT: '3px',
+      },
+      boxShadow: {
+        'level-2': '0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 22px 3px rgba(0, 0, 0, 0.26)',
+        'level-3': '0 1px 2px rgba(0, 0, 0, 0.2), 0 3px 25px 3px rgba(0, 0, 0, 0.56)',
       },
     },
   },

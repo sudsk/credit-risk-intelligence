@@ -2,24 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* EPAM Loveship Dark Theme Variables */
 :root {
-  --uui-primary-60: #48a4d0;
-  --uui-critical-60: #e74c3c;
-  --uui-warning-60: #f39c12;
-  --uui-success-60: #27ae60;
-  --uui-neutral-50: #f5f5f5;
-  --uui-neutral-60: #424242;
-  --uui-neutral-70: #2e2e2e;
-  --uui-neutral-80: #1a1a1a;
-  --uui-surface-main: #ffffff;
-  --uui-text-primary: #1a1a1a;
-  --uui-text-secondary: #616161;
-  --uui-text-tertiary: #9e9e9e;
-  --uui-border-radius: 8px;
-  --uui-shadow-level-1: 0 1px 3px rgba(0,0,0,0.12);
-  --uui-shadow-level-2: 0 4px 6px rgba(0,0,0,0.1);
-  --uui-shadow-level-3: 0 10px 20px rgba(0,0,0,0.15);
+  --uui-font: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --uui-font-mono: 'Roboto Mono', monospace;
+  --uui-grid-unit: 6px;
+  --uui-border-radius: 3px;
+
+  /* Night Palette */
+  --night50: #FAFAFC;
+  --night100: #E1E3EB;
+  --night200: #ACAFBF;
+  --night300: #6C6F80;
+  --night400: #585B69;
+  --night500: #474A59;
+  --night600: #383B4A;
+  --night700: #303240;
+  --night800: #272833;
+  --night900: #1D1E26;
+
+  /* Semantic Colors */
+  --sky-60: #48A4D0;
+  --sky-70: #7DBCDB;
+  --grass-60: #83B918;
+  --grass-70: #A6D151;
+  --fire-60: #E56248;
+  --fire-70: #F78C77;
+  --sun-60: #F4B83A;
+  --sun-70: #FFD06D;
+
+  /* Theme Mappings */
+  --uui-app-bg: var(--night900);
+  --uui-surface-main: var(--night800);
+  --uui-text-primary: var(--night50);
+  --uui-text-secondary: var(--night100);
+  --uui-text-tertiary: var(--night200);
+
+  --uui-primary-60: var(--sky-60);
+  --uui-primary-70: var(--sky-70);
+  --uui-success-60: var(--grass-60);
+  --uui-success-70: var(--grass-70);
+  --uui-warning-60: var(--sun-60);
+  --uui-warning-70: var(--sun-70);
+  --uui-critical-60: var(--fire-60);
+  --uui-critical-70: var(--fire-70);
+
+  --uui-shadow-level-2: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 22px 3px rgba(0, 0, 0, 0.26);
+  --uui-shadow-level-3: 0 1px 2px rgba(0, 0, 0, 0.2), 0 3px 25px 3px rgba(0, 0, 0, 0.56);
 }
 
 * {
@@ -29,11 +58,21 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: var(--uui-neutral-50);
+  font-family: var(--uui-font);
+  background: var(--uui-app-bg);
   color: var(--uui-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* Override Tailwind with dark theme */
+@layer base {
+  body {
+    @apply bg-neutral-900 text-neutral-50;
+  }
 }
 
 /* Scrollbar styling */
@@ -43,23 +82,25 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--uui-neutral-50);
+  background: var(--night800);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--uui-neutral-60);
+  background: var(--night500);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--uui-text-secondary);
+  background: var(--night400);
 }
 
+/* Animations */
 @keyframes slideIn {
   from {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -68,4 +109,23 @@ body {
 
 .animate-slideIn {
   animation: slideIn 0.3s ease-out;
+}
+
+@keyframes typing {
+
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: typing 1.4s infinite;
 }
