@@ -7,13 +7,18 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
-import uvicorn, httpx
+import uvicorn
+import httpx
+import logging
 
 # Import services
 from services.portfolio_service import get_portfolio_service
 from services.risk_engine import get_risk_engine
 from services.scenario_service import get_scenario_service
-from services.chat_service import get_chat_service
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
@@ -35,7 +40,6 @@ app.add_middleware(
 portfolio_service = get_portfolio_service()
 risk_engine = get_risk_engine()
 scenario_service = get_scenario_service()
-chat_service = get_chat_service()
 
 # Pydantic models for request/response
 class ScenarioRequest(BaseModel):
@@ -44,7 +48,7 @@ class ScenarioRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     query: str
-    use_claude_api: bool = False
+    session_id: str = "default"
 
 # Health check
 @app.get("/")
@@ -54,31 +58,29 @@ async def root():
         "name": "SME Credit Intelligence Platform API",
         "version": "1.0.0",
         "status": "healthy",
+        "architecture": "ADK Agent-Powered",
         "endpoints": {
             "portfolio": "/api/v1/portfolio/*",
             "scenarios": "/api/v1/scenarios/*",
-            "chat": "/api/v1/chat"
+            "chat": "/api/v1/chat",
+            "risk": "/api/v1/risk/*"
         }
     }
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy"}
+    return {"status": "healthy", "agents": "required on port 8080"}
 
 # Portfolio endpoints
 @app.get("/api/v1/portfolio/summary")
 async def get_portfolio_summary():
-    """
-    Get portfolio overview with risk distribution and metrics.
-    
-    Returns:
-        Portfolio summary with exposure, risk distribution, sector breakdown
-    """
+    """Get portfolio overview with risk distribution and metrics."""
     try:
         summary = await portfolio_service.get_portfolio_summary()
         return summary
     except Exception as e:
+        logger.error(f"Portfolio summary error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/portfolio/smes")
@@ -95,24 +97,7 @@ async def get_smes(
     limit: int = Query(100, description="Max results", ge=1, le=500),
     offset: int = Query(0, description="Pagination offset", ge=0)
 ):
-    """
-    Get filtered and sorted list of SMEs.
-    
-    Query Parameters:
-        - risk_category: Filter by risk level
-        - sector: Filter by industry sector
-        - geography: Filter by location
-        - trend: Filter by growth trend
-        - min_exposure/max_exposure: Filter by exposure range
-        - search: Search by company name
-        - sort_by: Field to sort by
-        - sort_order: asc or desc
-        - limit: Max results per page
-        - offset: Pagination offset
-    
-    Returns:
-        List of SMEs with metadata
-    """
+    """Get filtered and sorted list of SMEs."""
     try:
         result = await portfolio_service.get_sme_list(
             risk_category=risk_category,
@@ -129,99 +114,70 @@ async def get_smes(
         )
         return result
     except Exception as e:
+        logger.error(f"Get SMEs error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/portfolio/smes/{sme_id}")
 async def get_sme_detail(sme_id: str):
-    """
-    Get detailed profile for a specific SME including comprehensive risk analysis.
-    
-    Path Parameters:
-        - sme_id: SME identifier
-    
-    Returns:
-        Complete SME profile with risk breakdown
-    """
+    """Get detailed profile for a specific SME including comprehensive risk analysis."""
     try:
         detail = await portfolio_service.get_sme_detail(sme_id)
         return detail
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
+        logger.error(f"Get SME detail error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/portfolio/critical")
 async def get_critical_smes(limit: int = Query(20, ge=1, le=100)):
-    """
-    Get SMEs in critical risk category (risk score ≥ 60).
-    
-    Query Parameters:
-        - limit: Max results
-    
-    Returns:
-        List of critical SMEs sorted by risk score
-    """
+    """Get SMEs in critical risk category (risk score ≥ 60)."""
     try:
         critical = await portfolio_service.get_critical_smes(limit=limit)
         return {"smes": critical, "count": len(critical)}
     except Exception as e:
+        logger.error(f"Get critical SMEs error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/portfolio/sectors/{sector}")
 async def get_sector_breakdown(sector: str):
-    """
-    Get detailed breakdown for a specific sector.
-    
-    Path Parameters:
-        - sector: Sector name
-    
-    Returns:
-        Sector statistics and risk distribution
-    """
+    """Get detailed breakdown for a specific sector."""
     try:
         breakdown = await portfolio_service.get_sector_breakdown(sector)
         return breakdown
     except Exception as e:
+        logger.error(f"Get sector breakdown error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/portfolio/search")
 async def search_smes(q: str = Query(..., min_length=2), limit: int = Query(10, ge=1, le=50)):
-    """
-    Search SMEs by name.
-    
-    Query Parameters:
-        - q: Search query
-        - limit: Max results
-    
-    Returns:
-        List of matching SMEs
-    """
+    """Search SMEs by name."""
     try:
         smes = await portfolio_service.search_smes(q, limit=limit)
         return {"query": q, "results": smes, "count": len(smes)}
     except Exception as e:
+        logger.error(f"Search SMEs error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Scenario endpoints
 @app.post("/api/v1/scenarios/run")
 async def run_scenario(request: ScenarioRequest):
     """
-    Run a stress test scenario.
+    Run stress test scenario using bank's pre-calculated vectors.
+    
+    IMPORTANT: This does NOT re-run your full stress test model. 
+    Instead, it applies the PD/LGD vectors from your most recent 
+    CCAR/ICAAP stress test to the current portfolio composition.
     
     Request Body:
         {
             "scenario_type": "interest_rate" | "sector_shock" | "recession" | "regulation",
-            "parameters": {
-                // Scenario-specific parameters
-                // For interest_rate: {"rate_increase_bps": 200}
-                // For sector_shock: {"sector": "Retail/Fashion", "revenue_impact_pct": -20}
-                // For recession: {"severity": "moderate", "duration_months": 12}
-                // For regulation: {"regulation": "...", "affected_sectors": [...], "revenue_at_risk_pct": 40}
-            }
+            "parameters": {...}
         }
     
     Returns:
-        Scenario impact analysis with affected SMEs
+        Portfolio impact using your bank's stress vectors.
+        ADK agents will generate recommendations from this data.
     """
     try:
         result = await scenario_service.run_scenario(
@@ -232,26 +188,23 @@ async def run_scenario(request: ScenarioRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Scenario error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/scenarios/templates")
 async def get_scenario_templates():
-    """
-    Get available scenario templates with parameter descriptions.
-    
-    Returns:
-        List of scenario templates
-    """
+    """Get available scenario templates with parameter descriptions."""
     templates = [
         {
             "scenario_type": "interest_rate",
             "name": "Interest Rate Shock",
-            "description": "Simulate impact of interest rate increase on debt service",
+            "description": "Apply bank's interest rate stress vectors to portfolio",
             "parameters": {
                 "rate_increase_bps": {
                     "type": "number",
-                    "description": "Interest rate increase in basis points",
+                    "description": "Interest rate increase in basis points (100, 200, or 300)",
                     "default": 200,
+                    "options": [100, 200, 300],
                     "example": 200
                 }
             }
@@ -278,7 +231,7 @@ async def get_scenario_templates():
         {
             "scenario_type": "recession",
             "name": "Economic Recession",
-            "description": "Simulate broad economic downturn",
+            "description": "Apply bank's recession stress vectors",
             "parameters": {
                 "severity": {
                     "type": "string",
@@ -321,79 +274,70 @@ async def get_scenario_templates():
     
     return {"templates": templates}
 
-# Chat endpoint
+# Chat endpoint - ADK Agents Only
 @app.post("/api/v1/chat")
 async def chat(request: ChatRequest):
     """
-    Process chat via ADK Orchestrator (if enabled) or fallback to rule-based
+    Process chat via ADK Orchestrator - NO FALLBACK
+    
+    Requires ADK agents running on port 8080
     """
     try:
-        # Try orchestrator first
         async with httpx.AsyncClient(timeout=30.0) as client:
-            try:
-                orch_response = await client.post(
-                    "http://localhost:8080/orchestrate",
-                    json={
-                        "message": request.query,
-                        "session_id": "default"
-                    }
-                )
-                if orch_response.status_code == 200:
-                    data = orch_response.json()
-                    return {"answer": data["response"], "type": "adk_orchestrator"}
-            except:
-                pass  # Fallback to rule-based
-        
-        # Fallback to existing chat service
-        response = await chat_service.process_query(
-            request.query,
-            use_claude_api=request.use_claude_api
+            response = await client.post(
+                "http://localhost:8080/orchestrate",
+                json={
+                    "message": request.query,
+                    "session_id": request.session_id
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+            return {
+                "answer": data["response"],
+                "type": "adk_agent",
+                "session_id": request.session_id
+            }
+    except httpx.HTTPStatusError as e:
+        logger.error(f"Agent orchestrator HTTP error: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Agent service error: {e.response.status_code}. Ensure agents are running on port 8080."
         )
-        return response
+    except httpx.ConnectError:
+        logger.error("Cannot connect to agent orchestrator")
+        raise HTTPException(
+            status_code=503,
+            detail="Cannot connect to agent service. Please ensure ADK agents are running on port 8080."
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/api/v1/chat/history")
-async def clear_chat_history():
-    """Clear chat conversation history."""
-    chat_service.clear_history()
-    return {"message": "Chat history cleared"}
+        logger.error(f"Agent orchestrator failed: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Agent service unavailable: {str(e)}"
+        )
 
 # Risk calculation endpoints
 @app.get("/api/v1/risk/calculate/{sme_id}")
 async def calculate_risk(sme_id: str):
-    """
-    Calculate comprehensive risk score for an SME.
-    
-    Path Parameters:
-        - sme_id: SME identifier
-    
-    Returns:
-        Risk analysis with component breakdown and default probability
-    """
+    """Calculate comprehensive risk score for an SME."""
     try:
         risk_analysis = await risk_engine.calculate_risk_score(sme_id)
         return risk_analysis
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
+        logger.error(f"Risk calculation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/risk/batch")
 async def calculate_batch_risk(sme_ids: List[str]):
-    """
-    Calculate risk scores for multiple SMEs.
-    
-    Request Body:
-        ["0142", "0287", "0531", ...]
-    
-    Returns:
-        List of risk analyses
-    """
+    """Calculate risk scores for multiple SMEs."""
     try:
         results = await risk_engine.batch_calculate_risk_scores(sme_ids)
         return {"results": results, "count": len(results)}
     except Exception as e:
+        logger.error(f"Batch risk calculation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Run the application
