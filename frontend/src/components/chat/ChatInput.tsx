@@ -26,7 +26,7 @@ const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border-t border-neutral-300 bg-white rounded-b-lg">
+    <form onSubmit={handleSubmit} style={{ padding: '12px 18px', borderTop: '1px solid var(--uui-neutral-60)', background: 'var(--uui-neutral-70)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <div className="flex gap-2">
         <textarea
           value={input}
@@ -35,7 +35,7 @@ const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
           placeholder="Ask me anything about your portfolio..."
           disabled={disabled}
           rows={2}
-          className="flex-1 px-3 py-2 text-sm border border-neutral-600 rounded resize-none focus:outline-none focus:ring-2 focus:ring-primary-60 bg-neutral-700 text-neutral-50 disabled:bg-neutral-800 disabled:cursor-not-allowed"
+          style={{ flex: 1, padding: '9px 12px', background: 'var(--uui-neutral-80)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', color: 'var(--uui-text-primary)', fontSize: '13px', fontFamily: 'var(--uui-font)', outline: 'none', resize: 'none' }}
         />
         <Button
           type="submit"
@@ -47,7 +47,7 @@ const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
           <Send className="w-4 h-4" />
         </Button>
       </div>
-      <p className="text-xs text-neutral-500 mt-2">
+      <p style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>
         Press Enter to send • Shift+Enter for new line
       </p>
     </form>

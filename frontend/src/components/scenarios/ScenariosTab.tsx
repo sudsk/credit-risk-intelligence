@@ -28,8 +28,8 @@ const ScenariosTab = () => {
   return (
     <div className="space-y-6">
       {/* Create New Scenario */}
-      <div className="bg-white rounded-lg border border-neutral-300 p-6">
-        <h3 className="text-lg font-semibold text-neutral-800 mb-4">
+      <div style={{ background: 'var(--uui-surface-main)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', padding: '18px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '18px' }}>
           🎯 Create New Scenario
         </h3>
         <div className="flex gap-3">
@@ -86,7 +86,7 @@ const ScenariosTab = () => {
 
       {/* Empty State */}
       {scenarios.length === 0 && !isLoading && (
-        <div className="text-center py-12 bg-white rounded-lg border border-neutral-300">
+        <div style={{ textAlign: 'center', padding: '48px', background: 'var(--uui-surface-main)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)' }}>
           <div className="text-4xl mb-3">🎯</div>
           <p className="text-lg font-medium text-neutral-700">No scenarios yet</p>
           <p className="text-sm text-neutral-500 mt-2">

@@ -1,7 +1,6 @@
 import { AlertCircle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import { cn } from '@/utils/formatters'
 import { Badge } from '../common/Badge'
 import { Button } from '../common/Button'
 
@@ -10,11 +9,21 @@ const SMEDetailPanel = () => {
 
   if (!selectedSME) {
     return (
-      <div className="bg-neutral-800 rounded-lg border border-neutral-600 shadow-sm h-[calc(100vh-320px)] flex items-center justify-center">
-        <div className="text-center text-neutral-500">
-          <div className="text-4xl mb-4">📊</div>
-          <p className="text-lg font-medium">Select an SME to view details</p>
-          <p className="text-sm mt-2">Click on any SME from the list to see comprehensive analysis</p>
+      <div style={{
+        background: 'var(--uui-surface-main)',
+        border: '1px solid var(--uui-neutral-60)',
+        borderRadius: 'var(--uui-border-radius)',
+        height: 'calc(100vh - 320px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
+          <p style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-secondary)' }}>
+            Select an SME to view details
+          </p>
+          <p style={{ fontSize: '13px', marginTop: '8px', color: 'var(--uui-text-tertiary)' }}>
+            Click on any SME from the list to see comprehensive analysis
+          </p>
         </div>
       </div>
     )
@@ -22,29 +31,29 @@ const SMEDetailPanel = () => {
 
   const getRiskBadgeVariant = (category: string) => {
     switch (category) {
-      case 'critical':
-        return 'critical'
-      case 'medium':
-        return 'warning'
-      case 'stable':
-        return 'success'
-      default:
-        return 'info'
+      case 'critical': return 'critical'
+      case 'medium': return 'warning'
+      case 'stable': return 'success'
+      default: return 'info'
     }
   }
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up':
-        return <TrendingUp className="w-4 h-4 text-critical-60" />
-      case 'down':
-        return <TrendingDown className="w-4 h-4 text-success-60" />
-      default:
-        return <Minus className="w-4 h-4 text-neutral-500" />
+      case 'up': return <TrendingUp size={16} style={{ color: 'var(--uui-critical-60)' }} />
+      case 'down': return <TrendingDown size={16} style={{ color: 'var(--uui-success-60)' }} />
+      default: return <Minus size={16} style={{ color: 'var(--uui-text-tertiary)' }} />
     }
   }
 
-  // Mock detailed data (will come from API in real implementation)
+  const getTrendColor = (trend: string) => {
+    switch (trend) {
+      case 'up': return 'var(--uui-critical-60)'
+      case 'down': return 'var(--uui-success-60)'
+      default: return 'var(--uui-text-tertiary)'
+    }
+  }
+
   const detailedData = {
     financials: {
       revenue: '€2.4M',
@@ -64,42 +73,78 @@ const SMEDetailPanel = () => {
     },
   }
 
+  const sectionTitle = (text: string, icon?: React.ReactNode) => (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '6px',
+      fontSize: '12px', fontWeight: 600,
+      color: 'var(--uui-text-tertiary)',
+      textTransform: 'uppercase' as const,
+      marginBottom: '9px',
+    }}>
+      {icon}
+      {text}
+    </div>
+  )
+
+  const infoBox = (label: string, value: string) => (
+    <div style={{
+      padding: '9px 12px',
+      background: 'var(--uui-neutral-70)',
+      borderRadius: 'var(--uui-border-radius)',
+    }}>
+      <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '3px' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>
+        {value}
+      </div>
+    </div>
+  )
+
   return (
-    <div className="bg-neutral-800 rounded-lg border border-neutral-600 shadow-sm h-[calc(100vh-320px)] overflow-y-auto">
-      {/* Header */}
-      <div className="sticky top-0 bg-neutral-800 border-b border-neutral-600 px-6 py-4 z-10">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-sm font-mono text-neutral-500">
+    <div style={{
+      background: 'var(--uui-surface-main)',
+      border: '1px solid var(--uui-neutral-60)',
+      borderRadius: 'var(--uui-border-radius)',
+      height: 'calc(100vh - 320px)',
+      overflowY: 'auto',
+    }}>
+      {/* Sticky Header */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'var(--uui-neutral-70)',
+        borderBottom: '1px solid var(--uui-neutral-60)',
+        padding: '12px 18px',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          {/* Left */}
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', fontFamily: 'var(--uui-font-mono)' }}>
                 {selectedSME.id}
               </span>
-              <Badge variant={getRiskBadgeVariant(selectedSME.riskCategory)}>
+              <Badge variant={getRiskBadgeVariant(selectedSME.riskCategory) as any}>
                 {selectedSME.riskCategory.toUpperCase()}
               </Badge>
             </div>
-            <h2 className="text-xl font-bold text-neutral-50">
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--uui-text-primary)', marginBottom: '6px' }}>
               {selectedSME.name}
             </h2>
-            <div className="flex items-center gap-4 mt-2 text-sm text-neutral-600">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '13px', color: 'var(--uui-text-secondary)' }}>
               <span>💼 {selectedSME.sector}</span>
               <span>📍 {selectedSME.geography}</span>
-              <span className="font-mono font-semibold">{selectedSME.exposure}</span>
+              <span style={{ fontFamily: 'var(--uui-font-mono)', fontWeight: 600 }}>{selectedSME.exposure}</span>
             </div>
           </div>
 
-          <div className="text-right">
-            <div className="text-4xl font-bold text-neutral-50">
+          {/* Right - Score */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '36px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-primary)' }}>
               {selectedSME.riskScore}
             </div>
-            <div className="flex items-center justify-end gap-1 mt-1">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', marginTop: '4px' }}>
               {getTrendIcon(selectedSME.trend)}
-              <span className={cn(
-                'text-sm font-mono font-semibold',
-                selectedSME.trend === 'up' && 'text-critical-60',
-                selectedSME.trend === 'down' && 'text-success-60',
-                selectedSME.trend === 'stable' && 'text-neutral-500'
-              )}>
+              <span style={{ fontSize: '12px', fontFamily: 'var(--uui-font-mono)', fontWeight: 600, color: getTrendColor(selectedSME.trend) }}>
                 {selectedSME.trendValue > 0 ? '+' : ''}{selectedSME.trendValue} this quarter
               </span>
             </div>
@@ -108,32 +153,33 @@ const SMEDetailPanel = () => {
       </div>
 
       {/* Content */}
-      <div className="p-6 space-y-6">
+      <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+
         {/* Risk Drivers */}
         <section>
-          <h3 className="text-sm font-semibold text-neutral-700 uppercase mb-3 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4" />
-            Key Risk Drivers
-          </h3>
-          <div className="space-y-2">
+          {sectionTitle('Key Risk Drivers', <AlertCircle size={14} />)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
             {detailedData.riskDrivers.map((driver, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between p-3 bg-neutral-700 rounded border border-neutral-200"
-              >
-                <div className="flex-1">
-                  <div className="font-medium text-sm text-neutral-50">
+              <div key={idx} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px',
+                background: 'var(--uui-neutral-70)',
+                borderRadius: 'var(--uui-border-radius)',
+                borderLeft: '3px solid var(--uui-critical-60)',
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '3px' }}>
                     {driver.label}
                   </div>
-                  <div className="text-xs text-neutral-500 mt-1">
+                  <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>
                     Source: {driver.source}
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-lg font-bold text-critical-60">
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--uui-critical-60)' }}>
                     {driver.impact}
-                  </span>
-                  <div className="text-xs text-neutral-500">points</div>
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>points</div>
                 </div>
               </div>
             ))}
@@ -142,72 +188,48 @@ const SMEDetailPanel = () => {
 
         {/* Financial Metrics */}
         <section>
-          <h3 className="text-sm font-semibold text-neutral-700 uppercase mb-3">
-            Financial Metrics
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-neutral-700 rounded border border-neutral-200">
-              <div className="text-xs text-neutral-500 mb-1">Annual Revenue</div>
-              <div className="text-lg font-bold text-neutral-50">
-                {detailedData.financials.revenue}
-              </div>
-            </div>
-            <div className="p-3 bg-neutral-700 rounded border border-neutral-200">
-              <div className="text-xs text-neutral-500 mb-1">EBITDA</div>
-              <div className="text-lg font-bold text-neutral-50">
-                {detailedData.financials.ebitda}
-              </div>
-            </div>
-            <div className="p-3 bg-neutral-700 rounded border border-neutral-200">
-              <div className="text-xs text-neutral-500 mb-1">Debt Service Coverage</div>
-              <div className="text-lg font-bold text-neutral-50">
-                {detailedData.financials.debtServiceCoverage}
-              </div>
-            </div>
-            <div className="p-3 bg-neutral-700 rounded border border-neutral-200">
-              <div className="text-xs text-neutral-500 mb-1">Cash Reserves</div>
-              <div className="text-lg font-bold text-neutral-50">
-                {detailedData.financials.cashReserves}
-              </div>
-            </div>
+          {sectionTitle('Financial Metrics')}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            {infoBox('Annual Revenue', detailedData.financials.revenue)}
+            {infoBox('EBITDA', detailedData.financials.ebitda)}
+            {infoBox('Debt Service Coverage', detailedData.financials.debtServiceCoverage)}
+            {infoBox('Cash Reserves', detailedData.financials.cashReserves)}
           </div>
         </section>
 
         {/* External Risk Factors */}
         <section>
-          <h3 className="text-sm font-semibold text-neutral-700 uppercase mb-3">
-            External Risk Factors
-          </h3>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 bg-neutral-700 rounded border border-neutral-200">
-              <span className="text-sm text-neutral-700">Sector Health</span>
-              <Badge variant="warning">{detailedData.externalFactors.sectorHealth}</Badge>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-neutral-700 rounded border border-neutral-200">
-              <span className="text-sm text-neutral-700">Geography Risk</span>
-              <Badge variant="success">{detailedData.externalFactors.geographyRisk}</Badge>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-neutral-700 rounded border border-neutral-200">
-              <span className="text-sm text-neutral-700">Compliance Status</span>
-              <Badge variant="success">{detailedData.externalFactors.compliance}</Badge>
-            </div>
+          {sectionTitle('External Risk Factors')}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+            {[
+              { label: 'Sector Health', value: detailedData.externalFactors.sectorHealth, variant: 'warning' },
+              { label: 'Geography Risk', value: detailedData.externalFactors.geographyRisk, variant: 'success' },
+              { label: 'Compliance Status', value: detailedData.externalFactors.compliance, variant: 'success' },
+            ].map((item, idx) => (
+              <div key={idx} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '9px 12px',
+                background: 'var(--uui-neutral-70)',
+                borderRadius: 'var(--uui-border-radius)',
+              }}>
+                <span style={{ fontSize: '13px', color: 'var(--uui-text-secondary)' }}>{item.label}</span>
+                <Badge variant={item.variant as any}>{item.value}</Badge>
+              </div>
+            ))}
           </div>
         </section>
 
         {/* Actions */}
-        <section className="pt-4 border-t border-neutral-200">
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="primary" size="md">
-              Create Task
-            </Button>
-            <Button variant="secondary" size="md">
-              Run Scenario
-            </Button>
-            <Button variant="secondary" size="md" fullWidth className="col-span-2">
-              View Full History
-            </Button>
+        <section style={{ paddingTop: '12px', borderTop: '1px solid var(--uui-neutral-60)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '9px' }}>
+            <Button variant="primary" size="md">Create Task</Button>
+            <Button variant="secondary" size="md">Run Scenario</Button>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Button variant="secondary" size="md" fullWidth>View Full History</Button>
+            </div>
           </div>
         </section>
+
       </div>
     </div>
   )

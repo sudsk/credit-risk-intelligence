@@ -82,9 +82,9 @@ What would you like to know?`,
     }
   }
   return (
-    <div className="fixed bottom-24 right-6 z-50 w-[480px] h-[640px] bg-neutral-800 rounded-lg shadow-2xl border border-neutral-600 flex flex-col">
+    <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1001, width: '420px', height: '600px', background: 'var(--uui-surface-main)', borderRadius: 'var(--uui-border-radius)', border: '1px solid var(--uui-neutral-60)', boxShadow: 'var(--uui-shadow-level-3)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Header */}
-      <div className="px-4 py-3 bg-primary-60 text-white rounded-t-lg flex items-center justify-between">
+      <div style={{ padding: '12px 18px', background: 'var(--uui-neutral-70)', borderBottom: '1px solid var(--uui-neutral-60)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
             <span className="text-lg">🤖</span>
@@ -103,7 +103,7 @@ What would you like to know?`,
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-900">
+      <div style={{ flex: 1, overflowY: 'auto', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'var(--uui-neutral-90)' }}>
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}

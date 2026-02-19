@@ -12,7 +12,7 @@ const HomeTab = () => {
 
       {/* Portfolio Header with Simulate Button */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-neutral-50">
+        <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>
           Portfolio Overview
         </h2>
         <SimulateFeedButton /> {/* ADD */}

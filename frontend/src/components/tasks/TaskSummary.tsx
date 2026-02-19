@@ -11,8 +11,8 @@ const TaskSummary = () => {
   const completedThisWeek = tasks.filter((t) => t.status === 'completed')
 
   return (
-    <div className="bg-neutral-70 rounded-lg p-6">
-      <h3 className="text-sm font-semibold text-neutral-400 uppercase mb-4">
+    <div style={{ background: 'var(--uui-neutral-70)', borderRadius: 'var(--uui-border-radius)', padding: '18px', border: '1px solid var(--uui-neutral-60)' }}>
+      <h3 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '18px' }}>
         Task Summary
       </h3>
       <div className="grid grid-cols-4 gap-6">

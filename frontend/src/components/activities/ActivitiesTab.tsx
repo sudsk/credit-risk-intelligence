@@ -26,8 +26,8 @@ const ActivitiesTab = () => {
     }
   }
 
-  const filteredActivities = filter === 'all' 
-    ? activities 
+  const filteredActivities = filter === 'all'
+    ? activities
     : activities.filter(a => a.type === filter)
 
   const handleExportLog = () => {
@@ -47,11 +47,13 @@ const ActivitiesTab = () => {
               <button
                 key={filterType}
                 onClick={() => setFilter(filterType as any)}
-                className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                  filter === filterType
-                    ? 'bg-primary-60 text-white'
-                    : 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
-                }`}
+                style={{
+                  padding: '4px 12px', fontSize: '11px', fontWeight: 600,
+                  borderRadius: 'var(--uui-border-radius)', border: 'none', cursor: 'pointer',
+                  background: filter === filterType ? 'var(--uui-primary-60)' : 'var(--uui-neutral-60)',
+                  color: filter === filterType ? 'white' : 'var(--uui-text-primary)',
+                  fontFamily: 'var(--uui-font)',
+                }}
               >
                 {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
               </button>
