@@ -222,7 +222,7 @@ const NewsIntelligence = () => {
                           onChange={(e) =>
                             setSelectedAssignee({ ...selectedAssignee, [item.id]: e.target.value })
                           }
-                          className="w-full px-2 py-1.5 text-xs border border-neutral-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-60"
+                          className="w-full px-2 py-1.5 text-xs border border-neutral-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-60 bg-neutral-700 text-neutral-50"
                         >
                           <option value="">Select assignee...</option>
                           <option value="John Smith">John Smith</option>
@@ -240,7 +240,7 @@ const NewsIntelligence = () => {
                           onChange={(e) =>
                             setSelectedPriority({ ...selectedPriority, [item.id]: e.target.value })
                           }
-                          className="w-full px-2 py-1.5 text-xs border border-neutral-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-60"
+                          className="w-full px-2 py-1.5 text-xs border border-neutral-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-60 bg-neutral-700 text-neutral-50"
                         >
                           <option value="high">High</option>
                           <option value="medium">Medium</option>

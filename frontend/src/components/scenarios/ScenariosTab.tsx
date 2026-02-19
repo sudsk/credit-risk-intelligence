@@ -39,7 +39,7 @@ const ScenariosTab = () => {
             value={newScenarioInput}
             onChange={(e) => setNewScenarioInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleCreateScenario()}
-            className="flex-1 px-4 py-3 border border-neutral-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-60"
+            className="flex-1 px-4 py-3 border border-neutral-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-60 bg-neutral-700 text-neutral-50"
           />
           <Button
             variant="primary"

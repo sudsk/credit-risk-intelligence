@@ -35,7 +35,7 @@ const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
           placeholder="Ask me anything about your portfolio..."
           disabled={disabled}
           rows={2}
-          className="flex-1 px-3 py-2 text-sm border border-neutral-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-primary-60 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+          className="flex-1 px-3 py-2 text-sm border border-neutral-600 rounded resize-none focus:outline-none focus:ring-2 focus:ring-primary-60 bg-neutral-700 text-neutral-50 disabled:bg-neutral-800 disabled:cursor-not-allowed"
         />
         <Button
           type="submit"
