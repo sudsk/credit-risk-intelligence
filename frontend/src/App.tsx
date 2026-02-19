@@ -22,7 +22,7 @@ function App() {
   const chatOpen = useSelector((state: RootState) => state.chat.isOpen)
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-900">
       <Header />
       <TabNavigation />
 

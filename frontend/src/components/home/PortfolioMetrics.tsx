@@ -41,11 +41,11 @@ const PortfolioMetrics = () => {
           <Info className="w-3.5 h-3.5" />
         </button>
 
-        <div className="text-sm text-neutral-600 mb-1">Critical Risk (80-100)</div>
+        <div className="text-sm text-neutral-300 mb-1">Critical Risk (80-100)</div>
         <div className="text-3xl font-bold text-critical-60 mb-2">
           {metrics.criticalCount}
         </div>
-        <div className="text-xs text-neutral-500 font-mono">
+        <div className="text-xs text-neutral-300 font-mono">
           €42M | 12.8% | <span className="text-critical-60">↑ 5</span>
         </div>
       </div>
@@ -53,7 +53,7 @@ const PortfolioMetrics = () => {
       {/* Medium Risk */}
       <div
         onClick={() => handleCardClick('medium')}
-        className="relative bg-white rounded-lg border-2 border-warning-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
+        className="relative bg-neutral-800 rounded-lg border-2 border-warning-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
       >
         <button
           onClick={(e) => handleInfoClick(e, 'medium')}
@@ -63,11 +63,11 @@ const PortfolioMetrics = () => {
           <Info className="w-3.5 h-3.5" />
         </button>
 
-        <div className="text-sm text-neutral-600 mb-1">Medium Risk (50-79)</div>
+        <div className="text-sm text-neutral-300 mb-1">Medium Risk (50-79)</div>
         <div className="text-3xl font-bold text-warning-60 mb-2">
           {metrics.mediumCount}
         </div>
-        <div className="text-xs text-neutral-500 font-mono">
+        <div className="text-xs text-neutral-300 font-mono">
           €98M | 29.9% | <span className="text-warning-60">↑ 8</span>
         </div>
       </div>
@@ -75,7 +75,7 @@ const PortfolioMetrics = () => {
       {/* Low Risk */}
       <div
         onClick={() => handleCardClick('stable')}
-        className="relative bg-white rounded-lg border-2 border-success-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
+        className="relative bg-neutral-800 rounded-lg border-2 border-success-60 p-4 cursor-pointer hover:shadow-lg transition-shadow"
       >
         <button
           onClick={(e) => handleInfoClick(e, 'stable')}
@@ -85,33 +85,33 @@ const PortfolioMetrics = () => {
           <Info className="w-3.5 h-3.5" />
         </button>
 
-        <div className="text-sm text-neutral-600 mb-1">Low Risk (0-49)</div>
+        <div className="text-sm text-neutral-300 mb-1">Low Risk (0-49)</div>
         <div className="text-3xl font-bold text-success-60 mb-2">
           {metrics.stableCount}
         </div>
-        <div className="text-xs text-neutral-500 font-mono">
+        <div className="text-xs text-neutral-300 font-mono">
           €188M | 57.3% | <span className="text-success-60">↓ 13</span>
         </div>
       </div>
 
       {/* Total Portfolio */}
-      <div className="bg-white rounded-lg border border-neutral-300 p-4">
-        <div className="text-sm text-neutral-600 mb-1">Total Portfolio</div>
+      <div className="bg-neutral-800 rounded-lg border border-neutral-600 p-4">
+        <div className="text-sm text-neutral-300 mb-1">Total Portfolio</div>
         <div className="text-3xl font-bold text-neutral-800 mb-2">
           {metrics.totalSMEs}
         </div>
-        <div className="text-xs text-neutral-500 font-mono">
+        <div className="text-xs text-neutral-300 font-mono">
           {formatCurrency(metrics.totalExposure)}
         </div>
       </div>
 
       {/* Default Probability */}
-      <div className="bg-white rounded-lg border border-neutral-300 p-4">
-        <div className="text-sm text-neutral-600 mb-1">Default Probability</div>
+      <div className="bg-neutral-800 rounded-lg border border-neutral-600 p-4">
+        <div className="text-sm text-neutral-300 mb-1">Default Probability</div>
         <div className="text-3xl font-bold text-neutral-800 mb-2">
           {formatPercent(metrics.defaultProbability)}
         </div>
-        <div className="text-xs text-neutral-500 font-mono">
+        <div className="text-xs text-neutral-300 font-mono">
           Avg Score: {metrics.avgRiskScore}
         </div>
       </div>
