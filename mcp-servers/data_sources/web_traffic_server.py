@@ -1,417 +1,377 @@
 #!/usr/bin/env python3
 """
-Web Traffic Analytics MCP Server
-Provides website traffic, engagement, and digital footprint data from CSV files.
-In production, this would connect to SimilarWeb API or Google Analytics.
+Web Traffic MCP Server - Cloud Run Compatible
+Provides website traffic, engagement metrics, and digital presence analysis.
 """
-
-import asyncio
+import os
 import pandas as pd
 from pathlib import Path
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from fastmcp import FastMCP
 
 # Data paths
 DATA_DIR = Path(__file__).parent.parent / "data"
-TRAFFIC_CSV = DATA_DIR / "web_traffic.csv"
+WEB_TRAFFIC_CSV = DATA_DIR / "web_traffic.csv"
 
 # Load data
-traffic_df = pd.read_csv(TRAFFIC_CSV)
+traffic_df = pd.read_csv(WEB_TRAFFIC_CSV)
 
-# Create MCP server
-server = Server("web-traffic-data")
+# Create FastMCP server
+mcp = FastMCP("web-traffic-data")
 
-@server.list_tools()
-async def list_tools() -> list[Tool]:
-    """List available web traffic tools."""
-    return [
-        Tool(
-            name="get_traffic_metrics",
-            description="Get current web traffic metrics including sessions, users, and engagement",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "sme_id": {
-                        "type": "string",
-                        "description": "SME identifier"
-                    }
-                },
-                "required": ["sme_id"]
-            }
-        ),
-        Tool(
-            name="get_traffic_trend",
-            description="Get traffic trend analysis (QoQ growth/decline)",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "sme_id": {
-                        "type": "string",
-                        "description": "SME identifier"
-                    }
-                },
-                "required": ["sme_id"]
-            }
-        ),
-        Tool(
-            name="get_engagement_quality",
-            description="Analyze engagement quality (bounce rate, session duration, conversion)",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "sme_id": {
-                        "type": "string",
-                        "description": "SME identifier"
-                    }
-                },
-                "required": ["sme_id"]
-            }
-        ),
-        Tool(
-            name="assess_digital_health",
-            description="Overall digital health assessment combining traffic and engagement",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "sme_id": {
-                        "type": "string",
-                        "description": "SME identifier"
-                    }
-                },
-                "required": ["sme_id"]
-            }
-        )
-    ]
 
-@server.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[TextContent]:
-    """Handle tool calls."""
-    sme_id = arguments.get("sme_id")
+@mcp.tool()
+def get_traffic_metrics(sme_id: str) -> dict:
+    """Get website traffic metrics and trends"""
+    traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
     
-    if name == "get_traffic_metrics":
-        traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
-        
-        if traffic_row.empty:
-            return [TextContent(
-                type="text",
-                text=f"No traffic data found for SME {sme_id}"
-            )]
-        
-        data = traffic_row.iloc[0]
-        
-        metrics = {
-            "sme_id": sme_id,
-            "monthly_sessions": int(data['sessions_monthly']),
-            "monthly_users": int(data['users_monthly']),
-            "avg_session_duration_sec": int(data['avg_session_duration_sec']),
-            "bounce_rate": round(float(data['bounce_rate']), 3),
-            "conversion_rate_pct": float(data['conversion_rate']),
-            "top_traffic_source": data['top_source'],
-            "last_updated": data['last_updated']
-        }
-        
-        return [TextContent(
-            type="text",
-            text=f"Web Traffic Metrics:\n{pd.Series(metrics).to_string()}"
-        )]
+    if traffic_row.empty:
+        return {"error": f"No traffic data found for SME {sme_id}"}
     
-    elif name == "get_traffic_trend":
-        traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
-        
-        if traffic_row.empty:
-            return [TextContent(
-                type="text",
-                text=f"No trend data found for SME {sme_id}"
-            )]
-        
-        data = traffic_row.iloc[0]
-        
-        sessions_change = float(data['sessions_change_qoq'])
-        users_change = float(data['users_change_qoq'])
-        
-        trend = {
-            "sme_id": sme_id,
-            "sessions_change_qoq_pct": sessions_change,
-            "users_change_qoq_pct": users_change,
-            "trend_direction": _determine_trend(sessions_change),
-            "risk_level": _assess_traffic_risk(sessions_change),
-            "interpretation": _interpret_traffic_trend(sessions_change, users_change)
-        }
-        
-        return [TextContent(
-            type="text",
-            text=f"Traffic Trend Analysis:\n{pd.Series(trend).to_string()}"
-        )]
+    data = traffic_row.iloc[0]
     
-    elif name == "get_engagement_quality":
-        traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
-        
-        if traffic_row.empty:
-            return [TextContent(
-                type="text",
-                text=f"No engagement data found for SME {sme_id}"
-            )]
-        
-        data = traffic_row.iloc[0]
-        
-        bounce_rate = float(data['bounce_rate'])
-        avg_duration = int(data['avg_session_duration_sec'])
-        conversion_rate = float(data['conversion_rate'])
-        
-        quality_score = _calculate_engagement_score(bounce_rate, avg_duration, conversion_rate)
-        
-        engagement = {
-            "sme_id": sme_id,
-            "bounce_rate": round(bounce_rate, 3),
-            "avg_session_duration_min": round(avg_duration / 60, 1),
-            "conversion_rate_pct": conversion_rate,
-            "engagement_quality_score": quality_score,
-            "quality_rating": _rate_engagement(quality_score),
-            "interpretation": _interpret_engagement(bounce_rate, avg_duration, conversion_rate)
-        }
-        
-        return [TextContent(
-            type="text",
-            text=f"Engagement Quality:\n{pd.Series(engagement).to_string()}"
-        )]
+    metrics = {
+        "sme_id": sme_id,
+        "monthly_visitors": int(data['monthly_visitors']),
+        "traffic_change_30d": f"{float(data['traffic_change_30d']):.1f}%",
+        "traffic_change_90d": f"{float(data['traffic_change_90d']):.1f}%",
+        "bounce_rate": f"{float(data['bounce_rate']) * 100:.1f}%",
+        "avg_session_duration_seconds": int(data['avg_session_duration_seconds']),
+        "pages_per_session": round(float(data['pages_per_session']), 2),
+        "conversion_rate": f"{float(data['conversion_rate']) * 100:.2f}%"
+    }
     
-    elif name == "assess_digital_health":
-        traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
-        
-        if traffic_row.empty:
-            return [TextContent(
-                type="text",
-                text=f"No data found for SME {sme_id}"
-            )]
-        
-        data = traffic_row.iloc[0]
-        
-        # Calculate composite digital health score
-        sessions_change = float(data['sessions_change_qoq'])
-        bounce_rate = float(data['bounce_rate'])
-        avg_duration = int(data['avg_session_duration_sec'])
-        conversion_rate = float(data['conversion_rate'])
-        
-        # Traffic trend score (0-100, lower is better for risk)
-        traffic_score = _score_traffic_trend(sessions_change)
-        
-        # Engagement score (0-100, lower is better for risk)
-        engagement_score = _score_engagement(bounce_rate, avg_duration, conversion_rate)
-        
-        # Overall digital health (weighted average)
-        health_score = (traffic_score * 0.6) + (engagement_score * 0.4)
-        
-        assessment = {
-            "sme_id": sme_id,
-            "overall_health_score": round(health_score, 1),
-            "health_rating": _rate_digital_health(health_score),
-            "traffic_component": round(traffic_score, 1),
-            "engagement_component": round(engagement_score, 1),
-            "key_concerns": _identify_concerns(sessions_change, bounce_rate, avg_duration),
-            "risk_to_credit": _map_to_credit_risk(health_score)
-        }
-        
-        return [TextContent(
-            type="text",
-            text=f"Digital Health Assessment:\n{pd.Series({k: v for k, v in assessment.items() if k != 'key_concerns'}).to_string()}\n\nKey Concerns:\n{', '.join(assessment['key_concerns']) if assessment['key_concerns'] else 'None'}"
-        )]
+    return metrics
+
+
+@mcp.tool()
+def get_traffic_trend(sme_id: str) -> dict:
+    """Analyze traffic trends over 30 and 90 days"""
+    traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
     
+    if traffic_row.empty:
+        return {"error": f"No trend data found for SME {sme_id}"}
+    
+    data = traffic_row.iloc[0]
+    
+    current_visitors = int(data['monthly_visitors'])
+    change_30d = float(data['traffic_change_30d'])
+    change_90d = float(data['traffic_change_90d'])
+    
+    # Calculate historical visitor counts
+    visitors_30d_ago = int(current_visitors / (1 + change_30d/100))
+    visitors_90d_ago = int(current_visitors / (1 + change_90d/100))
+    
+    trend = {
+        "sme_id": sme_id,
+        "current_monthly_visitors": current_visitors,
+        "visitors_30_days_ago": visitors_30d_ago,
+        "visitors_90_days_ago": visitors_90d_ago,
+        "change_30d": f"{change_30d:.1f}%",
+        "change_90d": f"{change_90d:.1f}%",
+        "trend_direction": _assess_traffic_trend(change_30d, change_90d),
+        "traffic_health": _rate_traffic_health(current_visitors, change_30d)
+    }
+    
+    return trend
+
+
+@mcp.tool()
+def get_engagement_metrics(sme_id: str) -> dict:
+    """Get user engagement metrics (bounce rate, session duration, pages per session)"""
+    traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
+    
+    if traffic_row.empty:
+        return {"error": f"No engagement data found for SME {sme_id}"}
+    
+    data = traffic_row.iloc[0]
+    
+    bounce_rate = float(data['bounce_rate']) * 100
+    session_duration = int(data['avg_session_duration_seconds'])
+    pages_per_session = float(data['pages_per_session'])
+    
+    engagement = {
+        "sme_id": sme_id,
+        "bounce_rate": f"{bounce_rate:.1f}%",
+        "avg_session_duration": f"{session_duration // 60}m {session_duration % 60}s",
+        "pages_per_session": round(pages_per_session, 2),
+        "engagement_rating": _rate_engagement(bounce_rate, session_duration, pages_per_session),
+        "engagement_health": _assess_engagement_health(bounce_rate, session_duration, pages_per_session)
+    }
+    
+    return engagement
+
+
+@mcp.tool()
+def get_conversion_analysis(sme_id: str) -> dict:
+    """Analyze conversion rate and effectiveness"""
+    traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
+    
+    if traffic_row.empty:
+        return {"error": f"No conversion data found for SME {sme_id}"}
+    
+    data = traffic_row.iloc[0]
+    
+    conversion_rate = float(data['conversion_rate']) * 100
+    monthly_visitors = int(data['monthly_visitors'])
+    estimated_conversions = int(monthly_visitors * float(data['conversion_rate']))
+    
+    analysis = {
+        "sme_id": sme_id,
+        "conversion_rate": f"{conversion_rate:.2f}%",
+        "monthly_visitors": monthly_visitors,
+        "estimated_monthly_conversions": estimated_conversions,
+        "conversion_rating": _rate_conversion(conversion_rate),
+        "conversion_health": _assess_conversion_health(conversion_rate)
+    }
+    
+    return analysis
+
+
+@mcp.tool()
+def assess_digital_presence(sme_id: str) -> dict:
+    """Overall digital presence and web health assessment"""
+    traffic_row = traffic_df[traffic_df['sme_id'] == sme_id]
+    
+    if traffic_row.empty:
+        return {"error": f"No digital presence data found for SME {sme_id}"}
+    
+    data = traffic_row.iloc[0]
+    
+    # Calculate digital presence score
+    presence_score = _calculate_digital_presence_score(data)
+    
+    # Identify concerns
+    concerns = _identify_digital_concerns(data)
+    
+    assessment = {
+        "sme_id": sme_id,
+        "digital_presence_score": round(presence_score, 1),
+        "presence_rating": _rate_digital_presence(presence_score),
+        "monthly_visitors": int(data['monthly_visitors']),
+        "traffic_change_30d": f"{float(data['traffic_change_30d']):.1f}%",
+        "bounce_rate": f"{float(data['bounce_rate']) * 100:.1f}%",
+        "conversion_rate": f"{float(data['conversion_rate']) * 100:.2f}%",
+        "key_concerns": concerns,
+        "risk_contribution": f"Adds {_digital_risk_points(presence_score)} points to overall risk score"
+    }
+    
+    return assessment
+
+
+# Helper functions
+def _assess_traffic_trend(change_30d: float, change_90d: float) -> str:
+    """Assess traffic trend direction."""
+    if change_90d < -30:
+        return "🔴 CRITICAL: Severe traffic decline (>-30% in 90d)"
+    elif change_90d < -15:
+        return "🟠 WARNING: Significant traffic decline (-15 to -30% in 90d)"
+    elif change_30d < -10:
+        return "🟡 CONCERN: Recent traffic drop (>-10% in 30d)"
+    elif change_90d < 0:
+        return "⚠️ WATCH: Gradual traffic decline"
+    elif change_30d > 20:
+        return "🟢 EXCELLENT: Strong growth (>20% in 30d)"
+    elif change_90d > 10:
+        return "✅ POSITIVE: Growing traffic"
     else:
-        return [TextContent(
-            type="text",
-            text=f"Unknown tool: {name}"
-        )]
+        return "➡️ STABLE: Flat traffic"
 
-def _determine_trend(change_pct: float) -> str:
-    """Determine trend direction."""
-    if change_pct > 5:
-        return "Growing"
-    elif change_pct < -5:
-        return "Declining"
+
+def _rate_traffic_health(visitors: int, change_30d: float) -> str:
+    """Rate traffic health."""
+    if visitors >= 100000 and change_30d >= 10:
+        return "Excellent (High volume + growth)"
+    elif visitors >= 50000 and change_30d >= 0:
+        return "Good (Strong volume + stable/growing)"
+    elif visitors >= 10000:
+        return "Adequate (Moderate volume)"
+    elif visitors >= 1000:
+        return "Weak (Low volume)"
     else:
-        return "Stable"
+        return "Poor (Very low volume)"
 
-def _assess_traffic_risk(change_pct: float) -> str:
-    """Assess risk level from traffic trend."""
-    if change_pct < -40:
-        return "CRITICAL"
-    elif change_pct < -25:
-        return "HIGH"
-    elif change_pct < -10:
-        return "MEDIUM"
-    elif change_pct < -5:
-        return "LOW"
-    else:
-        return "MINIMAL"
 
-def _interpret_traffic_trend(sessions_change: float, users_change: float) -> str:
-    """Interpret traffic trend for credit risk."""
-    if sessions_change < -40:
-        return "🔴 CRITICAL: Massive traffic collapse - demand crisis likely"
-    elif sessions_change < -25:
-        return "🟠 HIGH RISK: Significant traffic decline - losing market position"
-    elif sessions_change < -15:
-        return "🟡 MEDIUM RISK: Notable traffic decline - customer interest waning"
-    elif sessions_change < -5:
-        return "⚠️ LOW RISK: Slight traffic decline - monitor closely"
-    elif sessions_change < 10:
-        return "✅ STABLE: Traffic stable - normal market position"
-    else:
-        return "🟢 POSITIVE: Traffic growing - increasing demand/interest"
-
-def _calculate_engagement_score(bounce_rate: float, duration: int, conversion: float) -> float:
-    """Calculate engagement quality score (0-100)."""
-    # Lower bounce rate is better
-    bounce_component = max(0, 100 - (bounce_rate * 150))
-    
-    # Higher duration is better (target ~180 seconds)
-    duration_component = min(100, (duration / 180) * 100)
-    
-    # Higher conversion is better (scale to typical 2-5% range)
-    conversion_component = min(100, (conversion / 5) * 100)
-    
-    # Weighted average
-    score = (bounce_component * 0.4) + (duration_component * 0.3) + (conversion_component * 0.3)
-    return round(score, 1)
-
-def _rate_engagement(score: float) -> str:
+def _rate_engagement(bounce_rate: float, session_duration: int, pages_per_session: float) -> str:
     """Rate engagement quality."""
-    if score >= 80:
-        return "Excellent"
-    elif score >= 60:
-        return "Good"
-    elif score >= 40:
-        return "Fair"
-    elif score >= 20:
-        return "Poor"
+    if bounce_rate < 30 and session_duration >= 180 and pages_per_session >= 4:
+        return "Excellent (Highly engaged users)"
+    elif bounce_rate < 40 and session_duration >= 120 and pages_per_session >= 3:
+        return "Good (Strong engagement)"
+    elif bounce_rate < 55 and session_duration >= 60 and pages_per_session >= 2:
+        return "Adequate (Moderate engagement)"
+    elif bounce_rate < 70:
+        return "Weak (Low engagement)"
     else:
-        return "Very Poor"
+        return "Poor (Very low engagement)"
 
-def _interpret_engagement(bounce_rate: float, duration: int, conversion: float) -> str:
-    """Interpret engagement quality."""
-    if bounce_rate > 0.70 and duration < 120:
-        return "🔴 CRITICAL: Very high bounce rate + low engagement = poor product-market fit"
-    elif bounce_rate > 0.60 and conversion < 2.0:
-        return "🟠 WARNING: High bounce, low conversion = value proposition issues"
-    elif bounce_rate > 0.50:
-        return "🟡 CAUTION: Elevated bounce rate - UX or targeting problems"
-    elif conversion < 2.0:
-        return "⚠️ WATCH: Low conversion despite decent traffic - funnel issues"
-    elif bounce_rate < 0.40 and duration > 180 and conversion > 3.5:
-        return "🟢 EXCELLENT: High engagement + good conversion = strong business"
-    else:
-        return "✅ NORMAL: Acceptable engagement metrics"
 
-def _score_traffic_trend(change_pct: float) -> float:
-    """Score traffic trend (0=excellent, 100=critical risk)."""
-    if change_pct >= 20:
-        return 5  # Excellent growth
-    elif change_pct >= 10:
-        return 15  # Good growth
-    elif change_pct >= 0:
-        return 30  # Stable
-    elif change_pct >= -10:
-        return 50  # Slight decline
-    elif change_pct >= -25:
-        return 70  # Concerning decline
-    elif change_pct >= -40:
-        return 85  # Severe decline
+def _assess_engagement_health(bounce_rate: float, session_duration: int, pages_per_session: float) -> str:
+    """Assess engagement health."""
+    if bounce_rate > 75:
+        return "🔴 CRITICAL: Very high bounce rate indicates poor UX or content"
+    elif session_duration < 30:
+        return "🟠 WARNING: Very short sessions suggest low interest"
+    elif bounce_rate > 60:
+        return "🟡 CONCERN: High bounce rate"
+    elif pages_per_session < 1.5:
+        return "⚠️ WATCH: Limited page exploration"
     else:
-        return 95  # Critical collapse
+        return "✅ HEALTHY: Good user engagement"
 
-def _score_engagement(bounce_rate: float, duration: int, conversion: float) -> float:
-    """Score engagement (0=excellent, 100=critical risk)."""
-    # Bounce rate component
-    if bounce_rate < 0.35:
-        bounce_score = 10
-    elif bounce_rate < 0.45:
-        bounce_score = 25
-    elif bounce_rate < 0.55:
-        bounce_score = 45
-    elif bounce_rate < 0.65:
-        bounce_score = 65
+
+def _rate_conversion(conversion_rate: float) -> str:
+    """Rate conversion effectiveness."""
+    if conversion_rate >= 10:
+        return "Excellent (>10%)"
+    elif conversion_rate >= 5:
+        return "Good (5-10%)"
+    elif conversion_rate >= 2:
+        return "Adequate (2-5%)"
+    elif conversion_rate >= 1:
+        return "Weak (1-2%)"
     else:
-        bounce_score = 85
+        return "Poor (<1%)"
+
+
+def _assess_conversion_health(conversion_rate: float) -> str:
+    """Assess conversion health."""
+    if conversion_rate < 0.5:
+        return "🔴 CRITICAL: Very low conversion indicates major funnel issues"
+    elif conversion_rate < 1:
+        return "🟠 WARNING: Low conversion rate needs optimization"
+    elif conversion_rate < 2:
+        return "🟡 FAIR: Below average conversion"
+    else:
+        return "✅ HEALTHY: Good conversion performance"
+
+
+def _calculate_digital_presence_score(data: pd.Series) -> float:
+    """Calculate digital presence score (0-100, higher = worse)."""
+    score = 15  # Base score
     
-    # Duration component
-    if duration > 240:
-        duration_score = 10
-    elif duration > 180:
-        duration_score = 25
-    elif duration > 120:
-        duration_score = 45
-    elif duration > 90:
-        duration_score = 65
-    else:
-        duration_score = 85
+    # Traffic volume
+    visitors = int(data['monthly_visitors'])
+    if visitors < 1000:
+        score += 40
+    elif visitors < 5000:
+        score += 25
+    elif visitors < 20000:
+        score += 10
     
-    # Conversion component
-    if conversion > 4.5:
-        conversion_score = 10
-    elif conversion > 3.5:
-        conversion_score = 25
-    elif conversion > 2.5:
-        conversion_score = 45
-    elif conversion > 1.5:
-        conversion_score = 65
-    else:
-        conversion_score = 85
+    # Traffic trend
+    change_30d = float(data['traffic_change_30d'])
+    change_90d = float(data['traffic_change_90d'])
     
-    # Weighted average
-    return (bounce_score * 0.4) + (duration_score * 0.3) + (conversion_score * 0.3)
+    if change_90d < -30:
+        score += 35
+    elif change_90d < -15:
+        score += 25
+    elif change_30d < -10:
+        score += 15
+    elif change_90d < -5:
+        score += 8
+    
+    # Engagement
+    bounce_rate = float(data['bounce_rate']) * 100
+    session_duration = int(data['avg_session_duration_seconds'])
+    
+    if bounce_rate > 75:
+        score += 25
+    elif bounce_rate > 60:
+        score += 15
+    elif bounce_rate > 50:
+        score += 8
+    
+    if session_duration < 30:
+        score += 20
+    elif session_duration < 60:
+        score += 10
+    
+    # Conversion
+    conversion_rate = float(data['conversion_rate']) * 100
+    if conversion_rate < 0.5:
+        score += 25
+    elif conversion_rate < 1:
+        score += 15
+    elif conversion_rate < 2:
+        score += 8
+    
+    return min(score, 100)
 
-def _rate_digital_health(score: float) -> str:
-    """Rate overall digital health."""
+
+def _rate_digital_presence(score: float) -> str:
+    """Rate digital presence."""
     if score < 25:
-        return "Excellent (Low Risk)"
+        return "Excellent (Strong online presence)"
     elif score < 40:
-        return "Good (Low-Medium Risk)"
+        return "Good (Solid online presence)"
     elif score < 60:
-        return "Fair (Medium Risk)"
+        return "Fair (Moderate online presence)"
     elif score < 75:
-        return "Poor (High Risk)"
+        return "Poor (Weak online presence)"
     else:
-        return "Critical (Very High Risk)"
+        return "Critical (Very weak online presence)"
 
-def _identify_concerns(sessions_change: float, bounce_rate: float, duration: int) -> list[str]:
-    """Identify key concerns."""
+
+def _identify_digital_concerns(data: pd.Series) -> list:
+    """Identify digital presence concerns."""
     concerns = []
     
-    if sessions_change < -30:
-        concerns.append("Severe traffic decline")
-    elif sessions_change < -15:
-        concerns.append("Significant traffic decline")
+    # Traffic
+    visitors = int(data['monthly_visitors'])
+    change_30d = float(data['traffic_change_30d'])
+    change_90d = float(data['traffic_change_90d'])
     
-    if bounce_rate > 0.65:
-        concerns.append("Very high bounce rate")
-    elif bounce_rate > 0.55:
-        concerns.append("Elevated bounce rate")
+    if visitors < 1000:
+        concerns.append(f"Very low traffic volume ({visitors:,} monthly visitors)")
+    elif visitors < 5000:
+        concerns.append(f"Low traffic volume ({visitors:,} monthly visitors)")
     
-    if duration < 120:
-        concerns.append("Low engagement time")
+    if change_90d < -20:
+        concerns.append(f"Severe traffic decline ({change_90d:.1f}% in 90 days)")
+    elif change_90d < -10:
+        concerns.append(f"Significant traffic decline ({change_90d:.1f}% in 90 days)")
+    
+    # Engagement
+    bounce_rate = float(data['bounce_rate']) * 100
+    session_duration = int(data['avg_session_duration_seconds'])
+    
+    if bounce_rate > 70:
+        concerns.append(f"Very high bounce rate ({bounce_rate:.1f}%)")
+    elif bounce_rate > 60:
+        concerns.append(f"High bounce rate ({bounce_rate:.1f}%)")
+    
+    if session_duration < 30:
+        concerns.append(f"Very short session duration ({session_duration}s)")
+    elif session_duration < 60:
+        concerns.append(f"Short session duration ({session_duration}s)")
+    
+    # Conversion
+    conversion_rate = float(data['conversion_rate']) * 100
+    if conversion_rate < 0.5:
+        concerns.append(f"Very low conversion rate ({conversion_rate:.2f}%)")
+    elif conversion_rate < 1:
+        concerns.append(f"Low conversion rate ({conversion_rate:.2f}%)")
     
     return concerns
 
-def _map_to_credit_risk(health_score: float) -> str:
-    """Map digital health to credit risk points."""
-    if health_score < 30:
-        return "Adds 10-15 points to risk score"
-    elif health_score < 50:
-        return "Adds 20-30 points to risk score"
-    elif health_score < 70:
-        return "Adds 40-55 points to risk score"
-    else:
-        return "Adds 65-85 points to risk score (critical factor)"
 
-async def main():
-    """Run the MCP server."""
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options()
-        )
+def _digital_risk_points(presence_score: float) -> str:
+    """Map digital presence to risk points."""
+    if presence_score < 30:
+        return "5-10"
+    elif presence_score < 50:
+        return "10-20"
+    elif presence_score < 70:
+        return "20-35"
+    else:
+        return "35-55"
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Use streamable-http for Cloud Run deployment
+    mcp.run(
+        transport="streamable-http",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 8006))
+    )

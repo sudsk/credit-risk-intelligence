@@ -1,61 +1,217 @@
 version: '3.8'
 
 services:
-  # Frontend
-  frontend:
-    build: ./frontend
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:8000
-      - VITE_WS_URL=ws://localhost:8000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: npm run dev -- --host 0.0.0.0
-    depends_on:
-      - backend
-
-  # Backend API
-  backend:
-    build: ./backend
-    ports:
-      - "8000:8000"
-    environment:
-      - DEBUG=true
-      - CORS_ORIGINS=http://localhost:5173
-      - AGENT_ORCHESTRATOR_URL=http://orchestrator:8080
-      - MCP_SERVER_URL=http://mcp-servers:8001
-    volumes:
-      - ./backend:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    depends_on:
-      - mcp-servers
-
-  # MCP Servers
-  mcp-servers:
-    build: ./mcp-servers
+  # ==========================================
+  # MCP SERVERS (6 Independent Services)
+  # ==========================================
+  
+  companies-house-server:
+    build:
+      context: ./mcp-servers
+      dockerfile: Dockerfile.companies-house
     ports:
       - "8001:8001"
+    environment:
+      - PORT=8001
     volumes:
-      - ./mcp-servers:/app
-    command: python main.py
+      - ./mcp-servers/data:/app/data:ro
+      - ./mcp-servers/data_sources:/app/data_sources:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Agent Orchestrator
+  financial-server:
+    build:
+      context: ./mcp-servers
+      dockerfile: Dockerfile.financial
+    ports:
+      - "8002:8002"
+    environment:
+      - PORT=8002
+    volumes:
+      - ./mcp-servers/data:/app/data:ro
+      - ./mcp-servers/data_sources:/app/data_sources:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  linkedin-server:
+    build:
+      context: ./mcp-servers
+      dockerfile: Dockerfile.linkedin
+    ports:
+      - "8003:8003"
+    environment:
+      - PORT=8003
+    volumes:
+      - ./mcp-servers/data:/app/data:ro
+      - ./mcp-servers/data_sources:/app/data_sources:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  news-server:
+    build:
+      context: ./mcp-servers
+      dockerfile: Dockerfile.news
+    ports:
+      - "8004:8004"
+    environment:
+      - PORT=8004
+    volumes:
+      - ./mcp-servers/data:/app/data:ro
+      - ./mcp-servers/data_sources:/app/data_sources:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  payment-server:
+    build:
+      context: ./mcp-servers
+      dockerfile: Dockerfile.payment
+    ports:
+      - "8005:8005"
+    environment:
+      - PORT=8005
+    volumes:
+      - ./mcp-servers/data:/app/data:ro
+      - ./mcp-servers/data_sources:/app/data_sources:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  web-traffic-server:
+    build:
+      context: ./mcp-servers
+      dockerfile: Dockerfile.web-traffic
+    ports:
+      - "8006:8006"
+    environment:
+      - PORT=8006
+    volumes:
+      - ./mcp-servers/data:/app/data:ro
+      - ./mcp-servers/data_sources:/app/data_sources:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # ADK ORCHESTRATOR
+  # ==========================================
+  
   orchestrator:
-    build: ./agents
+    build:
+      context: ./agents
+      dockerfile: Dockerfile.orchestrator
     ports:
       - "8080:8080"
     environment:
-      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
-      - VERTEX_AI_LOCATION=${VERTEX_AI_LOCATION}
-      - GEMINI_MODEL=gemini-2.0-flash-exp
-      - MCP_SERVER_URL=http://mcp-servers:8001
+      - PORT=8080
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID:-your-project-id}
+      - VERTEX_AI_LOCATION=${VERTEX_AI_LOCATION:-us-central1}
+      - GEMINI_MODEL=gemini-2.0-flash-thinking-exp-01-21
+      # MCP Server URLs (internal Docker network)
+      - MCP_COMPANIES_HOUSE_URL=http://companies-house-server:8001
+      - MCP_FINANCIAL_URL=http://financial-server:8002
+      - MCP_LINKEDIN_URL=http://linkedin-server:8003
+      - MCP_NEWS_URL=http://news-server:8004
+      - MCP_PAYMENT_URL=http://payment-server:8005
+      - MCP_WEB_TRAFFIC_URL=http://web-traffic-server:8006
       - BACKEND_API_URL=http://backend:8000
     volumes:
       - ./agents:/app
       - ~/.config/gcloud:/root/.config/gcloud:ro
-    command: python -m orchestrator.main
+    depends_on:
+      companies-house-server:
+        condition: service_healthy
+      financial-server:
+        condition: service_healthy
+      linkedin-server:
+        condition: service_healthy
+      news-server:
+        condition: service_healthy
+      payment-server:
+        condition: service_healthy
+      web-traffic-server:
+        condition: service_healthy
+    command: python orchestrator/main.py
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # BACKEND API
+  # ==========================================
+  
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DEBUG=true
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+      - AGENT_ORCHESTRATOR_URL=http://orchestrator:8080
+      # MCP Server URLs for direct access (if needed)
+      - MCP_COMPANIES_HOUSE_URL=http://companies-house-server:8001
+      - MCP_FINANCIAL_URL=http://financial-server:8002
+      - MCP_LINKEDIN_URL=http://linkedin-server:8003
+      - MCP_NEWS_URL=http://news-server:8004
+      - MCP_PAYMENT_URL=http://payment-server:8005
+      - MCP_WEB_TRAFFIC_URL=http://web-traffic-server:8006
+    volumes:
+      - ./backend:/app
+    depends_on:
+      orchestrator:
+        condition: service_healthy
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==========================================
+  # FRONTEND
+  # ==========================================
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      # Note: WebSocket removed from architecture
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+
+networks:
+  default:
+    name: foresight-network
+    driver: bridge
 
 volumes:
   node_modules:

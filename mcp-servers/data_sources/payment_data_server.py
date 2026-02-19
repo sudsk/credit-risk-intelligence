@@ -1,327 +1,339 @@
 #!/usr/bin/env python3
 """
-Payment Data MCP Server
-Provides payment behavior, delays, and cash flow patterns.
-In production, this would connect to Core Banking or Trade Credit Data providers.
+Payment Data MCP Server - Cloud Run Compatible
+Provides payment behavior, late payments, and transaction volume analysis.
 """
-
-import asyncio
+import os
 import pandas as pd
+from datetime import datetime
 from pathlib import Path
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from fastmcp import FastMCP
 
 # Data paths
 DATA_DIR = Path(__file__).parent.parent / "data"
-FINANCIAL_CSV = DATA_DIR / "financial_data.csv"
+SMES_CSV = DATA_DIR / "smes.csv"
 
 # Load data
-financial_df = pd.read_csv(FINANCIAL_CSV)
+smes_df = pd.read_csv(SMES_CSV)
 
-# Create MCP server
-server = Server("payment-data")
+# Create FastMCP server
+mcp = FastMCP("payment-data")
 
-@server.list_tools()
-async def list_tools() -> list[Tool]:
-    """List available payment data tools."""
-    return [
-        Tool(
-            name="get_payment_behavior",
-            description="Get current payment behavior metrics",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "sme_id": {
-                        "type": "string",
-                        "description": "SME identifier"
-                    }
-                },
-                "required": ["sme_id"]
-            }
+
+@mcp.tool()
+def get_payment_behavior(sme_id: str) -> dict:
+    """Get payment behavior and late payment trends"""
+    sme_row = smes_df[smes_df['sme_id'] == sme_id]
+    
+    if sme_row.empty:
+        return {"error": f"No payment data found for SME {sme_id}"}
+    
+    data = sme_row.iloc[0]
+    
+    behavior = {
+        "sme_id": sme_id,
+        "days_payable_outstanding": int(data['days_payable_outstanding']),
+        "late_payments_6m": int(data['late_payments_6m']),
+        "avg_days_late": int(data['avg_days_late']),
+        "payment_behavior_rating": _rate_payment_behavior(
+            int(data['late_payments_6m']),
+            int(data['avg_days_late'])
         ),
-        Tool(
-            name="check_payment_delays",
-            description="Check for payment delays and trends",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "sme_id": {
-                        "type": "string",
-                        "description": "SME identifier"
-                    }
-                },
-                "required": ["sme_id"]
-            }
-        ),
-        Tool(
-            name="assess_payment_risk",
-            description="Overall payment risk assessment",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "sme_id": {
-                        "type": "string",
-                        "description": "SME identifier"
-                    }
-                },
-                "required": ["sme_id"]
-            }
+        "payment_risk_level": _assess_payment_risk(
+            int(data['late_payments_6m']),
+            int(data['avg_days_late'])
         )
-    ]
-
-@server.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[TextContent]:
-    """Handle tool calls."""
-    sme_id = arguments.get("sme_id")
+    }
     
-    if name == "get_payment_behavior":
-        fin_row = financial_df[financial_df['sme_id'] == sme_id]
-        
-        if fin_row.empty:
-            return [TextContent(
-                type="text",
-                text=f"No payment data found for SME {sme_id}"
-            )]
-        
-        data = fin_row.iloc[0]
-        
-        payment_days = int(data['payment_days_avg'])
-        payment_trend = data['payment_days_trend']
-        working_capital = int(data['working_capital'])
-        
-        behavior = {
-            "sme_id": sme_id,
-            "avg_payment_days": payment_days,
-            "payment_trend": payment_trend,
-            "working_capital": f"€{working_capital:,}",
-            "payment_rating": _rate_payment_days(payment_days),
-            "behavior_assessment": _assess_payment_behavior(payment_days, payment_trend)
-        }
-        
-        return [TextContent(
-            type="text",
-            text=f"Payment Behavior:\n{pd.Series(behavior).to_string()}"
-        )]
+    return behavior
+
+
+@mcp.tool()
+def get_transaction_volume(sme_id: str) -> dict:
+    """Get transaction volume trends"""
+    sme_row = smes_df[smes_df['sme_id'] == sme_id]
     
-    elif name == "check_payment_delays":
-        fin_row = financial_df[financial_df['sme_id'] == sme_id]
-        
-        if fin_row.empty:
-            return [TextContent(
-                type="text",
-                text=f"No payment delay data found for SME {sme_id}"
-            )]
-        
-        data = fin_row.iloc[0]
-        
-        payment_days = int(data['payment_days_avg'])
-        payment_trend = data['payment_days_trend']
-        
-        # Industry standard is 30 days
-        delay_days = max(0, payment_days - 30)
-        is_delayed = payment_days > 30
-        
-        delays = {
-            "sme_id": sme_id,
-            "avg_payment_days": payment_days,
-            "industry_standard": 30,
-            "delay_vs_standard": delay_days,
-            "payment_trend": payment_trend,
-            "is_deteriorating": payment_trend == "increasing",
-            "delay_severity": _assess_delay_severity(payment_days, payment_trend),
-            "risk_signal": _payment_delay_risk_signal(payment_days, payment_trend)
-        }
-        
-        return [TextContent(
-            type="text",
-            text=f"Payment Delay Analysis:\n{pd.Series(delays).to_string()}"
-        )]
+    if sme_row.empty:
+        return {"error": f"No transaction data found for SME {sme_id}"}
     
-    elif name == "assess_payment_risk":
-        fin_row = financial_df[financial_df['sme_id'] == sme_id]
-        
-        if fin_row.empty:
-            return [TextContent(
-                type="text",
-                text=f"No payment risk data found for SME {sme_id}"
-            )]
-        
-        data = fin_row.iloc[0]
-        
-        payment_days = int(data['payment_days_avg'])
-        payment_trend = data['payment_days_trend']
-        working_capital = int(data['working_capital'])
-        cash_runway = float(data['cash_runway_months'])
-        
-        # Calculate payment risk score
-        risk_score = _calculate_payment_risk_score(payment_days, payment_trend, working_capital, cash_runway)
-        
-        assessment = {
-            "sme_id": sme_id,
-            "payment_risk_score": round(risk_score, 1),
-            "risk_rating": _rate_payment_risk(risk_score),
-            "avg_payment_days": payment_days,
-            "payment_trend": payment_trend,
-            "working_capital": f"€{working_capital:,}",
-            "cash_runway_months": round(cash_runway, 1),
-            "early_warning_signal": _is_early_warning(payment_days, payment_trend),
-            "risk_contribution": f"Adds {_payment_risk_points(risk_score)} points to overall risk score"
-        }
-        
-        return [TextContent(
-            type="text",
-            text=f"Payment Risk Assessment:\n{pd.Series(assessment).to_string()}"
-        )]
+    data = sme_row.iloc[0]
     
-    else:
-        return [TextContent(
-            type="text",
-            text=f"Unknown tool: {name}"
-        )]
+    # Calculate monthly volumes from quarterly data
+    current_monthly = int(data['transaction_volume_q4']) / 3
+    previous_monthly = int(data['transaction_volume_q3']) / 3
+    
+    pct_change = ((current_monthly - previous_monthly) / previous_monthly * 100) if previous_monthly > 0 else 0
+    
+    volume = {
+        "sme_id": sme_id,
+        "transaction_volume_q4": int(data['transaction_volume_q4']),
+        "transaction_volume_q3": int(data['transaction_volume_q3']),
+        "avg_monthly_current": round(current_monthly),
+        "avg_monthly_previous": round(previous_monthly),
+        "pct_change_qoq": round(pct_change, 1),
+        "volume_trend": _assess_volume_trend(pct_change),
+        "velocity_rating": _rate_transaction_velocity(current_monthly, pct_change)
+    }
+    
+    return volume
 
-def _rate_payment_days(days: int) -> str:
-    """Rate payment performance."""
-    if days <= 30:
-        return "Excellent (On-time)"
-    elif days <= 45:
-        return "Good (Slightly delayed)"
-    elif days <= 60:
-        return "Fair (Moderately delayed)"
-    elif days <= 90:
-        return "Poor (Significantly delayed)"
-    else:
-        return "Critical (Severely delayed)"
 
-def _assess_payment_behavior(days: int, trend: str) -> str:
-    """Assess payment behavior."""
-    if trend == "increasing" and days > 45:
-        return "🔴 CRITICAL: Payment delays worsening, cash flow crisis likely"
-    elif trend == "increasing" and days > 30:
-        return "🟠 WARNING: Payment delays increasing, cash flow pressure"
-    elif days > 60:
-        return "🟡 CONCERN: Significantly delayed payments"
-    elif days > 45:
-        return "⚠️ WATCH: Elevated payment days"
-    elif trend == "decreasing":
-        return "🟢 POSITIVE: Payment performance improving"
-    else:
-        return "✅ HEALTHY: Payment behavior normal"
+@mcp.tool()
+def get_payment_health(sme_id: str) -> dict:
+    """Overall payment health assessment"""
+    sme_row = smes_df[smes_df['sme_id'] == sme_id]
+    
+    if sme_row.empty:
+        return {"error": f"No payment health data found for SME {sme_id}"}
+    
+    data = sme_row.iloc[0]
+    
+    late_payments = int(data['late_payments_6m'])
+    avg_days_late = int(data['avg_days_late'])
+    dpo = int(data['days_payable_outstanding'])
+    
+    # Calculate payment health score
+    health_score = _calculate_payment_health_score(late_payments, avg_days_late, dpo)
+    
+    # Identify concerns
+    concerns = _identify_payment_concerns(late_payments, avg_days_late, dpo)
+    
+    assessment = {
+        "sme_id": sme_id,
+        "payment_health_score": round(health_score, 1),
+        "health_rating": _rate_payment_health(health_score),
+        "late_payments_6m": late_payments,
+        "avg_days_late": avg_days_late,
+        "days_payable_outstanding": dpo,
+        "key_concerns": concerns,
+        "risk_contribution": f"Adds {_payment_risk_points(health_score)} points to overall risk score"
+    }
+    
+    return assessment
 
-def _assess_delay_severity(days: int, trend: str) -> str:
-    """Assess delay severity."""
-    if trend == "increasing":
-        if days > 60:
-            return "Critical (Delays worsening, >60 days)"
-        elif days > 45:
-            return "High (Delays worsening, 45-60 days)"
-        elif days > 30:
-            return "Medium (Delays worsening, 30-45 days)"
-        else:
-            return "Low (Slight increase)"
-    else:
-        if days > 60:
-            return "High (Consistently delayed, >60 days)"
-        elif days > 45:
-            return "Medium (Moderately delayed, 45-60 days)"
-        elif days > 30:
-            return "Low (Slightly delayed, 30-45 days)"
-        else:
-            return "None (On-time payment)"
 
-def _payment_delay_risk_signal(days: int, trend: str) -> str:
-    """Determine if payment delays are an early warning signal."""
-    if trend == "increasing" and days > 45:
-        return "🚨 STRONG EARLY WARNING: Deteriorating payment behavior signals cash flow crisis (2-4 week lead indicator)"
-    elif trend == "increasing":
-        return "⚠️ EARLY WARNING: Payment delays increasing (monitor closely)"
-    elif days > 60:
-        return "🔴 HIGH RISK: Severely delayed payments indicate cash problems"
-    else:
-        return "✅ LOW RISK: Payment behavior within acceptable range"
+@mcp.tool()
+def check_payment_stress_signals(sme_id: str) -> dict:
+    """Detect payment stress signals (extending payment terms, late patterns)"""
+    sme_row = smes_df[smes_df['sme_id'] == sme_id]
+    
+    if sme_row.empty:
+        return {"error": f"No payment stress data found for SME {sme_id}"}
+    
+    data = sme_row.iloc[0]
+    
+    late_payments = int(data['late_payments_6m'])
+    avg_days_late = int(data['avg_days_late'])
+    dpo = int(data['days_payable_outstanding'])
+    
+    # Detect stress signals
+    stress_signals = []
+    severity = "LOW"
+    
+    if late_payments >= 10:
+        stress_signals.append(f"🔴 CRITICAL: {late_payments} late payments in 6 months")
+        severity = "CRITICAL"
+    elif late_payments >= 5:
+        stress_signals.append(f"🟠 HIGH: {late_payments} late payments in 6 months")
+        severity = "HIGH" if severity == "LOW" else severity
+    elif late_payments >= 3:
+        stress_signals.append(f"🟡 MEDIUM: {late_payments} late payments in 6 months")
+        severity = "MEDIUM" if severity == "LOW" else severity
+    
+    if avg_days_late >= 30:
+        stress_signals.append(f"🔴 CRITICAL: Average {avg_days_late} days late on payments")
+        severity = "CRITICAL"
+    elif avg_days_late >= 15:
+        stress_signals.append(f"🟠 HIGH: Average {avg_days_late} days late on payments")
+        severity = "HIGH" if severity in ["LOW", "MEDIUM"] else severity
+    elif avg_days_late >= 7:
+        stress_signals.append(f"🟡 MEDIUM: Average {avg_days_late} days late on payments")
+        severity = "MEDIUM" if severity == "LOW" else severity
+    
+    if dpo >= 90:
+        stress_signals.append(f"🟠 WARNING: Extended payment terms ({dpo} days)")
+        severity = "HIGH" if severity in ["LOW", "MEDIUM"] else severity
+    elif dpo >= 75:
+        stress_signals.append(f"⚠️ WATCH: Long payment terms ({dpo} days)")
+    
+    if not stress_signals:
+        stress_signals.append("✅ No significant payment stress signals detected")
+    
+    result = {
+        "sme_id": sme_id,
+        "stress_level": severity,
+        "signals_detected": len([s for s in stress_signals if not s.startswith("✅")]),
+        "stress_signals": stress_signals,
+        "interpretation": _interpret_payment_stress(severity, late_payments, avg_days_late)
+    }
+    
+    return result
 
-def _calculate_payment_risk_score(days: int, trend: str, working_capital: int, cash_runway: float) -> float:
-    """Calculate payment risk score (0-100, higher = worse)."""
+
+# Helper functions
+def _rate_payment_behavior(late_payments: int, avg_days_late: int) -> str:
+    """Rate payment behavior."""
+    if late_payments == 0:
+        return "Excellent (Perfect payment record)"
+    elif late_payments <= 2 and avg_days_late <= 5:
+        return "Good (Occasional minor delays)"
+    elif late_payments <= 5 and avg_days_late <= 15:
+        return "Fair (Some late payments)"
+    elif late_payments <= 10 and avg_days_late <= 30:
+        return "Poor (Frequent late payments)"
+    else:
+        return "Critical (Severe payment issues)"
+
+
+def _assess_payment_risk(late_payments: int, avg_days_late: int) -> str:
+    """Assess payment risk level."""
+    if late_payments >= 10 or avg_days_late >= 30:
+        return "CRITICAL"
+    elif late_payments >= 5 or avg_days_late >= 15:
+        return "HIGH"
+    elif late_payments >= 3 or avg_days_late >= 7:
+        return "MEDIUM"
+    elif late_payments >= 1:
+        return "LOW"
+    else:
+        return "MINIMAL"
+
+
+def _assess_volume_trend(pct_change: float) -> str:
+    """Assess transaction volume trend."""
+    if pct_change >= 20:
+        return "📈 Strong Growth (>20% increase)"
+    elif pct_change >= 10:
+        return "📈 Growing (10-20% increase)"
+    elif pct_change >= 0:
+        return "➡️ Stable (Slight growth)"
+    elif pct_change >= -10:
+        return "⚠️ Declining (-0 to -10%)"
+    elif pct_change >= -20:
+        return "🟡 Significant Decline (-10 to -20%)"
+    else:
+        return "🔴 Severe Decline (>-20%)"
+
+
+def _rate_transaction_velocity(monthly_volume: float, pct_change: float) -> str:
+    """Rate transaction velocity."""
+    if monthly_volume >= 10000 and pct_change >= 10:
+        return "Very High (Strong activity + growth)"
+    elif monthly_volume >= 5000 and pct_change >= 0:
+        return "High (Good activity + stable/growing)"
+    elif monthly_volume >= 2000:
+        return "Medium (Moderate activity)"
+    elif monthly_volume >= 500:
+        return "Low (Limited activity)"
+    else:
+        return "Very Low (Minimal activity)"
+
+
+def _calculate_payment_health_score(late_payments: int, avg_days_late: int, dpo: int) -> float:
+    """Calculate payment health score (0-100, higher = worse)."""
     score = 10  # Base score
     
-    # Payment days
-    if days > 90:
-        score += 50
-    elif days > 60:
-        score += 35
-    elif days > 45:
-        score += 20
-    elif days > 30:
-        score += 10
-    
-    # Payment trend
-    if trend == "increasing":
-        if days > 45:
-            score += 25
-        elif days > 30:
-            score += 15
-        else:
-            score += 8
-    elif trend == "decreasing":
-        score -= 5  # Improvement
-    
-    # Working capital
-    if working_capital < 0:
+    # Late payments
+    if late_payments >= 15:
+        score += 60
+    elif late_payments >= 10:
+        score += 45
+    elif late_payments >= 5:
         score += 30
-    elif working_capital < 100000:
+    elif late_payments >= 3:
         score += 15
+    elif late_payments >= 1:
+        score += 5
     
-    # Cash runway
-    if cash_runway < 3:
+    # Average days late
+    if avg_days_late >= 45:
+        score += 40
+    elif avg_days_late >= 30:
+        score += 30
+    elif avg_days_late >= 15:
         score += 20
-    elif cash_runway < 6:
+    elif avg_days_late >= 7:
         score += 10
+    
+    # Days payable outstanding
+    if dpo >= 120:
+        score += 25
+    elif dpo >= 90:
+        score += 15
+    elif dpo >= 75:
+        score += 8
     
     return min(score, 100)
 
-def _rate_payment_risk(score: float) -> str:
-    """Rate payment risk."""
-    if score < 25:
-        return "Low (Good payment behavior)"
-    elif score < 40:
-        return "Low-Medium (Minor concerns)"
-    elif score < 60:
-        return "Medium (Notable payment delays)"
+
+def _rate_payment_health(score: float) -> str:
+    """Rate payment health."""
+    if score < 20:
+        return "Excellent (Minimal Risk)"
+    elif score < 35:
+        return "Good (Low Risk)"
+    elif score < 55:
+        return "Fair (Medium Risk)"
     elif score < 75:
-        return "High (Significant payment issues)"
+        return "Poor (High Risk)"
     else:
-        return "Critical (Severe payment delays)"
+        return "Critical (Very High Risk)"
 
-def _is_early_warning(days: int, trend: str) -> str:
-    """Determine if payment behavior is an early warning signal."""
-    if trend == "increasing" and days > 45:
-        return "YES - Strong early warning signal (2-4 week lead)"
-    elif trend == "increasing" and days > 30:
-        return "YES - Moderate early warning signal"
-    elif days > 60:
-        return "CONCURRENT - Already indicating problems"
-    else:
-        return "NO - Payment behavior normal"
 
-def _payment_risk_points(score: float) -> str:
-    """Map payment risk to risk score points."""
-    if score < 30:
+def _identify_payment_concerns(late_payments: int, avg_days_late: int, dpo: int) -> list:
+    """Identify payment concerns."""
+    concerns = []
+    
+    if late_payments >= 10:
+        concerns.append(f"Chronic late payment pattern ({late_payments} in 6 months)")
+    elif late_payments >= 5:
+        concerns.append(f"Frequent late payments ({late_payments} in 6 months)")
+    elif late_payments >= 3:
+        concerns.append(f"Multiple late payments ({late_payments} in 6 months)")
+    
+    if avg_days_late >= 30:
+        concerns.append(f"Severely delayed payments (avg {avg_days_late} days late)")
+    elif avg_days_late >= 15:
+        concerns.append(f"Significantly late payments (avg {avg_days_late} days late)")
+    
+    if dpo >= 120:
+        concerns.append(f"Extremely extended payment terms ({dpo} days)")
+    elif dpo >= 90:
+        concerns.append(f"Very long payment terms ({dpo} days)")
+    
+    return concerns
+
+
+def _payment_risk_points(health_score: float) -> str:
+    """Map payment health to risk points."""
+    if health_score < 25:
         return "5-10"
-    elif score < 50:
-        return "10-20"
-    elif score < 70:
-        return "20-40"
+    elif health_score < 45:
+        return "10-25"
+    elif health_score < 65:
+        return "25-45"
     else:
-        return "40-55"
+        return "45-70"
 
-async def main():
-    """Run the MCP server."""
-    async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options()
-        )
+
+def _interpret_payment_stress(severity: str, late_payments: int, avg_days_late: int) -> str:
+    """Interpret payment stress level."""
+    if severity == "CRITICAL":
+        return "🔴 CRITICAL: Severe payment stress indicates liquidity crisis or financial distress"
+    elif severity == "HIGH":
+        return "🟠 HIGH RISK: Significant payment difficulties suggest cash flow problems"
+    elif severity == "MEDIUM":
+        return "🟡 MODERATE: Some payment delays may indicate temporary cash constraints"
+    elif severity == "LOW":
+        return "⚠️ WATCH: Minor payment issues to monitor"
+    else:
+        return "✅ HEALTHY: Good payment discipline maintained"
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Use streamable-http for Cloud Run deployment
+    mcp.run(
+        transport="streamable-http",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 8005))
+    )
