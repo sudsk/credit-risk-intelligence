@@ -228,7 +228,6 @@ export const chatAPI = {
   sendMessage: async (message: string): Promise<ChatMessage> => {
     const { data } = await api.post('/api/v1/chat', {
       query: message,
-      use_claude_api: false
     });
     return {
       id: `msg_${Date.now()}`,

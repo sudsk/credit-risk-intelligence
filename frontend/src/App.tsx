@@ -21,15 +21,6 @@ function App() {
   const activeTab = useSelector((state: RootState) => state.ui.activeTab)
   const chatOpen = useSelector((state: RootState) => state.chat.isOpen)
 
-  // WebSocket handlers for real-time updates
-  //useWebSocket('scenario_update', (scenario: Scenario) => {
-  //  dispatch(updateScenario(scenario))
-  //})
-
-  //useWebSocket('task_created', (task: Task) => {
-  //  dispatch(addTask(task))
-  //})
-
   return (
     <div className="min-h-screen bg-neutral-50">
       <Header />
