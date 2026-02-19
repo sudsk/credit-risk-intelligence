@@ -11,7 +11,7 @@ export const Card = ({ children, className, fullWidth = false }: CardProps) => {
   return (
     <div
       className={cn(
-        'bg-white rounded-lg border border-neutral-300 shadow-sm',
+        'bg-neutral-800 rounded-lg border border-neutral-600 shadow-sm',
         fullWidth && 'w-full',
         className
       )}
@@ -31,7 +31,7 @@ export const CardHeader = ({ children, className, action }: CardHeaderProps) => 
   return (
     <div
       className={cn(
-        'px-6 py-4 border-b border-neutral-300 flex items-center justify-between',
+        'px-6 py-4 border-b border-neutral-600 flex items-center justify-between bg-neutral-700',
         className
       )}
     >

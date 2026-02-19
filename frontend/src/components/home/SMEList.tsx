@@ -29,7 +29,7 @@ const SMEList = () => {
       case 'stable':
         return 'border-success-60 bg-success-50'
       default:
-        return 'border-neutral-300 bg-white'
+        return 'border-neutral-600 bg-neutral-800'
     }
   }
 
@@ -45,10 +45,10 @@ const SMEList = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-neutral-300 shadow-sm h-[calc(100vh-320px)] flex flex-col">
+    <div className="bg-neutral-800 rounded-lg border border-neutral-600 shadow-sm h-[calc(100vh-320px)] flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-neutral-300">
-        <h2 className="text-lg font-semibold text-neutral-800 mb-3">
+      <div className="px-4 py-3 border-b border-neutral-600">
+        <h2 className="text-lg font-semibold text-neutral-50 mb-3">
           SME Portfolio
           <span className="ml-2 text-sm font-normal text-neutral-500">
             ({smes.length} {filter !== 'all' ? filter : 'total'})
@@ -63,7 +63,7 @@ const SMEList = () => {
             placeholder="Search by ID, name, or sector..."
             value={localSearch}
             onChange={handleSearchChange}
-            className="w-full pl-10 pr-4 py-2 text-sm border border-neutral-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-60"
+            className="w-full pl-10 pr-4 py-2 text-sm border border-neutral-600 rounded focus:outline-none focus:ring-2 focus:ring-primary-60"
           />
         </div>
       </div>
@@ -100,12 +100,12 @@ const SMEList = () => {
                         {sme.trendValue > 0 ? '+' : ''}{sme.trendValue}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-sm text-neutral-800 mt-1">
+                    <h3 className="font-semibold text-sm text-neutral-50 mt-1">
                       {sme.name}
                     </h3>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-bold text-neutral-800">
+                    <div className="text-xl font-bold text-neutral-50">
                       {sme.riskScore}
                     </div>
                     <div className="text-xs text-neutral-500">Score</div>

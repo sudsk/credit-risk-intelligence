@@ -20,7 +20,7 @@ const TabNavigation = () => {
   }
 
   return (
-    <div className="sticky top-12 z-40 bg-neutral-80 border-b border-neutral-60">
+    <div className="sticky top-12 z-40 bg-neutral-800 border-b border-neutral-600">
       <div className="max-w-[1600px] mx-auto px-4">
         <div className="flex gap-0">
           {tabs.map((tab) => (
