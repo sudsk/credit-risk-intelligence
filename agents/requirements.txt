@@ -1,10 +1,10 @@
-# Google ADK v1.25.0
+# Google ADK
 google-genai[adk]==1.25.0
 
 # Google Cloud
 google-cloud-aiplatform==1.73.0
 
-# HTTP Client - bumped to satisfy google-genai[adk]>=0.28.1 requirement
+# HTTP Client
 httpx==0.28.1
 
 # Data Validation

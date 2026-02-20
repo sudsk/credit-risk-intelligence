@@ -1,18 +1,18 @@
 # FastMCP Framework
 fastmcp==0.2.0
 
-# Web Framework (FastMCP dependency)
+# Web Framework
 fastapi==0.115.6
 uvicorn[standard]==0.32.1
 
-# Data Processing - CRITICAL for CSV reading
+# Data Processing
 pandas==2.2.0
 
 # Data Validation
 pydantic==2.10.3
 
 # HTTP Client
-httpx==0.27.0
+httpx==0.28.1
 
 # Date/Time Utilities
 python-dateutil==2.9.0
