@@ -333,7 +333,7 @@ def _interpret_payment_stress(severity: str, late_payments: int, avg_days_late: 
 if __name__ == "__main__":
     # Use streamable-http for Cloud Run deployment
     mcp.run(
-        transport="streamable-http",
+        transport="http",
         host="0.0.0.0",
         port=int(os.getenv("PORT", 8005))
     )

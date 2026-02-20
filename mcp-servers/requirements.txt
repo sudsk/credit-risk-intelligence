@@ -1,5 +1,5 @@
 # FastMCP Framework
-fastmcp==0.2.0
+fastmcp>=2.12.0
 
 # Web Framework
 fastapi==0.115.6
