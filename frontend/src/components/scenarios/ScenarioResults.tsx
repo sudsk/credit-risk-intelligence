@@ -12,19 +12,15 @@ interface ScenarioResultsProps {
 const ScenarioResults = ({ scenario }: ScenarioResultsProps) => {
   const [expanded, setExpanded] = useState(false)
 
-  const mockResults = {
-    portfolioImpact: { criticalBefore: 23, criticalAfter: 25, defaultProbBefore: 2.8, defaultProbAfter: 3.1, avgScoreBefore: 64, avgScoreAfter: 66 },
-    sectorImpact: [
-      { sector: 'Construction', smes: 8, avgChange: 8 },
-      { sector: 'Retail', smes: 12, avgChange: 6 },
-    ],
-    topImpacted: [
-      { smeId: '#0445', smeName: 'GreenLeaf Products', scoreBefore: 72, scoreAfter: 87, change: 15, reason: 'Revenue drop due to product ban' },
-      { smeId: '#0672', smeName: 'Natural Wellness Ltd', scoreBefore: 68, scoreAfter: 82, change: 14, reason: 'Market contraction impact' },
-    ],
+  if (!scenario.results) {
+    return (
+      <div style={{ background: 'var(--uui-surface-main)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', padding: '18px', textAlign: 'center' }}>
+        <p style={{ fontSize: '13px', color: 'var(--uui-text-tertiary)' }}>No results available for this scenario.</p>
+      </div>
+    )
   }
 
-  const results = scenario.results || mockResults
+  const results = scenario.results
 
   const metricCard = (label: string, before: number | string, after: number | string, delta: string, color: string) => (
     <div style={{ background: 'var(--uui-neutral-70)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', padding: '12px' }}>
@@ -103,7 +99,7 @@ const ScenarioResults = ({ scenario }: ScenarioResultsProps) => {
               Top Impacted SMEs
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {results.topImpacted.map((sme, idx) => (
+              {results.topImpacted.map((sme: any, idx: number) => (
                 <div key={idx} style={{ background: 'var(--uui-neutral-70)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '3px' }}>

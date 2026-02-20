@@ -120,8 +120,8 @@ python main.py
 
 **Terminal 2 - ADK Orchestrator:**
 ```bash
-cd agents/orchestrator
-python main.py
+cd .. # go to root directory
+python -m agents.orchestrator.main
 # Orchestrator running on port 8080
 ```
 

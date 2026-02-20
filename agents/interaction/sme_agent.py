@@ -5,226 +5,148 @@ Deep dive analysis of individual SME health
 import logging
 from typing import Any, Dict
 
-from google import genai
-from google.genai.types import Tool, FunctionDeclaration, Schema, Type
+from google.adk.agents import Agent
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai.types import Content, Part
 
 from agents.shared.config import get_config
 from agents.shared.mcp_client import MCPClient
+from agents.interaction.prompts import SME_SYSTEM_INSTRUCTION
 
 logger = logging.getLogger(__name__)
 
+def make_sme_tools(mcp_client: MCPClient):
+    """Create SME analysis tool functions as plain async functions (ADK requirement)"""
 
-class SMEAnalysisAgent:
-    """
-    SME Analysis Agent
-    Performs comprehensive analysis of individual SME
-    """
-    
-    def __init__(self):
-        self.config = get_config()
-        
-        self.client = genai.Client(
-            vertexai=True,
-            project=self.config.project_id,
-            location=self.config.location,
+    async def get_financial_metrics(sme_id: str) -> Dict[str, Any]:
+        """Get financial metrics for an SME from BigQuery.
+
+        Args:
+            sme_id: SME ID to retrieve financials for (e.g. '0142' or '#0142')
+        """
+        clean_id = sme_id.replace("#", "")
+        logger.info(f"Fetching financial metrics for SME: #{clean_id}")
+        return await mcp_client.call_tool(
+            "bigquery_server", "get_sme_financials", {"sme_id": clean_id}
         )
-        
-        self.mcp_client = MCPClient(self.config.mcp_server_url)
-        self.agent = self._create_agent()
-        
-        logger.info("SME Analysis Agent initialized")
-    
-    def _create_agent(self) -> genai.Agent:
-        """Create SME analysis agent"""
-        
-        tools = [
-            Tool(
-                function_declarations=[
-                    FunctionDeclaration(
-                        name="get_financial_metrics",
-                        description="Get financial metrics for SME from BigQuery",
-                        parameters=Schema(
-                            type=Type.OBJECT,
-                            properties={
-                                "sme_id": Schema(type=Type.STRING, description="SME ID"),
-                            },
-                            required=["sme_id"]
-                        )
-                    ),
-                    FunctionDeclaration(
-                        name="get_alternative_data",
-                        description="Get alternative data signals (LinkedIn, web traffic, reviews)",
-                        parameters=Schema(
-                            type=Type.OBJECT,
-                            properties={
-                                "sme_id": Schema(type=Type.STRING, description="SME ID"),
-                            },
-                            required=["sme_id"]
-                        )
-                    ),
-                    FunctionDeclaration(
-                        name="get_risk_drivers",
-                        description="Get key risk drivers contributing to current risk score",
-                        parameters=Schema(
-                            type=Type.OBJECT,
-                            properties={
-                                "sme_id": Schema(type=Type.STRING, description="SME ID"),
-                            },
-                            required=["sme_id"]
-                        )
-                    ),
-                    FunctionDeclaration(
-                        name="get_peer_comparison",
-                        description="Compare SME to peers in same sector and size",
-                        parameters=Schema(
-                            type=Type.OBJECT,
-                            properties={
-                                "sme_id": Schema(type=Type.STRING, description="SME ID"),
-                            },
-                            required=["sme_id"]
-                        )
-                    ),
-                ]
-            )
-        ]
-        
-        system_instruction = """You are an SME Analysis Agent specializing in deep credit risk assessment.
 
-Your role:
-1. Gather comprehensive data from multiple sources
-2. Identify key risk drivers and trends
-3. Compare SME to industry peers
-4. Generate actionable recommendations
+    async def get_alternative_data(sme_id: str) -> Dict[str, Any]:
+        """Get alternative data signals including LinkedIn headcount and web traffic.
 
-Analysis Framework:
-1. Financial Health
-   - Revenue trends (QoQ, YoY)
-   - Profitability (EBITDA, margins)
-   - Debt service coverage
-   - Cash reserves
+        Args:
+            sme_id: SME ID to retrieve alternative data for (e.g. '0142' or '#0142')
+        """
+        clean_id = sme_id.replace("#", "")
+        logger.info(f"Fetching alternative data for SME: #{clean_id}")
 
-2. Alternative Data Signals
-   - Employee changes (LinkedIn)
-   - Web traffic trends
-   - Customer sentiment (reviews)
-   - Payment behavior
-
-3. External Factors
-   - Sector health
-   - Geographic risks
-   - Regulatory compliance
-   - Competition
-
-4. Risk Drivers
-   - Top 3-5 factors contributing to risk score
-   - Recent changes and trends
-   - Forward-looking indicators
-
-Provide clear, actionable insights with specific data points and recommendations.
-"""
-        
-        agent = self.client.agentic.create_agent(
-            model=self.config.model_name,
-            system_instruction=system_instruction,
-            tools=tools,
+        linkedin = await mcp_client.call_tool(
+            "linkedin_server", "get_employee_count", {"sme_id": clean_id}
         )
-    
-    async def get_financial_metrics(self, sme_id: str) -> Dict[str, Any]:
-        """Get financial metrics"""
-        return await self.mcp_client.call_tool(
-            "bigquery_server",
-            "get_sme_financials",
-            {"sme_id": sme_id.replace("#", "")}
+        web_traffic = await mcp_client.call_tool(
+            "google_analytics_server", "get_traffic_metrics", {"sme_id": clean_id}
         )
-    
-    async def get_alternative_data(self, sme_id: str) -> Dict[str, Any]:
-        """Get alternative data signals"""
-        # LinkedIn data
-        linkedin = await self.mcp_client.call_tool(
-            "linkedin_server",
-            "get_employee_count",
-            {"sme_id": sme_id.replace("#", "")}
-        )
-        
-        # Web analytics
-        web_traffic = await self.mcp_client.call_tool(
-            "google_analytics_server",
-            "get_traffic_metrics",
-            {"sme_id": sme_id.replace("#", "")}
-        )
-        
+
         return {
             "linkedin": linkedin,
             "web_traffic": web_traffic,
         }
-    
-    async def get_risk_drivers(self, sme_id: str) -> Dict[str, Any]:
-        """Get risk drivers"""
-        return await self.mcp_client.call_tool(
-            "vertex_ai_server",
-            "get_risk_drivers",
-            {"sme_id": sme_id.replace("#", "")}
-        )
-    
-    async def get_peer_comparison(self, sme_id: str) -> Dict[str, Any]:
-        """Get peer comparison"""
-        return await self.mcp_client.call_tool(
-            "bigquery_server",
-            "get_peer_comparison",
-            {"sme_id": sme_id.replace("#", "")}
-        )
-    
-    async def analyze(self, sme_id: str) -> str:
-        """
-        Analyze SME comprehensively
-        
+
+    async def get_risk_drivers(sme_id: str) -> Dict[str, Any]:
+        """Get the key risk drivers contributing to the SME's current risk score.
+
         Args:
-            sme_id: SME ID to analyze
-            
-        Returns:
-            Comprehensive analysis text
+            sme_id: SME ID to retrieve risk drivers for (e.g. '0142' or '#0142')
         """
-        logger.info(f"Analyzing SME: {sme_id}")
-        
+        clean_id = sme_id.replace("#", "")
+        logger.info(f"Fetching risk drivers for SME: #{clean_id}")
+        return await mcp_client.call_tool(
+            "vertex_ai_server", "get_risk_drivers", {"sme_id": clean_id}
+        )
+
+    async def get_peer_comparison(sme_id: str) -> Dict[str, Any]:
+        """Compare an SME to peers in the same sector and size band.
+
+        Args:
+            sme_id: SME ID to compare (e.g. '0142' or '#0142')
+        """
+        clean_id = sme_id.replace("#", "")
+        logger.info(f"Fetching peer comparison for SME: #{clean_id}")
+        return await mcp_client.call_tool(
+            "bigquery_server", "get_peer_comparison", {"sme_id": clean_id}
+        )
+
+    return [get_financial_metrics, get_alternative_data, get_risk_drivers, get_peer_comparison]
+
+
+class SMEAnalysisAgent:
+    """Performs comprehensive deep-dive analysis of individual SMEs"""
+
+    def __init__(self):
+        self.config = get_config()
+        self.mcp_client = MCPClient(self.config.mcp_server_url)
+
+        tools = make_sme_tools(self.mcp_client)
+
+        self.agent = Agent(
+            name="sme_analysis_agent",
+            model=self.config.model_name,
+            description="Deep credit risk analysis agent for individual SMEs",
+            instruction=SME_SYSTEM_INSTRUCTION,
+            tools=tools,
+        )
+
+        self.session_service = InMemorySessionService()
+        self.runner = Runner(
+            agent=self.agent,
+            app_name="sme_analysis",
+            session_service=self.session_service,
+        )
+
+        logger.info("SME Analysis Agent initialized")
+
+    async def analyze(self, sme_id: str) -> str:
+        """Perform comprehensive analysis of an individual SME.
+
+        Args:
+            sme_id: SME ID to analyse (e.g. '#0142')
+        """
+        import uuid
+        clean_id = sme_id.replace("#", "")
+        session_id = str(uuid.uuid4())
+        logger.info(f"Analysing SME: #{clean_id} [session: {session_id}]")
+
         try:
-            session = self.agent.start_session()
-            
-            prompt = f"""Perform comprehensive analysis of SME {sme_id}.
+            await self.session_service.create_session(
+                app_name="sme_analysis",
+                user_id="system",
+                session_id=session_id,
+            )
 
-Include:
-1. Current financial health
-2. Alternative data signals
-3. Key risk drivers
-4. Peer comparison
-5. Recommendations
+            prompt = f"""Perform a comprehensive analysis of SME #{clean_id}.
 
-Be specific with data points and actionable.
+Steps:
+1. Call get_financial_metrics to assess financial health
+2. Call get_alternative_data to review LinkedIn and web signals
+3. Call get_risk_drivers to identify the top risk contributors
+4. Call get_peer_comparison to benchmark against sector peers
+5. Summarise findings with specific data points and actionable recommendations
 """
-            
-            response = session.send_message(prompt)
-            
-            # Process function calls
-            while response.function_calls:
-                function_responses = []
-                
-                for fc in response.function_calls:
-                    if fc.name == "get_financial_metrics":
-                        result = await self.get_financial_metrics(fc.args.get("sme_id"))
-                    elif fc.name == "get_alternative_data":
-                        result = await self.get_alternative_data(fc.args.get("sme_id"))
-                    elif fc.name == "get_risk_drivers":
-                        result = await self.get_risk_drivers(fc.args.get("sme_id"))
-                    elif fc.name == "get_peer_comparison":
-                        result = await self.get_peer_comparison(fc.args.get("sme_id"))
-                    else:
-                        result = {"error": f"Unknown function: {fc.name}"}
-                    
-                    function_responses.append({"id": fc.id, "result": result})
-                
-                response = session.send_message(function_responses)
-            
-            return response.text
-            
+
+            content = Content(parts=[Part(text=prompt)], role="user")
+            final_response = None
+
+            async for event in self.runner.run_async(
+                user_id="system",
+                session_id=session_id,
+                new_message=content,
+            ):
+                if event.is_final_response():
+                    final_response = event.content.parts[0].text
+                    break
+
+            return final_response or "No analysis generated"
+
         except Exception as e:
-            logger.error(f"SME analysis error: {e}")
-            return f"Error analyzing SME: {str(e)}"
+            logger.error(f"SME analysis error: {e}", exc_info=True)
+            return f"Error analysing SME #{clean_id}: {str(e)}"

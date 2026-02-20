@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
-import { updateTask, removeTask } from '@/store/tasksSlice'
+import { updateTask } from '@/store/tasksSlice'
 import { setActiveTab } from '@/store/uiSlice'
 import { setSelectedSME } from '@/store/portfolioSlice'
 import TaskCard from './TaskCard'
 import { Button } from '../common/Button'
 import { Plus } from 'lucide-react'
+import { portfolioAPI } from '@/services/api'
 
 const TaskList = () => {
   const dispatch = useDispatch()
@@ -22,37 +23,32 @@ const TaskList = () => {
   const handleCompleteTask = (taskId: string) => {
     const task = tasks.find((t) => t.id === taskId)
     if (task) {
-      dispatch(
-        updateTask({
-          ...task,
-          status: 'completed',
-        })
-      )
+      dispatch(updateTask({ ...task, status: 'completed' }))
     }
   }
 
-  const handleViewSME = (task: typeof tasks[0]) => {
-    // Mock SME - in real app would fetch from API
-    const sme = {
-      id: task.smeId,
-      name: task.smeName,
-      riskScore: 68,
-      riskCategory: 'critical' as const,
-      exposure: task.exposure,
-      sector: 'Software/Technology',
-      geography: 'UK',
-      trend: 'up' as const,
-      trendValue: 14,
+  const handleViewSME = async (task: typeof tasks[0]) => {
+    try {
+      const sme = await portfolioAPI.getSMEById(task.smeId)
+      dispatch(setSelectedSME({
+        id: sme.id,
+        name: sme.name,
+        riskScore: sme.risk_score,
+        riskCategory: sme.risk_category,
+        exposure: `€${(sme.exposure / 1000).toFixed(0)}K`,
+        sector: sme.sector,
+        geography: sme.geography,
+        trend: sme.trend,
+        trendValue: sme.trend_value,
+      }))
+      dispatch(setActiveTab('home'))
+    } catch (err) {
+      console.error('Failed to load SME:', err)
     }
-    dispatch(setSelectedSME(sme))
-    dispatch(setActiveTab('home'))
   }
 
   const handleViewSource = (task: typeof tasks[0]) => {
-    // Navigate to source event
-    if (task.source.includes('Predicted Event')) {
-      dispatch(setActiveTab('news'))
-    } else if (task.source.includes('News Intelligence')) {
+    if (task.source.includes('Predicted Event') || task.source.includes('News Intelligence')) {
       dispatch(setActiveTab('news'))
     }
   }
@@ -62,11 +58,9 @@ const TaskList = () => {
       {/* Overdue Tasks */}
       {overdueTasks.length > 0 && (
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-critical-60)', marginBottom: '12px' }}>
-              ⚠️ Overdue Tasks ({overdueTasks.length})
-            </h3>
-          </div>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-critical-60)', marginBottom: '12px' }}>
+            ⚠️ Overdue Tasks ({overdueTasks.length})
+          </h3>
           <div className="space-y-3">
             {overdueTasks.map((task) => (
               <TaskCard
@@ -84,11 +78,9 @@ const TaskList = () => {
       {/* Due Today */}
       {dueTodayTasks.length > 0 && (
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-warning-60)', marginBottom: '12px' }}>
-              📅 Due Today ({dueTodayTasks.length})
-            </h3>
-          </div>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-warning-60)', marginBottom: '12px' }}>
+            📅 Due Today ({dueTodayTasks.length})
+          </h3>
           <div className="space-y-3">
             {dueTodayTasks.map((task) => (
               <TaskCard
@@ -106,11 +98,9 @@ const TaskList = () => {
       {/* Upcoming Tasks */}
       {upcomingTasks.length > 0 && (
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-primary-60)', marginBottom: '12px' }}>
-              📋 Upcoming Tasks ({upcomingTasks.length})
-            </h3>
-          </div>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-primary-60)', marginBottom: '12px' }}>
+            📋 Upcoming Tasks ({upcomingTasks.length})
+          </h3>
           <div className="space-y-3">
             {displayedUpcoming.map((task) => (
               <TaskCard
@@ -124,12 +114,7 @@ const TaskList = () => {
           </div>
           {upcomingTasks.length > 3 && !showAllUpcoming && (
             <div className="mt-3">
-              <Button
-                variant="secondary"
-                size="md"
-                fullWidth
-                onClick={() => setShowAllUpcoming(true)}
-              >
+              <Button variant="secondary" size="md" fullWidth onClick={() => setShowAllUpcoming(true)}>
                 Show All {upcomingTasks.length} Upcoming Tasks
               </Button>
             </div>

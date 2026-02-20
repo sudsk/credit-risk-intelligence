@@ -1,0 +1,4 @@
+id,title,sme_id,sme_name,exposure,assignee,priority,due_date,status,description,source,created_at
+task_001,Review CTO departure - TechStart Solutions,#0142,TechStart Solutions Ltd,250000,John Smith,high,2024-11-20,overdue,CTO Sarah Johnson departed. Immediate review required.,News Intelligence,2024-11-16T14:32:17Z
+task_002,Monitor payment delays - Urban Fashion,#0287,Urban Fashion Ltd,180000,Jane Doe,medium,2024-11-22,due_today,3 suppliers reporting late payments avg 47 days.,News Intelligence,2024-11-16T11:15:43Z
+task_003,Covenant review - Digital Marketing Hub,#0531,Digital Marketing Hub,140000,Sarah Chen,medium,2024-11-30,upcoming,Client churn detected. Review scores declining.,News Intelligence,2024-11-16T08:22:11Z

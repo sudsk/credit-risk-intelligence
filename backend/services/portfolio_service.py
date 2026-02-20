@@ -276,6 +276,28 @@ class PortfolioService:
             }
         }
 
+    async def get_breakdown_by_risk(self, risk_level: str) -> Dict[str, Any]:
+        df = self.smes_df[self.smes_df['risk_category'] == risk_level]
+        
+        by_sector = df.groupby('sector').agg(
+            smes=('id', 'count'),
+            exposure=('exposure', 'sum')
+        ).reset_index().to_dict('records')
+        
+        by_geo = df.groupby('geography').agg(
+            smes=('id', 'count'),
+            exposure=('exposure', 'sum')
+        ).reset_index().to_dict('records')
+        
+        return {
+            "risk_level": risk_level,
+            "total": {
+                "smes": len(df),
+                "exposure": float(df['exposure'].sum()),
+            },
+            "by_sector": by_sector,
+            "by_geography": by_geo,
+        }
 
 # Singleton instance
 _portfolio_service = None

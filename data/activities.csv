@@ -1,0 +1,6 @@
+id,timestamp,type,message
+act_001,2024-11-16T14:32:17Z,alert,TechStart Solutions risk score increased to 68 (CRITICAL). CTO departure detected via LinkedIn.
+act_002,2024-11-16T12:15:00Z,info,Q3 financial estimates batch updated for 1284 SMEs. Average processing time 23 seconds.
+act_003,2024-11-16T10:45:32Z,success,Credit application #0823 GreenTech Energy approved at €300K facility.
+act_004,2024-11-16T09:22:18Z,warning,Urban Fashion Ltd payment delays detected. 3 suppliers flagged avg 47 days late.
+act_005,2024-11-16T08:10:45Z,info,Daily portfolio risk recalculation completed. 1284 SMEs processed in 2 minutes.
