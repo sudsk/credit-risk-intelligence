@@ -16,7 +16,6 @@ from pydantic import BaseModel
 from services.portfolio_service import get_portfolio_service
 from services.risk_engine import get_risk_engine
 from services.scenario_job_service import get_scenario_job_service
-from services.task_service import get_task_service
 from services.alert_service import get_alert_service
 
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +30,6 @@ async def lifespan(app: FastAPI):
     get_portfolio_service()
     get_risk_engine()
     get_scenario_job_service()
-    get_task_service()
     get_alert_service()
     logger.info("All services ready")
     yield
@@ -64,25 +62,6 @@ class ScenarioRequest(BaseModel):
 class ChatRequest(BaseModel):
     query: str
     session_id: str = "default"
-
-class TaskCreateRequest(BaseModel):
-    id: str
-    title: str
-    sme_id: str
-    sme_name: str
-    priority: str = "medium"
-    status: str = "pending"
-    due_date: Optional[str] = None
-    assigned_to: Optional[str] = None
-    description: Optional[str] = None
-
-class TaskUpdateRequest(BaseModel):
-    status: Optional[str] = None
-    priority: Optional[str] = None
-    due_date: Optional[str] = None
-    assigned_to: Optional[str] = None
-    description: Optional[str] = None
-
 
 # ---------------------------------------------------------------------------
 # Root / Health
