@@ -54,27 +54,36 @@ export interface BreakdownData {
 export interface PredictedEvent {
   id: string;
   date: string;
-  daysUntil: number;
+  daysUntil: number;          // mapped from backend snake_case days_until
   title: string;
   probability: number;
   affects: {
     smes: number;
-    exposure: string;
+    exposure: string;         // formatted string e.g. "€2.1M"
   };
   impact: string;
-  keySMEs?: string[];
+  keySMEs: string[];          // non-optional — api.ts mapper defaults to []
   source: string;
+  description: string;
 }
 
-// News Types
+// News Types — corrected to match backend response + NewsIntelligence.tsx
+export interface NewsSignal {
+  source: string;
+  detail: string;
+}
+
 export interface NewsItem {
   id: string;
   timestamp: string;
-  smeId: string;
-  smeName: string;
-  exposure: string;
-  message: string;
-  type: 'departure' | 'payment_delay' | 'churn' | 'other';
+  sme_id: string;
+  sme_name: string;
+  exposure: string;           // formatted string e.g. "€250K"
+  title: string;
+  summary: string;
+  severity: 'critical' | 'warning';
+  signals: NewsSignal[];
+  recommendation: string;
 }
 
 // Task Types
@@ -103,7 +112,7 @@ export interface Scenario {
   createdAt: string;
   completedAt?: string;
   results?: ScenarioResults;
-  recommendations?: ScenarioRecommendation 
+  recommendations?: ScenarioRecommendation;
 }
 
 export interface ScenarioResults {
@@ -130,14 +139,6 @@ export interface ScenarioResults {
   }[];
 }
 
-// Activity Types
-export interface Activity {
-  id: string;
-  timestamp: string;
-  type: 'alert' | 'info' | 'success' | 'warning';
-  message: string;
-}
-
 // Chat Types
 export interface ChatMessage {
   id: string;
@@ -147,27 +148,27 @@ export interface ChatMessage {
 }
 
 export interface Alert {
-  id: string
-  timestamp: string
-  severity: 'critical' | 'warning'
-  smeId: string
-  smeName: string
-  exposure: string
-  eventType: 'executive_departure' | 'payment_delay' | 'regulation' | 'sector_shock' | 'client_churn'
-  eventSummary: string
-  dataSources: string[]
-  dismissed: boolean
+  id: string;
+  timestamp: string;
+  severity: 'critical' | 'warning';
+  smeId: string;
+  smeName: string;
+  exposure: string;
+  eventType: 'executive_departure' | 'payment_delay' | 'regulation' | 'sector_shock' | 'client_churn';
+  eventSummary: string;
+  dataSources: string[];
+  dismissed: boolean;
 }
 
 export interface RecommendationTier {
-  reserveIncrease: string
-  sectorAdjustments: string[]
-  timeline: string
-  riskMitigation: string
+  reserveIncrease: string;
+  sectorAdjustments: string[];
+  timeline: string;
+  riskMitigation: string;
 }
 
 export interface ScenarioRecommendation {
-  ultraConservative: RecommendationTier
-  conservative: RecommendationTier
-  moderate: RecommendationTier
+  ultraConservative: RecommendationTier;
+  conservative: RecommendationTier;
+  moderate: RecommendationTier;
 }

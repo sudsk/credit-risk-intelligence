@@ -1,6 +1,6 @@
 """
 FastAPI server for Interaction Agents
-Exposes the Master Orchestrator as the primary endpoint
+Single entry point — routes to chat, analyse, and scenario agents.
 """
 import logging
 from contextlib import asynccontextmanager
@@ -8,23 +8,29 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from agents.orchestrator.agent import MasterOrchestrator
+from agents.interaction.chat_agent import ChatAgent
+from agents.interaction.sme_agent import SMEAnalysisAgent
+from agents.interaction.scenario_agent import ScenarioAgent
 from agents.shared.config import get_config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 config = get_config()
-orchestrator: MasterOrchestrator = None
+chat_agent: ChatAgent = None
+sme_agent: SMEAnalysisAgent = None
+scenario_agent: ScenarioAgent = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialise agents on startup, clean up on shutdown"""
-    global orchestrator
-    logger.info("Initialising Master Orchestrator...")
-    orchestrator = MasterOrchestrator()
-    logger.info("Master Orchestrator ready")
+    global chat_agent, sme_agent, scenario_agent
+    logger.info("Initialising agents...")
+    chat_agent     = ChatAgent()
+    sme_agent      = SMEAnalysisAgent()
+    scenario_agent = ScenarioAgent()
+    logger.info("All agents ready")
     yield
     logger.info("Shutting down...")
 
@@ -43,24 +49,19 @@ class ChatRequest(BaseModel):
     message: str
     session_id: str = "default"
 
-
 class ChatResponse(BaseModel):
     response: str
     session_id: str
 
-
 class AnalyseRequest(BaseModel):
     sme_id: str
-
 
 class AnalyseResponse(BaseModel):
     sme_id: str
     analysis: str
 
-
 class ScenarioRequest(BaseModel):
     description: str
-
 
 class ScenarioResponse(BaseModel):
     description: str
@@ -72,9 +73,9 @@ class ScenarioResponse(BaseModel):
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    """General chat — routed through Master Orchestrator"""
+    """General chat with the credit risk assistant"""
     try:
-        response_text = await orchestrator.process(
+        response_text = await chat_agent.process_query(
             request.message,
             session_id=request.session_id,
         )
@@ -88,7 +89,7 @@ async def chat(request: ChatRequest):
 async def analyse_sme(request: AnalyseRequest):
     """Deep dive analysis of a specific SME"""
     try:
-        analysis = await orchestrator.sme_agent.analyze(request.sme_id)
+        analysis = await sme_agent.analyze(request.sme_id)
         return AnalyseResponse(sme_id=request.sme_id, analysis=analysis)
     except Exception as e:
         logger.error(f"SME analysis error: {e}", exc_info=True)
@@ -99,7 +100,7 @@ async def analyse_sme(request: AnalyseRequest):
 async def run_scenario(request: ScenarioRequest):
     """Run a what-if scenario simulation"""
     try:
-        result = await orchestrator.scenario_agent.simulate(request.description)
+        result = await scenario_agent.simulate(request.description)
         return ScenarioResponse(
             description=result["description"],
             analysis=result.get("analysis", ""),
@@ -112,23 +113,21 @@ async def run_scenario(request: ScenarioRequest):
 
 @app.get("/health")
 async def health():
-    """Health check"""
     return {
         "status": "healthy",
         "agents": {
-            "orchestrator": orchestrator is not None,
-            "chat": orchestrator is not None and orchestrator.chat_agent is not None,
-            "scenario": orchestrator is not None and orchestrator.scenario_agent is not None,
-            "sme": orchestrator is not None and orchestrator.sme_agent is not None,
+            "chat":     chat_agent is not None,
+            "sme":      sme_agent is not None,
+            "scenario": scenario_agent is not None,
         },
         "config": {
-            "project": config.project_id,
+            "project":  config.project_id,
             "location": config.location,
-            "model": config.model_name,
+            "model":    config.model_name,
         }
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8081)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
