@@ -26,6 +26,13 @@ const SMEList = () => {
     dispatch(setSearchQuery(e.target.value))
   }
 
+  const CATEGORY_CONFIG = {
+    critical: { icon: '🚨', label: 'Critical Risk', badge: 'Requires Action', badgeColor: 'var(--uui-critical-60)' },
+    medium: { icon: '⚠️', label: 'Medium Risk', badge: 'Monitor Closely', badgeColor: 'var(--uui-warning-60)' },
+    stable: { icon: '✅', label: 'Low Risk', badge: 'Stable', badgeColor: 'var(--uui-primary-60)' },
+  }
+  const config = CATEGORY_CONFIG[filter as keyof typeof CATEGORY_CONFIG] ?? CATEGORY_CONFIG.critical
+
   return (
     <div style={{
       background: 'var(--uui-surface-main)',
@@ -37,9 +44,9 @@ const SMEList = () => {
       {/* Header */}
       <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--uui-neutral-60)', background: 'var(--uui-neutral-70)' }}>
         <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: 'var(--uui-text-primary)' }}>
-          🚨 Critical Risk SMEs ({smes.length})
-          <span style={{ marginLeft: '8px', fontSize: '11px', background: 'var(--uui-critical-60)', color: 'white', padding: '2px 8px', borderRadius: 'var(--uui-border-radius)' }}>
-            Requires Action
+          {config.icon} {config.label} SMEs ({smes.length})
+          <span style={{ marginLeft: '8px', fontSize: '11px', background: config.badgeColor, color: 'white', padding: '2px 8px', borderRadius: 'var(--uui-border-radius)' }}>
+            {config.badge}
           </span>
         </div>
         <div style={{ position: 'relative' }}>
