@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, Any, List
 
 # Data paths
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent / "mcp-servers" / "data"
 SMES_CSV = DATA_DIR / "smes.csv"
 
 # Pre-calculated stress test vectors from bank's CCAR/ICAAP models

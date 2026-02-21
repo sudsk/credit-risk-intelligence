@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Optional
 from .risk_engine import get_risk_engine
 
 # Data paths
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+DATA_DIR = Path(__file__).parent.parent.parent / "mcp-servers" / "data"
 SMES_CSV = DATA_DIR / "smes.csv"
 
 class PortfolioService:
