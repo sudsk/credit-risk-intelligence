@@ -3,12 +3,11 @@ import { API_BASE_URL } from '@/utils/constants';
 import type {
   PortfolioMetrics,
   SME,
-  NewsItem,
+  AlertSignal,
   Task,
   Scenario,
   ChatMessage,
   Alert,
-  PredictedEvent,
 } from './types';
 
 // ─── Single axios instance ────────────────────────────────────────────────────
@@ -144,57 +143,6 @@ export const portfolioAPI = {
   },
 };
 
-// ─── News & Events API ────────────────────────────────────────────────────────
-export const newsAPI = {
-  /**
-   * GET /api/v1/news/intelligence
-   * Backend: { items: [{ id, sme_id, sme_name, exposure, title, summary,
-   *   severity, timestamp, signals: [{source, detail}], recommendation }] }
-   */
-  getNewsIntelligence: async (): Promise<NewsItem[]> => {
-    const { data } = await api.get('/api/v1/news/intelligence');
-    return (data.items ?? []).map((item: any) => ({
-      id: item.id,
-      timestamp: item.timestamp,
-      sme_id: item.sme_id,
-      sme_name: item.sme_name,
-      exposure: typeof item.exposure === 'number'
-        ? formatExposure(item.exposure)
-        : (item.exposure ?? '€0'),
-      title: item.title ?? '',
-      summary: item.summary ?? '',
-      severity: item.severity ?? 'warning',
-      signals: item.signals ?? [],
-      recommendation: item.recommendation ?? '',
-    }));
-  },
-
-  /**
-   * GET /api/v1/news/predicted-events
-   * Backend returns snake_case. Frontend (PredictedEvents.tsx) expects camelCase:
-   * daysUntil, keySMEs, affects.exposure as formatted string.
-   */
-  getPredictedEvents: async (): Promise<PredictedEvent[]> => {
-    const { data } = await api.get('/api/v1/news/predicted-events');
-    return (data.events ?? []).map((e: any) => ({
-      id: e.id,
-      date: e.date,
-      daysUntil: e.days_until ?? e.daysUntil ?? 0,
-      title: e.title,
-      probability: e.probability,
-      affects: {
-        smes: e.affects?.smes ?? 0,
-        exposure: typeof e.affects?.exposure === 'number'
-          ? formatExposure(e.affects.exposure)
-          : (e.affects?.exposure ?? '€0'),
-      },
-      impact: e.impact ?? '',
-      keySMEs: e.key_smes ?? e.keySMEs ?? [],
-      source: e.source ?? '',
-      description: e.description ?? '',
-    }));
-  },
-};
 
 // ─── Tasks API ────────────────────────────────────────────────────────────────
 export const tasksAPI = {
@@ -328,14 +276,17 @@ export const chatAPI = {
 };
 
 // ─── Alert API ────────────────────────────────────────────────────────────────
-// Backend (Change 8) returns:
-//   { alert: { id, sme_id, sme_name, severity, exposure, summary,
-//              signals: [{ signal_type, detail, source, impact_score }], timestamp } }
-// AlertToast expects flat Alert shape — mapped here.
+// Maps both live-feed alerts (Change 8 shape) and historic news intelligence
+// into the unified Alert type.
 function mapAlertResponse(raw: any): Alert {
-  const a = raw.alert ?? raw; // tolerate both { alert: {...} } and flat
+  const a = raw.alert ?? raw;
+  // signals: backend may return news-style [{source,detail}] or alert-style [{signal_type,detail,source}]
+  const signals: AlertSignal[] = (a.signals ?? []).map((s: any) => ({
+    source: s.source ?? s.signal_type ?? '',
+    detail: s.detail ?? '',
+  }));
   return {
-    id: a.id ?? a.alert_id ?? `alert_${Date.now()}`,
+    id: a.id ?? `alert_${Date.now()}`,
     timestamp: a.timestamp ?? new Date().toISOString(),
     severity: a.severity ?? 'warning',
     smeId: a.sme_id ?? '',
@@ -343,22 +294,22 @@ function mapAlertResponse(raw: any): Alert {
     exposure: typeof a.exposure === 'number'
       ? formatExposure(a.exposure)
       : (a.exposure ?? '€0'),
-    eventType: a.event_type ?? a.signals?.[0]?.signal_type ?? 'sector_shock',
-    eventSummary: a.summary ?? a.event_summary ?? '',
-    dataSources: a.data_sources
-      ?? (a.signals ?? []).map((s: any) => s.source).filter(Boolean),
+    title: a.title ?? a.event_type ?? 'Alert',
+    summary: a.summary ?? a.event_summary ?? '',
+    signals,
+    recommendation: a.recommendation ?? '',
     dismissed: false,
   };
 }
 
 export const alertAPI = {
-  // POST /api/v1/alerts/simulate
+  // POST /api/v1/alerts/simulate — fire a new live alert
   simulateFeed: async (): Promise<Alert> => {
     const { data } = await api.post('/api/v1/alerts/simulate');
     return mapAlertResponse(data);
   },
 
-  // GET /api/v1/alerts/history
+  // GET /api/v1/alerts/history — all historic alerts (news + past live alerts)
   getAlertHistory: async (): Promise<Alert[]> => {
     const { data } = await api.get('/api/v1/alerts/history');
     return (data.alerts ?? []).map(mapAlertResponse);

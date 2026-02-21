@@ -50,40 +50,10 @@ export interface BreakdownData {
   geographies: GeographyBreakdown[];
 }
 
-// Event Types
-export interface PredictedEvent {
-  id: string;
-  date: string;
-  daysUntil: number;          // mapped from backend snake_case days_until
-  title: string;
-  probability: number;
-  affects: {
-    smes: number;
-    exposure: string;         // formatted string e.g. "€2.1M"
-  };
-  impact: string;
-  keySMEs: string[];          // non-optional — api.ts mapper defaults to []
-  source: string;
-  description: string;
-}
-
-// News Types — corrected to match backend response + NewsIntelligence.tsx
-export interface NewsSignal {
+// Alert Signal (from news intelligence / alert feed)
+export interface AlertSignal {
   source: string;
   detail: string;
-}
-
-export interface NewsItem {
-  id: string;
-  timestamp: string;
-  sme_id: string;
-  sme_name: string;
-  exposure: string;           // formatted string e.g. "€250K"
-  title: string;
-  summary: string;
-  severity: 'critical' | 'warning';
-  signals: NewsSignal[];
-  recommendation: string;
 }
 
 // Task Types
@@ -147,6 +117,7 @@ export interface ChatMessage {
   timestamp: string;
 }
 
+// Unified Alert — covers both live feed alerts and historic news intelligence
 export interface Alert {
   id: string;
   timestamp: string;
@@ -154,9 +125,10 @@ export interface Alert {
   smeId: string;
   smeName: string;
   exposure: string;
-  eventType: 'executive_departure' | 'payment_delay' | 'regulation' | 'sector_shock' | 'client_churn';
-  eventSummary: string;
-  dataSources: string[];
+  title: string;
+  summary: string;
+  signals: AlertSignal[];
+  recommendation: string;
   dismissed: boolean;
 }
 

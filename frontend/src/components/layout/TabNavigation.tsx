@@ -4,10 +4,9 @@ import { setActiveTab } from '@/store/uiSlice'
 
 const tabs = [
   { id: 'home', label: 'Home', icon: '🏠', badge: null, badgeType: null },
-  { id: 'news', label: 'News & Events', icon: '📰', badge: 11, badgeType: 'warning' },
+  { id: 'alerts', label: 'Alerts', icon: '📰', badge: 11, badgeType: 'warning' },
   { id: 'tasks', label: 'Tasks', icon: '📋', badge: 12, badgeType: 'critical' },
   { id: 'scenarios', label: 'Scenarios', icon: '🎯', badge: 3, badgeType: 'info' },
-  { id: 'activities', label: 'Activities', icon: '🔔', badge: 47, badgeType: 'info' },
 ] as const
 
 const badgeColors: Record<string, string> = {
