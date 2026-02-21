@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
-DATA_FILE = Path(__file__).parent.parent.parent / "mcp-servers" / "data" / "alerts.csv"
+DATA_FILE = Path(__file__).parent.parent / "data" / "alerts.csv"
 
 # Max signals per alert in the CSV (columns: signal_N_source, signal_N_detail)
 MAX_SIGNALS = 3
