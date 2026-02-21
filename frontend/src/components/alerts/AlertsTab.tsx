@@ -179,11 +179,28 @@ const AlertsTab = () => {
                   overflow: 'hidden',
                 }}>
                   <div style={{ padding: '12px' }}>
-                    {/* Meta row */}
+                    {/* Meta row — scope-aware */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '11px', fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-tertiary)' }}>
-                        {alert.smeId} {alert.smeName}
-                      </span>
+                      {alert.scope === 'sme' && (
+                        <span style={{ fontSize: '11px', fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-tertiary)' }}>
+                          {alert.smeId} {alert.smeName}
+                        </span>
+                      )}
+                      {alert.scope === 'sector' && (
+                        <span style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>
+                          🏭 <strong>Sector</strong> · {alert.smeName} · {alert.affected_count} SMEs affected
+                        </span>
+                      )}
+                      {alert.scope === 'geography' && (
+                        <span style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>
+                          📍 <strong>Geography</strong> · {alert.smeName} · {alert.affected_count} SMEs affected
+                        </span>
+                      )}
+                      {alert.scope === 'macro' && (
+                        <span style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>
+                          🌐 <strong>Macro</strong> · Portfolio-wide · {alert.affected_count} SMEs affected
+                        </span>
+                      )}
                       <Badge variant={isCritical ? 'critical' : 'warning'}>
                         {alert.severity.toUpperCase()}
                       </Badge>
@@ -264,7 +281,9 @@ const AlertsTab = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                       <Button variant="secondary" size="sm" onClick={() => handleCreateTask(alert)}>📋 Create Task</Button>
                       <Button variant="secondary" size="sm" onClick={() => handleRunScenario(alert)}>🎯 Run Scenario</Button>
-                      <Button variant="secondary" size="sm" onClick={() => handleViewSME(alert)}>👁️ View SME</Button>
+                      {alert.scope === 'sme' && (
+                        <Button variant="secondary" size="sm" onClick={() => handleViewSME(alert)}>👁️ View SME</Button>
+                      )}
                       <Button variant="secondary" size="sm" onClick={() => setExpandedId(isExpanded ? null : alert.id)}>
                         {isExpanded ? 'Less' : 'Details'}
                       </Button>

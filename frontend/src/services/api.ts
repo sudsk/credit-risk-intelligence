@@ -144,6 +144,32 @@ export const portfolioAPI = {
 };
 
 
+// ─── Tasks API ────────────────────────────────────────────────────────────────
+export const tasksAPI = {
+  // GET /api/v1/tasks
+  getTasks: async (): Promise<Task[]> => {
+    const { data } = await api.get('/api/v1/tasks');
+    return data.tasks ?? [];
+  },
+
+  // POST /api/v1/tasks
+  createTask: async (task: Partial<Task>) => {
+    const { data } = await api.post('/api/v1/tasks', task);
+    return data;
+  },
+
+  // PUT /api/v1/tasks/:id
+  updateTask: async (id: string, updates: Partial<Task>) => {
+    const { data } = await api.put(`/api/v1/tasks/${id}`, updates);
+    return data;
+  },
+
+  // DELETE /api/v1/tasks/:id
+  deleteTask: async (id: string): Promise<void> => {
+    await api.delete(`/api/v1/tasks/${id}`);
+  },
+};
+
 // ─── Scenarios API ────────────────────────────────────────────────────────────
 const SCENARIO_POLL_INTERVAL_MS = 1500;
 const SCENARIO_POLL_TIMEOUT_MS = 120_000; // 2 min
@@ -263,6 +289,8 @@ function mapAlertResponse(raw: any): Alert {
     id: a.id ?? `alert_${Date.now()}`,
     timestamp: a.timestamp ?? new Date().toISOString(),
     severity: a.severity ?? 'warning',
+    scope: a.scope ?? 'sme',
+    affected_count: a.affected_count ?? 1,
     smeId: a.sme_id ?? '',
     smeName: a.sme_name ?? '',
     exposure: typeof a.exposure === 'number'

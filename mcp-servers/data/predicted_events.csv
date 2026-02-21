@@ -1,3 +1,0 @@
-id,date,days_until,title,probability,affected_smes,affected_exposure,impact,key_smes,source,description
-evt_001,2024-12-01,17,UK Hemp Products Ban,75,8,12000000,+12 to +18 avg score increase,"#0445 GreenLeaf Products,#0672 Natural Wellness Ltd",UK Parliament Calendar,Parliamentary vote expected Dec 1. 75% probability of ban passing based on committee support.
-evt_002,2024-12-15,31,BoE Interest Rate Decision,60,487,142000000,Expected +0.25% increase,,Bank of England Schedule,MPC meeting Dec 15. Market pricing in 60% chance of 25bps hike to combat inflation.
