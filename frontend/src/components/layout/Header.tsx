@@ -1,4 +1,8 @@
-import { Clock } from 'lucide-react'
+import { Clock, UserCircle } from 'lucide-react'
+
+const MOCK_USER = {
+  name: 'Sarah Chen',
+}
 
 const Header = () => {
   const currentTime = new Date().toLocaleString('en-GB', {
@@ -14,8 +18,13 @@ const Header = () => {
       display: 'flex', alignItems: 'center',
       justifyContent: 'space-between', padding: '0 24px'
     }}>
+      {/* Left — logo + title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Effective_Programming_for_America_logo.svg" alt="EPAM" style={{ height: '24px', filter: 'brightness(0) invert(1)' }} />
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/7/72/Effective_Programming_for_America_logo.svg"
+          alt="EPAM"
+          style={{ height: '24px', filter: 'brightness(0) invert(1)' }}
+        />
         <div>
           <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>
             Credit Risk Intelligence Platform
@@ -25,9 +34,20 @@ const Header = () => {
           </div>
         </div>
       </div>
-      <div style={{ fontSize: '12px', color: 'var(--uui-text-tertiary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <Clock size={14} />
-        Last Updated: {currentTime}
+
+      {/* Right — timestamp + user */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ fontSize: '12px', color: 'var(--uui-text-tertiary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Clock size={14} />
+          Last Updated: {currentTime}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>
+            {MOCK_USER.name}
+          </span>
+          <UserCircle size={28} style={{ color: 'var(--uui-primary-60)' }} />
+        </div>
       </div>
     </header>
   )
