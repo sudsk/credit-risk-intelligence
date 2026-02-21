@@ -15,7 +15,7 @@ const Header = () => {
       justifyContent: 'space-between', padding: '0 24px'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Effective_Programming_for_America_logo.svg" alt="Logo" style={{ width: '32px', height: '32px' }} />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Effective_Programming_for_America_logo.svg" alt="EPAM" style={{ height: '24px', filter: 'brightness(0) invert(1)' }} />
         <div>
           <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>
             Credit Risk Intelligence Platform
