@@ -16,7 +16,6 @@ from pydantic import BaseModel
 from services.portfolio_service import get_portfolio_service
 from services.risk_engine import get_risk_engine
 from services.scenario_job_service import get_scenario_job_service
-from services.news_service import get_news_service
 from services.task_service import get_task_service
 from services.alert_service import get_alert_service
 
@@ -32,7 +31,6 @@ async def lifespan(app: FastAPI):
     get_portfolio_service()
     get_risk_engine()
     get_scenario_job_service()
-    get_news_service()
     get_task_service()
     get_alert_service()
     logger.info("All services ready")
@@ -462,74 +460,24 @@ async def calculate_batch_risk(sme_ids: List[str]):
 
 
 # ---------------------------------------------------------------------------
-# Change 6 — News routes (routes 2 & 3)
+# Alert routes (simulate + history)
 # ---------------------------------------------------------------------------
 
-@app.get("/api/v1/news/intelligence")
-async def get_news_intelligence(
+@app.get("/api/v1/alerts/history")
+async def get_alert_history(
     sme_id: Optional[str] = Query(None),
     severity: Optional[str] = Query(None),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(50, ge=1, le=200),
 ):
-    """News events feed — filterable by SME and severity."""
+    """Historic alerts feed — covers both live-fired alerts and news intelligence."""
     try:
-        return await get_news_service().get_news_intelligence(
+        return await get_alert_service().get_alert_history(
             sme_id=sme_id, severity=severity, limit=limit
         )
     except Exception as e:
-        logger.error(f"News intelligence error: {e}")
+        logger.error(f"Alert history error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.get("/api/v1/news/predicted-events")
-async def get_predicted_events():
-    """AI-predicted upcoming risk events for the portfolio."""
-    try:
-        return await get_news_service().get_predicted_events()
-    except Exception as e:
-        logger.error(f"Predicted events error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ---------------------------------------------------------------------------
-# Change 6 — Task routes (routes 4, 5, 6)
-# ---------------------------------------------------------------------------
-
-@app.get("/api/v1/tasks")
-async def get_tasks(status: Optional[str] = Query(None)):
-    """Get all tasks, optionally filtered by status."""
-    try:
-        return await get_task_service().get_tasks(status=status)
-    except Exception as e:
-        logger.error(f"Get tasks error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/api/v1/tasks", status_code=201)
-async def create_task(request: TaskCreateRequest):
-    """Create a new task."""
-    try:
-        return await get_task_service().create_task(request.model_dump())
-    except Exception as e:
-        logger.error(f"Create task error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.put("/api/v1/tasks/{task_id}")
-async def update_task(task_id: str, request: TaskUpdateRequest):
-    """Update an existing task."""
-    try:
-        updates = {k: v for k, v in request.model_dump().items() if v is not None}
-        return await get_task_service().update_task(task_id, updates)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        logger.error(f"Update task error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ---------------------------------------------------------------------------
-# Change 6 + 8 — Alert routes (route 8)
-# ---------------------------------------------------------------------------
 
 @app.post("/api/v1/alerts/simulate")
 async def simulate_alert():

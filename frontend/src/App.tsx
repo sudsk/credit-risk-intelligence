@@ -4,7 +4,6 @@ import TabNavigation from './components/layout/TabNavigation'
 import ChatFloatingButton from './components/layout/ChatFloatingButton'
 import HomeTab from './components/home/HomeTab'
 import AlertsTab from './components/alerts/AlertsTab'
-import TasksTab from './components/tasks/TasksTab'
 import ScenariosTab from './components/scenarios/ScenariosTab'
 import ChatModal from './components/chat/ChatModal'
 import BreakdownModal from './components/home/BreakdownModal'
@@ -24,7 +23,6 @@ function App() {
         {/* Tab Content */}
         {activeTab === 'home' && <HomeTab />}
         {activeTab === 'alerts' && <AlertsTab />}
-        {activeTab === 'tasks' && <TasksTab />}
         {activeTab === 'scenarios' && <ScenariosTab />}
       </main>
 

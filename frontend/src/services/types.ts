@@ -56,22 +56,6 @@ export interface AlertSignal {
   detail: string;
 }
 
-// Task Types
-export interface Task {
-  id: string;
-  title: string;
-  smeId: string;
-  smeName: string;
-  exposure: string;
-  assignee: string;
-  priority: 'high' | 'medium' | 'low';
-  dueDate: string;
-  status: 'overdue' | 'due_today' | 'upcoming' | 'completed';
-  description: string;
-  source: string;
-  createdAt: string;
-}
-
 // Scenario Types
 export interface Scenario {
   id: string;
