@@ -1,93 +1,93 @@
-id,name,risk_score,risk_category,exposure,sector,geography,trend,trend_value,revenue,ebitda,employee_count,debt_service_coverage,current_ratio,cash_reserves,total_debt,incorporation_date,last_review_date
-0142,TechStart Solutions Ltd,68,critical,250000,Software/Technology,UK,up,14,2400000,420000,45,1.2,1.1,180000,850000,2015-03-12,2024-10-15
-0287,Urban Fashion Ltd,62,medium,180000,Retail/Fashion,UK,up,8,1800000,280000,32,1.5,1.3,120000,450000,2016-07-20,2024-10-20
-0531,Digital Marketing Hub,58,medium,140000,Marketing Services,UK,up,12,1200000,180000,28,1.8,1.4,95000,280000,2017-02-10,2024-10-18
-0445,GreenLeaf Products,72,critical,320000,Food/Hospitality,UK,stable,2,3200000,580000,52,1.1,0.9,220000,1200000,2014-11-05,2024-10-12
-0672,Natural Wellness Ltd,68,critical,210000,Retail/Fashion,EU,up,6,2100000,350000,38,1.3,1.2,150000,680000,2016-09-15,2024-10-14
-0823,GreenTech Energy Ltd,45,stable,300000,Energy/Utilities,UK,down,-3,3500000,680000,65,2.1,1.8,450000,720000,2013-05-22,2024-10-22
-0234,BuildCo Construction,72,critical,420000,Construction,UK,up,8,4200000,580000,78,1.2,1.0,280000,1800000,2012-08-14,2024-10-10
-0456,Retail Fashion Group,68,critical,380000,Retail/Fashion,UK,up,13,3800000,520000,55,1.4,1.1,240000,1100000,2015-04-18,2024-10-16
-0789,Northern Manufacturing,65,medium,290000,Manufacturing,UK,up,7,2900000,480000,62,1.6,1.3,310000,820000,2014-06-25,2024-10-19
-0912,DataFlow Analytics,42,stable,180000,Software/Technology,UK,down,-2,1800000,420000,35,2.3,1.9,380000,350000,2018-01-10,2024-10-23
-1045,Coastal Logistics Ltd,38,stable,220000,Transportation,UK,stable,0,2200000,385000,48,2.5,2.0,420000,410000,2016-03-14,2024-10-21
-1156,Premium Catering Co,55,medium,195000,Food/Hospitality,UK,up,5,1950000,310000,42,1.7,1.4,185000,520000,2017-07-08,2024-10-17
-1267,Urban Retail Partners,62,medium,275000,Retail/Fashion,EU,up,9,2750000,440000,51,1.5,1.2,205000,780000,2015-11-20,2024-10-13
-1378,TechForward Systems,48,stable,165000,Software/Technology,UK,down,-1,1650000,310000,32,2.0,1.7,295000,380000,2018-05-15,2024-10-24
-1489,Green Construction Ltd,58,medium,310000,Construction,UK,up,6,3100000,485000,68,1.7,1.3,275000,920000,2014-09-22,2024-10-11
-1590,Fashion Express UK,64,medium,235000,Retail/Fashion,UK,up,10,2350000,365000,44,1.4,1.1,175000,690000,2016-12-05,2024-10-15
-1701,Digital Nexus Agency,52,medium,145000,Marketing Services,UK,up,4,1450000,245000,28,1.9,1.5,165000,340000,2017-08-17,2024-10-20
-1812,Highland Foods Ltd,68,critical,285000,Food/Hospitality,UK,up,11,2850000,425000,58,1.3,1.0,195000,980000,2013-04-10,2024-10-12
-1923,Metro Manufacturing,55,medium,265000,Manufacturing,UK,up,5,2650000,445000,55,1.8,1.4,285000,650000,2015-06-28,2024-10-18
-2034,Bright Software Labs,35,stable,125000,Software/Technology,UK,down,-4,1250000,285000,24,2.6,2.1,325000,220000,2019-02-20,2024-10-25
-2145,Capital Consulting Group,32,stable,185000,Professional Services,UK,stable,1,1850000,395000,38,2.8,2.3,445000,310000,2017-10-12,2024-10-22
-2256,Eco Products Ltd,58,medium,205000,Retail/Fashion,EU,up,7,2050000,325000,36,1.7,1.3,185000,560000,2016-05-19,2024-10-16
-2367,Northern Logistics,42,stable,240000,Transportation,UK,stable,0,2400000,425000,52,2.2,1.8,395000,480000,2015-09-08,2024-10-21
-2478,Premium Tech Solutions,48,stable,175000,Software/Technology,UK,down,-2,1750000,335000,33,2.1,1.7,305000,390000,2018-03-25,2024-10-23
-2589,Retail Dynamics Ltd,62,medium,255000,Retail/Fashion,UK,up,8,2550000,385000,47,1.5,1.2,195000,720000,2015-12-14,2024-10-14
-2690,Urban Development Co,72,critical,385000,Construction,UK,up,14,3850000,535000,72,1.1,0.9,245000,1650000,2012-07-22,2024-10-09
-2801,Digital Commerce Hub,55,medium,195000,Software/Technology,UK,up,6,1950000,345000,38,1.8,1.5,265000,490000,2017-11-08,2024-10-19
-2912,Northern Foods Group,65,medium,295000,Food/Hospitality,UK,up,9,2950000,465000,62,1.4,1.1,215000,950000,2014-08-16,2024-10-13
-3023,Fashion Forward Ltd,58,medium,225000,Retail/Fashion,EU,up,7,2250000,355000,42,1.7,1.3,195000,620000,2016-04-20,2024-10-17
-3134,Tech Innovators Ltd,38,stable,155000,Software/Technology,UK,down,-3,1550000,315000,29,2.4,1.9,345000,310000,2018-09-15,2024-10-24
-3245,Manufacturing Solutions,52,medium,245000,Manufacturing,UK,up,5,2450000,415000,51,1.9,1.5,295000,590000,2015-11-22,2024-10-18
-3356,Coastal Retail Partners,62,medium,265000,Retail/Fashion,UK,up,8,2650000,395000,48,1.5,1.2,205000,750000,2016-06-18,2024-10-15
-3467,Digital Media Labs,45,stable,165000,Marketing Services,UK,down,-1,1650000,295000,31,2.1,1.7,285000,370000,2017-12-10,2024-10-22
-3578,Green Energy Solutions,35,stable,285000,Energy/Utilities,UK,stable,1,2850000,595000,58,2.7,2.2,485000,520000,2016-08-25,2024-10-20
-3689,Highland Manufacturing,58,medium,275000,Manufacturing,UK,up,6,2750000,455000,56,1.7,1.4,285000,680000,2015-03-17,2024-10-16
-3790,Metro Fashion Group,65,medium,285000,Retail/Fashion,UK,up,10,2850000,425000,52,1.4,1.1,205000,880000,2014-10-08,2024-10-12
-3901,Bright Tech Systems,42,stable,145000,Software/Technology,UK,stable,0,1450000,295000,27,2.2,1.8,315000,330000,2018-05-22,2024-10-23
-4012,Capital Construction Ltd,68,critical,395000,Construction,UK,up,12,3950000,545000,75,1.2,1.0,255000,1750000,2012-09-14,2024-10-10
-4123,Eco Retail Solutions,55,medium,215000,Retail/Fashion,EU,up,5,2150000,345000,40,1.8,1.4,205000,570000,2016-07-28,2024-10-18
-4234,Northern Tech Group,48,stable,185000,Software/Technology,UK,down,-2,1850000,355000,35,2.0,1.7,305000,400000,2017-11-15,2024-10-21
-4345,Premium Logistics Ltd,38,stable,255000,Transportation,UK,stable,0,2550000,465000,54,2.5,2.0,425000,510000,2015-05-20,2024-10-19
-4456,Urban Food Services,62,medium,245000,Food/Hospitality,UK,up,8,2450000,375000,51,1.5,1.2,195000,730000,2014-12-12,2024-10-14
-4567,Digital Solutions Lab,52,medium,175000,Software/Technology,UK,up,4,1750000,325000,33,1.9,1.5,275000,420000,2018-02-18,2024-10-22
-4678,Fashion Retail Express,65,medium,295000,Retail/Fashion,UK,up,9,2950000,445000,55,1.4,1.1,215000,910000,2015-08-25,2024-10-13
-4789,Green Manufacturing Co,58,medium,265000,Manufacturing,UK,up,7,2650000,435000,53,1.7,1.3,285000,670000,2016-03-10,2024-10-17
-4890,Highland Tech Partners,45,stable,155000,Software/Technology,UK,down,-1,1550000,305000,30,2.1,1.7,295000,360000,2018-07-08,2024-10-24
-5001,Metro Construction Group,72,critical,425000,Construction,UK,up,15,4250000,565000,82,1.1,0.9,265000,1900000,2011-06-20,2024-10-08
-5112,Coastal Fashion Ltd,62,medium,235000,Retail/Fashion,UK,up,8,2350000,365000,45,1.5,1.2,195000,700000,2016-09-15,2024-10-15
-5223,Bright Consulting Group,32,stable,195000,Professional Services,UK,stable,1,1950000,425000,40,2.8,2.3,465000,320000,2017-04-22,2024-10-23
-5334,Northern Energy Ltd,35,stable,295000,Energy/Utilities,UK,stable,0,2950000,615000,62,2.7,2.2,495000,540000,2016-10-18,2024-10-20
-5445,Urban Manufacturing Co,55,medium,255000,Manufacturing,UK,up,5,2550000,425000,52,1.8,1.4,295000,630000,2015-12-08,2024-10-18
-5556,Digital Marketing Pro,52,medium,165000,Marketing Services,UK,up,4,1650000,285000,30,1.9,1.5,255000,390000,2017-08-25,2024-10-21
-5667,Fashion Dynamics Ltd,58,medium,245000,Retail/Fashion,EU,up,7,2450000,375000,46,1.7,1.3,205000,650000,2016-05-12,2024-10-16
-5778,Green Tech Systems,38,stable,145000,Software/Technology,UK,down,-3,1450000,295000,27,2.4,1.9,325000,300000,2018-11-05,2024-10-25
-5889,Highland Logistics Group,42,stable,265000,Transportation,UK,stable,0,2650000,475000,56,2.2,1.8,415000,520000,2015-07-18,2024-10-19
-5990,Premium Retail Partners,62,medium,285000,Retail/Fashion,UK,up,8,2850000,425000,53,1.5,1.2,205000,840000,2014-11-20,2024-10-14
-6101,Metro Tech Solutions,48,stable,175000,Software/Technology,UK,down,-2,1750000,335000,33,2.0,1.7,305000,390000,2018-03-15,2024-10-22
-6212,Coastal Construction Ltd,68,critical,385000,Construction,UK,up,13,3850000,535000,74,1.2,1.0,245000,1650000,2012-08-08,2024-10-09
-6323,Bright Energy Solutions,35,stable,275000,Energy/Utilities,UK,stable,1,2750000,585000,56,2.7,2.2,475000,510000,2016-12-22,2024-10-20
-6434,Northern Retail Group,65,medium,295000,Retail/Fashion,UK,up,9,2950000,445000,55,1.4,1.1,215000,900000,2015-04-15,2024-10-13
-6545,Urban Tech Labs,42,stable,155000,Software/Technology,UK,stable,0,1550000,315000,29,2.2,1.8,315000,340000,2018-06-20,2024-10-23
-6656,Digital Food Services,58,medium,255000,Food/Hospitality,UK,up,6,2550000,395000,54,1.7,1.3,205000,680000,2015-10-10,2024-10-17
-6767,Fashion Express Group,62,medium,275000,Retail/Fashion,EU,up,8,2750000,415000,51,1.5,1.2,205000,770000,2016-08-05,2024-10-15
-6878,Green Manufacturing Ltd,55,medium,245000,Manufacturing,UK,up,5,2450000,415000,50,1.8,1.4,285000,610000,2015-11-28,2024-10-18
-6989,Highland Software Co,38,stable,145000,Software/Technology,UK,down,-3,1450000,295000,26,2.4,1.9,335000,290000,2018-09-18,2024-10-24
-7090,Metro Logistics Partners,45,stable,275000,Transportation,UK,stable,0,2750000,495000,58,2.1,1.8,435000,540000,2015-06-12,2024-10-19
-7201,Coastal Marketing Hub,52,medium,185000,Marketing Services,UK,up,4,1850000,325000,35,1.9,1.5,275000,410000,2017-12-08,2024-10-21
-7312,Bright Retail Solutions,62,medium,265000,Retail/Fashion,UK,up,8,2650000,395000,49,1.5,1.2,205000,760000,2016-04-20,2024-10-15
-7423,Northern Tech Systems,48,stable,165000,Software/Technology,UK,down,-2,1650000,325000,31,2.0,1.7,295000,380000,2018-02-25,2024-10-22
-7534,Urban Energy Group,35,stable,285000,Energy/Utilities,UK,stable,1,2850000,595000,59,2.7,2.2,485000,530000,2016-10-15,2024-10-20
-7645,Digital Construction Co,72,critical,415000,Construction,UK,up,14,4150000,555000,78,1.1,0.9,255000,1850000,2012-05-22,2024-10-08
-7756,Fashion Retail Group,65,medium,285000,Retail/Fashion,UK,up,9,2850000,435000,53,1.4,1.1,215000,880000,2015-09-18,2024-10-13
-7867,Green Tech Partners,42,stable,155000,Software/Technology,UK,stable,0,1550000,305000,29,2.2,1.8,305000,350000,2018-07-12,2024-10-23
-7978,Highland Manufacturing Ltd,58,medium,275000,Manufacturing,UK,up,6,2750000,455000,55,1.7,1.4,285000,690000,2015-12-05,2024-10-16
-8089,Metro Fashion Partners,62,medium,245000,Retail/Fashion,UK,up,8,2450000,375000,47,1.5,1.2,195000,720000,2016-06-20,2024-10-17
-8190,Coastal Tech Solutions,45,stable,165000,Software/Technology,UK,down,-1,1650000,315000,31,2.1,1.7,295000,370000,2018-04-15,2024-10-22
-8301,Bright Logistics Ltd,38,stable,265000,Transportation,UK,stable,0,2650000,475000,55,2.5,2.0,425000,520000,2015-08-08,2024-10-19
-8412,Northern Food Services,62,medium,255000,Food/Hospitality,UK,up,8,2550000,385000,53,1.5,1.2,195000,740000,2014-10-25,2024-10-14
-8523,Urban Software Labs,48,stable,175000,Software/Technology,UK,down,-2,1750000,335000,33,2.0,1.7,305000,390000,2018-03-20,2024-10-23
-8634,Digital Retail Express,65,medium,295000,Retail/Fashion,EU,up,9,2950000,445000,54,1.4,1.1,215000,910000,2015-07-15,2024-10-13
-8745,Fashion Tech Group,55,medium,235000,Retail/Fashion,UK,up,6,2350000,365000,45,1.8,1.4,205000,650000,2016-11-08,2024-10-18
-8856,Green Construction Co,68,critical,395000,Construction,UK,up,12,3950000,545000,76,1.2,1.0,255000,1700000,2012-09-20,2024-10-10
-8967,Highland Retail Ltd,58,medium,245000,Retail/Fashion,UK,up,7,2450000,375000,46,1.7,1.3,205000,660000,2016-05-25,2024-10-16
-9078,Metro Tech Group,42,stable,155000,Software/Technology,UK,stable,0,1550000,305000,29,2.2,1.8,315000,340000,2018-08-10,2024-10-24
-9189,Coastal Energy Ltd,35,stable,285000,Energy/Utilities,UK,stable,1,2850000,595000,58,2.7,2.2,485000,520000,2016-12-15,2024-10-20
-9290,Bright Manufacturing Co,55,medium,265000,Manufacturing,UK,up,5,2650000,435000,53,1.8,1.4,285000,660000,2015-10-22,2024-10-18
-9401,Northern Software Labs,38,stable,145000,Software/Technology,UK,down,-3,1450000,295000,27,2.4,1.9,325000,300000,2018-11-12,2024-10-25
-9512,Urban Logistics Group,45,stable,275000,Transportation,UK,stable,0,2750000,495000,57,2.1,1.8,435000,540000,2015-06-18,2024-10-19
-9623,Digital Fashion Hub,62,medium,265000,Retail/Fashion,UK,up,8,2650000,395000,49,1.5,1.2,205000,760000,2016-04-12,2024-10-15
-9734,Fashion Solutions Ltd,65,medium,285000,Retail/Fashion,EU,up,9,2850000,435000,52,1.4,1.1,215000,880000,2015-09-08,2024-10-13
-9845,Green Tech Labs,42,stable,155000,Software/Technology,UK,stable,0,1550000,305000,29,2.2,1.8,305000,350000,2018-07-20,2024-10-23
-9956,Highland Construction Ltd,72,critical,425000,Construction,UK,up,15,4250000,565000,81,1.1,0.9,265000,1900000,2011-05-15,2024-10-08
+id,name,risk_score,risk_category,exposure,sector,geography,trend,trend_value,revenue,ebitda,employee_count,debt_service_coverage,current_ratio,cash_reserves,total_debt,incorporation_date,last_review_date,bank_rating,pd_original,pd_adjusted,score_previous,score_change_reason,score_financial,score_operational,score_market,score_altdata,net_profit_margin,loan_origination_date,sector_health,geography_risk,compliance_status
+0142,TechStart Solutions Ltd,68,critical,250000,Software/Technology,UK,up,14,2400000,420000,45,1.2,1.1,180000,850000,2015-03-12,2024-10-15,BB+,3.0,5.4,45,CTO departure -12pts; web traffic -42% -8pts; payment delays -5pts,74,74,71,77,10.8,2017-03-01,improving,low,under_review
+0287,Urban Fashion Ltd,62,medium,180000,Retail/Fashion,UK,up,8,1800000,280000,32,1.5,1.3,120000,450000,2016-07-20,2024-10-20,BBB-,2.2,3.0,57,Sector headwinds -4pts; revenue softening -3pts,65,62,61,60,9.6,2018-07-01,deteriorating,medium,compliant
+0531,Digital Marketing Hub,58,medium,140000,Marketing Services,UK,up,12,1200000,180000,28,1.8,1.4,95000,280000,2017-02-10,2024-10-18,BBB,1.8,2.4,53,Sector headwinds -4pts; revenue softening -3pts,62,53,54,61,9.3,2019-02-01,deteriorating,low,compliant
+0445,GreenLeaf Products,72,critical,320000,Food/Hospitality,UK,stable,2,3200000,580000,52,1.1,0.9,220000,1200000,2014-11-05,2024-10-12,BB,3.8,3.8,72,No significant signal changes in review period,74,75,67,78,11.2,2016-11-01,deteriorating,low,breach
+0672,Natural Wellness Ltd,68,critical,210000,Retail/Fashion,EU,up,6,2100000,350000,38,1.3,1.2,150000,680000,2016-09-15,2024-10-14,BB+,3.0,5.4,54,Key executive change -10pts; EBITDA margin compression -6pts; sector risk +4pts,74,74,71,77,10.3,2018-09-01,deteriorating,medium,watch
+0823,GreenTech Energy Ltd,45,stable,300000,Energy/Utilities,UK,down,-3,3500000,680000,65,2.1,1.8,450000,720000,2013-05-22,2024-10-22,BBB+,0.8,0.7,49,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,37,39,47,38,12.0,2015-05-01,stable,low,compliant
+0234,BuildCo Construction,72,critical,420000,Construction,UK,up,8,4200000,580000,78,1.2,1.0,280000,1800000,2012-08-14,2024-10-10,BB,3.8,8.0,62,Key executive change -10pts; EBITDA margin compression -6pts; sector risk +4pts,74,75,67,78,8.6,2014-08-01,deteriorating,medium,watch
+0456,Retail Fashion Group,68,critical,380000,Retail/Fashion,UK,up,13,3800000,520000,55,1.4,1.1,240000,1100000,2015-04-18,2024-10-16,BB+,3.0,5.4,54,CEO departure -10pts; revenue decline -8% -6pts; sector headwinds -4pts,74,74,71,77,8.5,2017-04-01,deteriorating,medium,watch
+0789,Northern Manufacturing,65,medium,290000,Manufacturing,UK,up,7,2900000,480000,62,1.6,1.3,310000,820000,2014-06-25,2024-10-19,BBB-,2.4,3.2,60,Sector headwinds -4pts; revenue softening -3pts,60,60,65,65,10.3,2016-06-01,stable,low,compliant
+0912,DataFlow Analytics,42,stable,180000,Software/Technology,UK,down,-2,1800000,420000,35,2.3,1.9,380000,350000,2018-01-10,2024-10-23,BBB+,0.7,0.6,46,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,38,43,37,42,14.5,2020-01-01,improving,low,compliant
+1045,Coastal Logistics Ltd,38,stable,220000,Transportation,UK,stable,0,2200000,385000,48,2.5,2.0,420000,410000,2016-03-14,2024-10-21,BBB+,0.7,0.7,38,No significant signal changes in review period,33,32,35,31,10.8,2018-03-01,stable,low,compliant
+1156,Premium Catering Co,55,medium,195000,Food/Hospitality,UK,up,5,1950000,310000,42,1.7,1.4,185000,520000,2017-07-08,2024-10-17,BBB,1.6,2.2,50,Market exposure increase -4pts; late payments flag -2pts,50,53,61,56,9.9,2019-07-01,deteriorating,low,compliant
+1267,Urban Retail Partners,62,medium,275000,Retail/Fashion,EU,up,9,2750000,440000,51,1.5,1.2,205000,780000,2015-11-20,2024-10-13,BBB-,2.2,3.0,57,Market exposure increase -4pts; late payments flag -2pts,65,62,61,60,9.9,2017-11-01,deteriorating,medium,watch
+1378,TechForward Systems,48,stable,165000,Software/Technology,UK,down,-1,1650000,310000,32,2.0,1.7,295000,380000,2018-05-15,2024-10-24,BBB,0.8,0.7,52,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,43,49,46,41,11.6,2020-05-01,improving,low,compliant
+1489,Green Construction Ltd,58,medium,310000,Construction,UK,up,6,3100000,485000,68,1.7,1.3,275000,920000,2014-09-22,2024-10-11,BBB,1.8,2.4,53,Market exposure increase -4pts; late payments flag -2pts,62,53,54,61,9.7,2016-09-01,deteriorating,medium,compliant
+1590,Fashion Express UK,64,medium,235000,Retail/Fashion,UK,up,10,2350000,365000,44,1.4,1.1,175000,690000,2016-12-05,2024-10-15,BBB-,2.3,3.1,59,Market exposure increase -4pts; late payments flag -2pts,69,60,66,61,9.6,2018-12-01,deteriorating,medium,watch
+1701,Digital Nexus Agency,52,medium,145000,Marketing Services,UK,up,4,1450000,245000,28,1.9,1.5,165000,340000,2017-08-17,2024-10-20,BBB,1.4,1.9,47,Market exposure increase -4pts; late payments flag -2pts,50,51,51,55,10.5,2019-08-01,deteriorating,low,compliant
+1812,Highland Foods Ltd,68,critical,285000,Food/Hospitality,UK,up,11,2850000,425000,58,1.3,1.0,195000,980000,2013-04-10,2024-10-12,BB+,3.0,5.4,54,CEO departure -10pts; revenue decline -8% -6pts; sector headwinds -4pts,74,74,71,77,9.2,2015-04-01,deteriorating,low,watch
+1923,Metro Manufacturing,55,medium,265000,Manufacturing,UK,up,5,2650000,445000,55,1.8,1.4,285000,650000,2015-06-28,2024-10-18,BBB,1.6,2.2,50,Margin pressure -3pts; working capital tightening -2pts,50,53,61,56,10.4,2017-06-01,stable,low,compliant
+2034,Bright Software Labs,35,stable,125000,Software/Technology,UK,down,-4,1250000,285000,24,2.6,2.1,325000,220000,2019-02-20,2024-10-25,A,0.7,0.6,39,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,27,37,31,34,14.1,2021-02-01,improving,low,compliant
+2145,Capital Consulting Group,32,stable,185000,Professional Services,UK,stable,1,1850000,395000,38,2.8,2.3,445000,310000,2017-10-12,2024-10-22,A,0.6,0.6,32,No significant signal changes in review period,27,28,33,31,13.2,2019-10-01,stable,low,compliant
+2256,Eco Products Ltd,58,medium,205000,Retail/Fashion,EU,up,7,2050000,325000,36,1.7,1.3,185000,560000,2016-05-19,2024-10-16,BBB,1.8,2.4,53,Margin pressure -3pts; working capital tightening -2pts,62,53,54,61,9.8,2018-05-01,deteriorating,medium,compliant
+2367,Northern Logistics,42,stable,240000,Transportation,UK,stable,0,2400000,425000,52,2.2,1.8,395000,480000,2015-09-08,2024-10-21,BBB+,0.7,0.7,42,No significant signal changes in review period,38,43,37,42,11.0,2017-09-01,stable,low,compliant
+2478,Premium Tech Solutions,48,stable,175000,Software/Technology,UK,down,-2,1750000,335000,33,2.1,1.7,305000,390000,2018-03-25,2024-10-23,BBB,0.8,0.7,52,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,43,49,46,41,11.9,2020-03-01,improving,low,compliant
+2589,Retail Dynamics Ltd,62,medium,255000,Retail/Fashion,UK,up,8,2550000,385000,47,1.5,1.2,195000,720000,2015-12-14,2024-10-14,BBB-,2.2,3.0,57,Margin pressure -3pts; working capital tightening -2pts,65,62,61,60,9.4,2017-12-01,deteriorating,medium,watch
+2690,Urban Development Co,72,critical,385000,Construction,UK,up,14,3850000,535000,72,1.1,0.9,245000,1650000,2012-07-22,2024-10-09,BB,3.8,8.0,62,Payment delays x3 -8pts; debt coverage breach -7pts; market contraction -5pts,74,75,67,78,8.6,2014-07-01,deteriorating,medium,breach
+2801,Digital Commerce Hub,55,medium,195000,Software/Technology,UK,up,6,1950000,345000,38,1.8,1.5,265000,490000,2017-11-08,2024-10-19,BBB,1.6,2.2,50,Sector headwinds -4pts; revenue softening -3pts,50,53,61,56,11.0,2019-11-01,improving,low,compliant
+2912,Northern Foods Group,65,medium,295000,Food/Hospitality,UK,up,9,2950000,465000,62,1.4,1.1,215000,950000,2014-08-16,2024-10-13,BBB-,2.4,3.2,60,Market exposure increase -4pts; late payments flag -2pts,60,60,65,65,9.8,2016-08-01,deteriorating,low,watch
+3023,Fashion Forward Ltd,58,medium,225000,Retail/Fashion,EU,up,7,2250000,355000,42,1.7,1.3,195000,620000,2016-04-20,2024-10-17,BBB,1.8,2.4,53,Sector headwinds -4pts; revenue softening -3pts,62,53,54,61,9.8,2018-04-01,deteriorating,medium,compliant
+3134,Tech Innovators Ltd,38,stable,155000,Software/Technology,UK,down,-3,1550000,315000,29,2.4,1.9,345000,310000,2018-09-15,2024-10-24,BBB+,0.7,0.6,42,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,33,32,35,31,12.6,2020-09-01,improving,low,compliant
+3245,Manufacturing Solutions,52,medium,245000,Manufacturing,UK,up,5,2450000,415000,51,1.9,1.5,295000,590000,2015-11-22,2024-10-18,BBB,1.4,1.9,47,Margin pressure -3pts; working capital tightening -2pts,50,51,51,55,10.5,2017-11-01,stable,low,compliant
+3356,Coastal Retail Partners,62,medium,265000,Retail/Fashion,UK,up,8,2650000,395000,48,1.5,1.2,205000,750000,2016-06-18,2024-10-15,BBB-,2.2,3.0,57,Market exposure increase -4pts; late payments flag -2pts,65,62,61,60,9.2,2018-06-01,deteriorating,medium,watch
+3467,Digital Media Labs,45,stable,165000,Marketing Services,UK,down,-1,1650000,295000,31,2.1,1.7,285000,370000,2017-12-10,2024-10-22,BBB+,0.8,0.7,49,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,37,39,47,38,11.1,2019-12-01,deteriorating,low,compliant
+3578,Green Energy Solutions,35,stable,285000,Energy/Utilities,UK,stable,1,2850000,595000,58,2.7,2.2,485000,520000,2016-08-25,2024-10-20,A,0.7,0.7,35,No significant signal changes in review period,27,37,31,34,12.9,2018-08-01,stable,low,compliant
+3689,Highland Manufacturing,58,medium,275000,Manufacturing,UK,up,6,2750000,455000,56,1.7,1.4,285000,680000,2015-03-17,2024-10-16,BBB,1.8,2.4,53,Margin pressure -3pts; working capital tightening -2pts,62,53,54,61,10.3,2017-03-01,stable,low,compliant
+3790,Metro Fashion Group,65,medium,285000,Retail/Fashion,UK,up,10,2850000,425000,52,1.4,1.1,205000,880000,2014-10-08,2024-10-12,BBB-,2.4,3.2,60,Margin pressure -3pts; working capital tightening -2pts,60,60,65,65,9.2,2016-10-01,deteriorating,medium,watch
+3901,Bright Tech Systems,42,stable,145000,Software/Technology,UK,stable,0,1450000,295000,27,2.2,1.8,315000,330000,2018-05-22,2024-10-23,BBB+,0.7,0.7,42,No significant signal changes in review period,38,43,37,42,12.6,2020-05-01,improving,low,compliant
+4012,Capital Construction Ltd,68,critical,395000,Construction,UK,up,12,3950000,545000,75,1.2,1.0,255000,1750000,2012-09-14,2024-10-10,BB+,3.0,5.4,54,CFO resignation -12pts; cash reserves declining -5pts; covenant watch -3pts,74,74,71,77,8.6,2014-09-01,deteriorating,medium,watch
+4123,Eco Retail Solutions,55,medium,215000,Retail/Fashion,EU,up,5,2150000,345000,40,1.8,1.4,205000,570000,2016-07-28,2024-10-18,BBB,1.6,2.2,50,Margin pressure -3pts; working capital tightening -2pts,50,53,61,56,9.9,2018-07-01,deteriorating,medium,compliant
+4234,Northern Tech Group,48,stable,185000,Software/Technology,UK,down,-2,1850000,355000,35,2.0,1.7,305000,400000,2017-11-15,2024-10-21,BBB,0.8,0.7,52,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,43,49,46,41,11.9,2019-11-01,improving,low,compliant
+4345,Premium Logistics Ltd,38,stable,255000,Transportation,UK,stable,0,2550000,465000,54,2.5,2.0,425000,510000,2015-05-20,2024-10-19,BBB+,0.7,0.7,38,No significant signal changes in review period,33,32,35,31,11.3,2017-05-01,stable,low,compliant
+4456,Urban Food Services,62,medium,245000,Food/Hospitality,UK,up,8,2450000,375000,51,1.5,1.2,195000,730000,2014-12-12,2024-10-14,BBB-,2.2,3.0,57,Market exposure increase -4pts; late payments flag -2pts,65,62,61,60,9.5,2016-12-01,deteriorating,low,watch
+4567,Digital Solutions Lab,52,medium,175000,Software/Technology,UK,up,4,1750000,325000,33,1.9,1.5,275000,420000,2018-02-18,2024-10-22,BBB,1.4,1.9,47,Market exposure increase -4pts; late payments flag -2pts,50,51,51,55,11.5,2020-02-01,improving,low,compliant
+4678,Fashion Retail Express,65,medium,295000,Retail/Fashion,UK,up,9,2950000,445000,55,1.4,1.1,215000,910000,2015-08-25,2024-10-13,BBB-,2.4,3.2,60,Market exposure increase -4pts; late payments flag -2pts,60,60,65,65,9.4,2017-08-01,deteriorating,medium,watch
+4789,Green Manufacturing Co,58,medium,265000,Manufacturing,UK,up,7,2650000,435000,53,1.7,1.3,285000,670000,2016-03-10,2024-10-17,BBB,1.8,2.4,53,Sector headwinds -4pts; revenue softening -3pts,62,53,54,61,10.2,2018-03-01,stable,low,compliant
+4890,Highland Tech Partners,45,stable,155000,Software/Technology,UK,down,-1,1550000,305000,30,2.1,1.7,295000,360000,2018-07-08,2024-10-24,BBB+,0.8,0.7,49,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,37,39,47,38,12.2,2020-07-01,improving,low,compliant
+5001,Metro Construction Group,72,critical,425000,Construction,UK,up,15,4250000,565000,82,1.1,0.9,265000,1900000,2011-06-20,2024-10-08,BB,3.8,8.0,62,CFO resignation -12pts; cash reserves declining -5pts; covenant watch -3pts,74,75,67,78,8.2,2013-06-01,deteriorating,medium,breach
+5112,Coastal Fashion Ltd,62,medium,235000,Retail/Fashion,UK,up,8,2350000,365000,45,1.5,1.2,195000,700000,2016-09-15,2024-10-15,BBB-,2.2,3.0,57,Sector headwinds -4pts; revenue softening -3pts,65,62,61,60,9.6,2018-09-01,deteriorating,medium,watch
+5223,Bright Consulting Group,32,stable,195000,Professional Services,UK,stable,1,1950000,425000,40,2.8,2.3,465000,320000,2017-04-22,2024-10-23,A,0.6,0.6,32,No significant signal changes in review period,27,28,33,31,13.5,2019-04-01,stable,low,compliant
+5334,Northern Energy Ltd,35,stable,295000,Energy/Utilities,UK,stable,0,2950000,615000,62,2.7,2.2,495000,540000,2016-10-18,2024-10-20,A,0.7,0.7,35,No significant signal changes in review period,27,37,31,34,12.9,2018-10-01,stable,low,compliant
+5445,Urban Manufacturing Co,55,medium,255000,Manufacturing,UK,up,5,2550000,425000,52,1.8,1.4,295000,630000,2015-12-08,2024-10-18,BBB,1.6,2.2,50,Margin pressure -3pts; working capital tightening -2pts,50,53,61,56,10.3,2017-12-01,stable,low,compliant
+5556,Digital Marketing Pro,52,medium,165000,Marketing Services,UK,up,4,1650000,285000,30,1.9,1.5,255000,390000,2017-08-25,2024-10-21,BBB,1.4,1.9,47,Market exposure increase -4pts; late payments flag -2pts,50,51,51,55,10.7,2019-08-01,deteriorating,low,compliant
+5667,Fashion Dynamics Ltd,58,medium,245000,Retail/Fashion,EU,up,7,2450000,375000,46,1.7,1.3,205000,650000,2016-05-12,2024-10-16,BBB,1.8,2.4,53,Market exposure increase -4pts; late payments flag -2pts,62,53,54,61,9.5,2018-05-01,deteriorating,medium,compliant
+5778,Green Tech Systems,38,stable,145000,Software/Technology,UK,down,-3,1450000,295000,27,2.4,1.9,325000,300000,2018-11-05,2024-10-25,BBB+,0.7,0.6,42,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,33,32,35,31,12.6,2020-11-01,improving,low,compliant
+5889,Highland Logistics Group,42,stable,265000,Transportation,UK,stable,0,2650000,475000,56,2.2,1.8,415000,520000,2015-07-18,2024-10-19,BBB+,0.7,0.7,42,No significant signal changes in review period,38,43,37,42,11.1,2017-07-01,stable,low,compliant
+5990,Premium Retail Partners,62,medium,285000,Retail/Fashion,UK,up,8,2850000,425000,53,1.5,1.2,205000,840000,2014-11-20,2024-10-14,BBB-,2.2,3.0,57,Margin pressure -3pts; working capital tightening -2pts,65,62,61,60,9.2,2016-11-01,deteriorating,medium,watch
+6101,Metro Tech Solutions,48,stable,175000,Software/Technology,UK,down,-2,1750000,335000,33,2.0,1.7,305000,390000,2018-03-15,2024-10-22,BBB,0.8,0.7,52,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,43,49,46,41,11.9,2020-03-01,improving,low,compliant
+6212,Coastal Construction Ltd,68,critical,385000,Construction,UK,up,13,3850000,535000,74,1.2,1.0,245000,1650000,2012-08-08,2024-10-09,BB+,3.0,5.4,54,CEO departure -10pts; revenue decline -8% -6pts; sector headwinds -4pts,74,74,71,77,8.6,2014-08-01,deteriorating,medium,watch
+6323,Bright Energy Solutions,35,stable,275000,Energy/Utilities,UK,stable,1,2750000,585000,56,2.7,2.2,475000,510000,2016-12-22,2024-10-20,A,0.7,0.7,35,No significant signal changes in review period,27,37,31,34,13.2,2018-12-01,stable,low,compliant
+6434,Northern Retail Group,65,medium,295000,Retail/Fashion,UK,up,9,2950000,445000,55,1.4,1.1,215000,900000,2015-04-15,2024-10-13,BBB-,2.4,3.2,60,Market exposure increase -4pts; late payments flag -2pts,60,60,65,65,9.4,2017-04-01,deteriorating,medium,watch
+6545,Urban Tech Labs,42,stable,155000,Software/Technology,UK,stable,0,1550000,315000,29,2.2,1.8,315000,340000,2018-06-20,2024-10-23,BBB+,0.7,0.7,42,No significant signal changes in review period,38,43,37,42,12.6,2020-06-01,improving,low,compliant
+6656,Digital Food Services,58,medium,255000,Food/Hospitality,UK,up,6,2550000,395000,54,1.7,1.3,205000,680000,2015-10-10,2024-10-17,BBB,1.8,2.4,53,Market exposure increase -4pts; late payments flag -2pts,62,53,54,61,9.6,2017-10-01,deteriorating,low,compliant
+6767,Fashion Express Group,62,medium,275000,Retail/Fashion,EU,up,8,2750000,415000,51,1.5,1.2,205000,770000,2016-08-05,2024-10-15,BBB-,2.2,3.0,57,Sector headwinds -4pts; revenue softening -3pts,65,62,61,60,9.4,2018-08-01,deteriorating,medium,watch
+6878,Green Manufacturing Ltd,55,medium,245000,Manufacturing,UK,up,5,2450000,415000,50,1.8,1.4,285000,610000,2015-11-28,2024-10-18,BBB,1.6,2.2,50,Market exposure increase -4pts; late payments flag -2pts,50,53,61,56,10.5,2017-11-01,stable,low,compliant
+6989,Highland Software Co,38,stable,145000,Software/Technology,UK,down,-3,1450000,295000,26,2.4,1.9,335000,290000,2018-09-18,2024-10-24,BBB+,0.7,0.6,42,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,33,32,35,31,12.6,2020-09-01,improving,low,compliant
+7090,Metro Logistics Partners,45,stable,275000,Transportation,UK,stable,0,2750000,495000,58,2.1,1.8,435000,540000,2015-06-12,2024-10-19,BBB+,0.8,0.8,45,No significant signal changes in review period,37,39,47,38,11.2,2017-06-01,stable,low,compliant
+7201,Coastal Marketing Hub,52,medium,185000,Marketing Services,UK,up,4,1850000,325000,35,1.9,1.5,275000,410000,2017-12-08,2024-10-21,BBB,1.4,1.9,47,Market exposure increase -4pts; late payments flag -2pts,50,51,51,55,10.9,2019-12-01,deteriorating,low,compliant
+7312,Bright Retail Solutions,62,medium,265000,Retail/Fashion,UK,up,8,2650000,395000,49,1.5,1.2,205000,760000,2016-04-20,2024-10-15,BBB-,2.2,3.0,57,Market exposure increase -4pts; late payments flag -2pts,65,62,61,60,9.2,2018-04-01,deteriorating,medium,watch
+7423,Northern Tech Systems,48,stable,165000,Software/Technology,UK,down,-2,1650000,325000,31,2.0,1.7,295000,380000,2018-02-25,2024-10-22,BBB,0.8,0.7,52,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,43,49,46,41,12.2,2020-02-01,improving,low,compliant
+7534,Urban Energy Group,35,stable,285000,Energy/Utilities,UK,stable,1,2850000,595000,59,2.7,2.2,485000,530000,2016-10-15,2024-10-20,A,0.7,0.7,35,No significant signal changes in review period,27,37,31,34,12.9,2018-10-01,stable,low,compliant
+7645,Digital Construction Co,72,critical,415000,Construction,UK,up,14,4150000,555000,78,1.1,0.9,255000,1850000,2012-05-22,2024-10-08,BB,3.8,8.0,62,CEO departure -10pts; revenue decline -8% -6pts; sector headwinds -4pts,74,75,67,78,8.3,2014-05-01,deteriorating,medium,breach
+7756,Fashion Retail Group,65,medium,285000,Retail/Fashion,UK,up,9,2850000,435000,53,1.4,1.1,215000,880000,2015-09-18,2024-10-13,BBB-,2.4,3.2,60,Sector headwinds -4pts; revenue softening -3pts,60,60,65,65,9.5,2017-09-01,deteriorating,medium,watch
+7867,Green Tech Partners,42,stable,155000,Software/Technology,UK,stable,0,1550000,305000,29,2.2,1.8,305000,350000,2018-07-12,2024-10-23,BBB+,0.7,0.7,42,No significant signal changes in review period,38,43,37,42,12.2,2020-07-01,improving,low,compliant
+7978,Highland Manufacturing Ltd,58,medium,275000,Manufacturing,UK,up,6,2750000,455000,55,1.7,1.4,285000,690000,2015-12-05,2024-10-16,BBB,1.8,2.4,53,Market exposure increase -4pts; late payments flag -2pts,62,53,54,61,10.3,2017-12-01,stable,low,compliant
+8089,Metro Fashion Partners,62,medium,245000,Retail/Fashion,UK,up,8,2450000,375000,47,1.5,1.2,195000,720000,2016-06-20,2024-10-17,BBB-,2.2,3.0,57,Margin pressure -3pts; working capital tightening -2pts,65,62,61,60,9.5,2018-06-01,deteriorating,medium,watch
+8190,Coastal Tech Solutions,45,stable,165000,Software/Technology,UK,down,-1,1650000,315000,31,2.1,1.7,295000,370000,2018-04-15,2024-10-22,BBB+,0.8,0.7,49,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,37,39,47,38,11.8,2020-04-01,improving,low,compliant
+8301,Bright Logistics Ltd,38,stable,265000,Transportation,UK,stable,0,2650000,475000,55,2.5,2.0,425000,520000,2015-08-08,2024-10-19,BBB+,0.7,0.7,38,No significant signal changes in review period,33,32,35,31,11.1,2017-08-01,stable,low,compliant
+8412,Northern Food Services,62,medium,255000,Food/Hospitality,UK,up,8,2550000,385000,53,1.5,1.2,195000,740000,2014-10-25,2024-10-14,BBB-,2.2,3.0,57,Margin pressure -3pts; working capital tightening -2pts,65,62,61,60,9.4,2016-10-01,deteriorating,low,watch
+8523,Urban Software Labs,48,stable,175000,Software/Technology,UK,down,-2,1750000,335000,33,2.0,1.7,305000,390000,2018-03-20,2024-10-23,BBB,0.8,0.7,52,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,43,49,46,41,11.9,2020-03-01,improving,low,compliant
+8634,Digital Retail Express,65,medium,295000,Retail/Fashion,EU,up,9,2950000,445000,54,1.4,1.1,215000,910000,2015-07-15,2024-10-13,BBB-,2.4,3.2,60,Margin pressure -3pts; working capital tightening -2pts,60,60,65,65,9.4,2017-07-01,deteriorating,medium,watch
+8745,Fashion Tech Group,55,medium,235000,Retail/Fashion,UK,up,6,2350000,365000,45,1.8,1.4,205000,650000,2016-11-08,2024-10-18,BBB,1.6,2.2,50,Margin pressure -3pts; working capital tightening -2pts,50,53,61,56,9.6,2018-11-01,deteriorating,medium,compliant
+8856,Green Construction Co,68,critical,395000,Construction,UK,up,12,3950000,545000,76,1.2,1.0,255000,1700000,2012-09-20,2024-10-10,BB+,3.0,5.4,54,CEO departure -10pts; revenue decline -8% -6pts; sector headwinds -4pts,74,74,71,77,8.6,2014-09-01,deteriorating,medium,watch
+8967,Highland Retail Ltd,58,medium,245000,Retail/Fashion,UK,up,7,2450000,375000,46,1.7,1.3,205000,660000,2016-05-25,2024-10-16,BBB,1.8,2.4,53,Margin pressure -3pts; working capital tightening -2pts,62,53,54,61,9.5,2018-05-01,deteriorating,medium,compliant
+9078,Metro Tech Group,42,stable,155000,Software/Technology,UK,stable,0,1550000,305000,29,2.2,1.8,315000,340000,2018-08-10,2024-10-24,BBB+,0.7,0.7,42,No significant signal changes in review period,38,43,37,42,12.2,2020-08-01,improving,low,compliant
+9189,Coastal Energy Ltd,35,stable,285000,Energy/Utilities,UK,stable,1,2850000,595000,58,2.7,2.2,485000,520000,2016-12-15,2024-10-20,A,0.7,0.7,35,No significant signal changes in review period,27,37,31,34,12.9,2018-12-01,stable,low,compliant
+9290,Bright Manufacturing Co,55,medium,265000,Manufacturing,UK,up,5,2650000,435000,53,1.8,1.4,285000,660000,2015-10-22,2024-10-18,BBB,1.6,2.2,50,Sector headwinds -4pts; revenue softening -3pts,50,53,61,56,10.2,2017-10-01,stable,low,compliant
+9401,Northern Software Labs,38,stable,145000,Software/Technology,UK,down,-3,1450000,295000,27,2.4,1.9,325000,300000,2018-11-12,2024-10-25,BBB+,0.7,0.6,42,Strong trading -3pts; improved cash position -2pts; sector recovery -1pt,33,32,35,31,12.6,2020-11-01,improving,low,compliant
+9512,Urban Logistics Group,45,stable,275000,Transportation,UK,stable,0,2750000,495000,57,2.1,1.8,435000,540000,2015-06-18,2024-10-19,BBB+,0.8,0.8,45,No significant signal changes in review period,37,39,47,38,11.2,2017-06-01,stable,low,compliant
+9623,Digital Fashion Hub,62,medium,265000,Retail/Fashion,UK,up,8,2650000,395000,49,1.5,1.2,205000,760000,2016-04-12,2024-10-15,BBB-,2.2,3.0,57,Margin pressure -3pts; working capital tightening -2pts,65,62,61,60,9.2,2018-04-01,deteriorating,medium,watch
+9734,Fashion Solutions Ltd,65,medium,285000,Retail/Fashion,EU,up,9,2850000,435000,52,1.4,1.1,215000,880000,2015-09-08,2024-10-13,BBB-,2.4,3.2,60,Margin pressure -3pts; working capital tightening -2pts,60,60,65,65,9.5,2017-09-01,deteriorating,medium,watch
+9845,Green Tech Labs,42,stable,155000,Software/Technology,UK,stable,0,1550000,305000,29,2.2,1.8,305000,350000,2018-07-20,2024-10-23,BBB+,0.7,0.7,42,No significant signal changes in review period,38,43,37,42,12.2,2020-07-01,improving,low,compliant
+9956,Highland Construction Ltd,72,critical,425000,Construction,UK,up,15,4250000,565000,81,1.1,0.9,265000,1900000,2011-05-15,2024-10-08,BB,3.8,8.0,62,CFO resignation -12pts; cash reserves declining -5pts; covenant watch -3pts,74,75,67,78,8.2,2013-05-01,deteriorating,medium,breach

@@ -123,6 +123,21 @@ const SMEDetailPanel = () => {
   const trendDirection = smeDetail?.trend?.direction ?? selectedSME.trend
   const trendValue = smeDetail?.trend?.value ?? selectedSME.trendValue
 
+  // ── Rating overlay — pulled from enriched SME (via mapSMEResponse) ───────
+  const indicativeGrade = selectedSME.indicativeGrade ?? smeDetail?.indicative_grade ?? '—'
+  const bankRating = selectedSME.bankRating ?? smeDetail?.bank_rating ?? '—'
+  const ratingGapNotches = selectedSME.ratingGapNotches ?? smeDetail?.rating_gap_notches ?? 0
+  const bankRatingStale = ratingGapNotches >= 2
+
+  // ── PD overlay ────────────────────────────────────────────────────────────
+  const pdOriginal = selectedSME.pdOriginal ?? smeDetail?.pd_original ?? null
+  const pdAdjusted = selectedSME.pdAdjusted ?? smeDetail?.pd_adjusted ?? null
+  const pdDelta = (pdOriginal !== null && pdAdjusted !== null)
+    ? Math.round((pdAdjusted - pdOriginal) * 10) / 10
+    : null
+  const activeSignalCount = (selectedSME.activeSignals ?? []).length ||
+    (smeDetail?.active_signals ?? []).length
+
   const handleCreateTask = () => {
     dispatch(addTask({
       id: `task_${Date.now()}`,
@@ -201,6 +216,99 @@ const SMEDetailPanel = () => {
             </div>
           </div>
         </div>
+
+        {/* ── Three-field rating row ──────────────────────────────────────────
+            Live Score (our real-time) | Indicative Grade | Bank Rating (static)
+            The gap between Indicative and Bank Rating is the core value prop —
+            our signals have moved ahead of the bank's quarterly update cycle. */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
+          gap: '1px',
+          marginTop: '12px',
+          background: 'var(--uui-neutral-60)',   // gap colour
+          borderRadius: 'var(--uui-border-radius)',
+          overflow: 'hidden',
+        }}>
+          {/* Live Score */}
+          <div style={{
+            padding: '10px 12px',
+            background: 'var(--uui-neutral-80)',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>
+              Live Score
+            </div>
+            <div style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-primary)' }}>
+              {selectedSME.riskScore}
+            </div>
+            <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', marginTop: '2px' }}>
+              real-time
+            </div>
+          </div>
+
+          {/* Indicative Grade — our signal-derived grade */}
+          <div style={{
+            padding: '10px 12px',
+            background: 'var(--uui-neutral-80)',
+            textAlign: 'center',
+            borderLeft: bankRatingStale ? '2px solid var(--uui-warning-60)' : 'none',
+          }}>
+            <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>
+              Indicative Grade
+            </div>
+            <div style={{
+              fontSize: '22px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)',
+              color: bankRatingStale ? 'var(--uui-warning-60)' : 'var(--uui-text-primary)',
+            }}>
+              {indicativeGrade}
+            </div>
+            <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', marginTop: '2px' }}>
+              our signals
+            </div>
+          </div>
+
+          {/* Bank Rating — official quarterly rating */}
+          <div style={{
+            padding: '10px 12px',
+            background: 'var(--uui-neutral-80)',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>
+              Bank Rating
+            </div>
+            <div style={{ fontSize: '22px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-secondary)' }}>
+              {bankRating}
+            </div>
+            <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', marginTop: '2px' }}>
+              last quarterly
+            </div>
+          </div>
+        </div>
+
+        {/* ── Stale rating warning banner ─────────────────────────────────────
+            Only shown when ratingGapNotches >= 2.
+            This is the "wow moment" Sandro described — our live grade has
+            deteriorated significantly ahead of the bank's official update. */}
+        {bankRatingStale && (
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: '8px',
+            marginTop: '8px',
+            padding: '9px 12px',
+            background: 'rgba(var(--uui-warning-rgb, 245, 158, 11), 0.12)',
+            border: '1px solid var(--uui-warning-60)',
+            borderRadius: 'var(--uui-border-radius)',
+          }}>
+            <span style={{ fontSize: '14px', flexShrink: 0, marginTop: '1px' }}>⚠️</span>
+            <div>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--uui-warning-60)' }}>
+                {ratingGapNotches}-notch deterioration detected
+              </span>
+              <span style={{ fontSize: '12px', color: 'var(--uui-text-secondary)', marginLeft: '6px' }}>
+                — bank rating ({bankRating}) may not reflect current risk signals. Our indicative grade: {indicativeGrade}.
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Loading */}
@@ -214,6 +322,83 @@ const SMEDetailPanel = () => {
       {/* Content */}
       {!isLoading && (
         <div style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+
+          {/* ── PD Row — Original PD vs Signal-Adjusted PD ──────────────────────
+              Shows the bank's static PD alongside our overlay-adjusted PD.
+              The delta with signal count is the quantified version of the
+              stale rating gap narrative. Only rendered when PD data is present. */}
+          {pdOriginal !== null && pdAdjusted !== null && (
+            <section>
+              {sectionTitle('Probability of Default')}
+              <div style={{
+                padding: '12px 14px',
+                background: 'var(--uui-neutral-70)',
+                borderRadius: 'var(--uui-border-radius)',
+                borderLeft: pdDelta !== null && pdDelta > 2
+                  ? '3px solid var(--uui-critical-60)'
+                  : '3px solid var(--uui-neutral-50)',
+              }}>
+                {/* PD before → after row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  {/* Bank's static PD */}
+                  <div style={{ textAlign: 'center', minWidth: '64px' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                      Bank PD
+                    </div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-secondary)' }}>
+                      {pdOriginal}%
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <div style={{ color: 'var(--uui-text-tertiary)', fontSize: '18px', lineHeight: 1 }}>→</div>
+
+                  {/* Our adjusted PD */}
+                  <div style={{ textAlign: 'center', minWidth: '64px' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                      Signal PD
+                    </div>
+                    <div style={{
+                      fontSize: '20px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)',
+                      color: pdDelta !== null && pdDelta > 0 ? 'var(--uui-critical-60)' : 'var(--uui-success-60)',
+                    }}>
+                      {pdAdjusted}%
+                    </div>
+                  </div>
+
+                  {/* Delta badge */}
+                  {pdDelta !== null && (
+                    <div style={{
+                      marginLeft: 'auto',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      background: pdDelta > 0
+                        ? 'rgba(var(--uui-critical-rgb, 239, 68, 68), 0.15)'
+                        : 'rgba(var(--uui-success-rgb, 34, 197, 94), 0.15)',
+                      fontSize: '13px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)',
+                      color: pdDelta > 0 ? 'var(--uui-critical-60)' : 'var(--uui-success-60)',
+                    }}>
+                      {pdDelta > 0 ? '+' : ''}{pdDelta}pp
+                    </div>
+                  )}
+                </div>
+
+                {/* Narrative line */}
+                <div style={{
+                  fontSize: '12px',
+                  color: 'var(--uui-text-tertiary)',
+                  lineHeight: 1.5,
+                  paddingTop: '8px',
+                  borderTop: '1px solid var(--uui-neutral-60)',
+                }}>
+                  {pdDelta !== null && pdDelta > 0
+                    ? `PD moved ${pdOriginal}% → ${pdAdjusted}% due to ${activeSignalCount > 0 ? activeSignalCount : ''} live signal${activeSignalCount !== 1 ? 's' : ''}. Bank's quarterly model not yet updated.`
+                    : `PD unchanged from bank model — no material signal uplift detected.`
+                  }
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Risk Drivers */}
           <section>

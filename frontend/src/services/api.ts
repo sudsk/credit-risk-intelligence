@@ -60,6 +60,66 @@ function formatExposure(value: number): string {
   return `€${value}`;
 }
 
+// ─── SME response mapper ──────────────────────────────────────────────────────
+// Single source of truth for snake_case → camelCase mapping.
+// Used by both getSMEs (list) and getSMEById (detail) so new fields
+// are automatically available in both contexts.
+function mapSMEResponse(sme: any): any {
+  return {
+    // Core fields (always present)
+    id: sme.id,
+    name: sme.name,
+    riskScore: sme.risk_score,
+    riskCategory: sme.risk_category,
+    exposure: formatExposure(sme.exposure),
+    sector: sme.sector,
+    geography: sme.geography,
+    trend: sme.trend,
+    trendValue: sme.trend_value,
+
+    // ── Rating overlay ──────────────────────────────────────────────────
+    indicativeGrade: sme.indicative_grade ?? '',
+    bankRating: sme.bank_rating ?? '',
+    ratingGapNotches: sme.rating_gap_notches ?? 0,
+
+    // ── PD overlay ──────────────────────────────────────────────────────
+    pdOriginal: sme.pd_original ?? 0,
+    pdAdjusted: sme.pd_adjusted ?? 0,
+
+    // ── Score delta ─────────────────────────────────────────────────────
+    scorePrevious: sme.score_previous ?? sme.risk_score ?? 0,
+    scoreNarrative: sme.score_change_reason ?? sme.score_narrative ?? '',
+    activeSignals: (sme.active_signals ?? []).map((s: any) => ({
+      label: s.label ?? '',
+      impact: s.impact ?? 0,
+    })),
+
+    // ── Detail panel ────────────────────────────────────────────────────
+    bankRatingStale: sme.bank_rating_stale ?? (sme.rating_gap_notches ?? 0) >= 2,
+    sectorHealth: sme.sector_health ?? 'stable',
+    geographyRisk: sme.geography_risk ?? 'low',
+    complianceStatus: sme.compliance_status ?? 'compliant',
+    netProfitMargin: sme.net_profit_margin ?? 0,
+    loanOriginationDate: sme.loan_origination_date ?? '',
+
+    // ── Risk component scores ────────────────────────────────────────────
+    scoreFinancial: sme.score_financial ?? 0,
+    scoreOperational: sme.score_operational ?? 0,
+    scoreMarket: sme.score_market ?? 0,
+    scoreAltdata: sme.score_altdata ?? 0,
+
+    // ── Pass through any extra fields the backend may add ───────────────
+    revenue: sme.revenue,
+    ebitda: sme.ebitda,
+    employeeCount: sme.employee_count,
+    debtServiceCoverage: sme.debt_service_coverage,
+    currentRatio: sme.current_ratio,
+    cashReserves: sme.cash_reserves,
+    totalDebt: sme.total_debt,
+    lastReviewDate: sme.last_review_date,
+  };
+}
+
 // ─── Portfolio API ────────────────────────────────────────────────────────────
 export const portfolioAPI = {
   // GET /api/v1/portfolio/summary
@@ -80,23 +140,13 @@ export const portfolioAPI = {
   // GET /api/v1/portfolio/smes?limit=100
   getSMEs: async (): Promise<SME[]> => {
     const { data } = await api.get('/api/v1/portfolio/smes?limit=100');
-    return data.smes.map((sme: any) => ({
-      id: sme.id,
-      name: sme.name,
-      riskScore: sme.risk_score,
-      riskCategory: sme.risk_category,
-      exposure: formatExposure(sme.exposure),
-      sector: sme.sector,
-      geography: sme.geography,
-      trend: sme.trend,
-      trendValue: sme.trend_value,
-    }));
+    return data.smes.map(mapSMEResponse);
   },
 
   // GET /api/v1/portfolio/smes/:id
   getSMEById: async (id: string): Promise<any> => {
     const { data } = await api.get(`/api/v1/portfolio/smes/${id}`);
-    return data;
+    return mapSMEResponse(data);
   },
 
   /**
@@ -187,6 +237,11 @@ async function pollScenarioJob(jobId: string): Promise<any> {
 }
 
 function mapJobResultToScenario(description: string, result: any): Scenario {
+  // Support both camelCase (new scenario_service) and snake_case (legacy)
+  const pi = result?.portfolioImpact ?? result?.portfolio_impact ?? {};
+  const el = result?.estimatedLoss ?? result?.estimated_loss ?? {};
+  const recs = result?.recommendations ?? null;
+
   return {
     id: `scenario_${Date.now()}`,
     name: description,
@@ -195,30 +250,78 @@ function mapJobResultToScenario(description: string, result: any): Scenario {
     createdAt: new Date().toISOString(),
     completedAt: new Date().toISOString(),
     duration: result?.duration ?? result?.processing_time ?? 15,
+
     results: result ? {
       portfolioImpact: {
-        criticalBefore: result.portfolio_impact?.critical_before ?? 0,
-        criticalAfter: result.portfolio_impact?.critical_after ?? 0,
-        defaultProbBefore: result.portfolio_impact?.default_prob_before ?? 0,
-        defaultProbAfter: result.portfolio_impact?.default_prob_after ?? 0,
-        avgScoreBefore: result.portfolio_impact?.avg_score_before ?? 0,
-        avgScoreAfter: result.portfolio_impact?.avg_score_after ?? 0,
+        criticalBefore: pi.criticalBefore ?? pi.critical_before ?? 0,
+        criticalAfter: pi.criticalAfter ?? pi.critical_after ?? 0,
+        defaultProbBefore: pi.defaultProbBefore ?? pi.default_prob_before ?? 0,
+        defaultProbAfter: pi.defaultProbAfter ?? pi.default_prob_after ?? 0,
+        avgScoreBefore: pi.avgScoreBefore ?? pi.avg_score_before ?? 0,
+        avgScoreAfter: pi.avgScoreAfter ?? pi.avg_score_after ?? 0,
+        totalExposure: pi.totalExposure ?? pi.total_exposure,
+        newCriticalExposure: pi.newCriticalExposure ?? pi.new_critical_exposure,
       },
-      topImpacted: (result.top_impacted ?? []).map((s: any) => ({
-        smeId: s.sme_id ?? s.smeId,
-        smeName: s.sme_name ?? s.smeName,
-        scoreBefore: s.score_before ?? s.scoreBefore ?? 0,
-        scoreAfter: s.score_after ?? s.scoreAfter ?? 0,
-        change: s.change ?? 0,
-        reason: s.reason ?? '',
-      })),
-      sectorImpact: (result.sector_impact ?? []).map((s: any) => ({
+
+      // ── 3-year loss projection ─────────────────────────────────────
+      estimatedLoss: {
+        current: el.current ?? el.current_year ?? 0,
+        year1: el.year1 ?? el.year_1 ?? 0,
+        year2: el.year2 ?? el.year_2 ?? 0,
+        year3: el.year3 ?? el.year_3 ?? 0,
+        lgdAssumption: el.lgdAssumption ?? el.lgd_assumption ?? 0.45,
+        note: el.note,
+      },
+
+      // ── Sector impact — richer shape ───────────────────────────────
+      sectorImpact: (result.sectorImpact ?? result.sector_impact ?? []).map((s: any) => ({
         sector: s.sector,
         smes: s.smes ?? s.count ?? 0,
-        avgChange: s.avg_change ?? s.avgChange ?? 0,
+        avgChange: s.avgChange ?? s.avg_change ?? 0,
+        newCritical: s.newCritical ?? s.new_critical ?? 0,
+        totalExposure: s.totalExposure ?? s.total_exposure ?? 0,
+        estimatedLoss: s.estimatedLoss ?? s.estimated_loss ?? 0,
+      })),
+
+      // ── Top impacted SMEs — extended shape ─────────────────────────
+      topImpacted: (result.topImpacted ?? result.top_impacted ?? []).map((s: any) => ({
+        smeId: s.smeId ?? s.sme_id,
+        smeName: s.smeName ?? s.sme_name,
+        scoreBefore: s.scoreBefore ?? s.score_before ?? 0,
+        scoreAfter: s.scoreAfter ?? s.score_after ?? 0,
+        change: s.change ?? 0,
+        reason: s.reason ?? '',
+        sector: s.sector,
+        geography: s.geography,
+        exposure: s.exposure,
       })),
     } : undefined,
-    recommendations: result?.recommendations ?? null,
+
+    // ── Recommendations — map warranted tier + scope ───────────────────
+    recommendations: recs ? {
+      warrantedTier: recs.warranted_tier ?? recs.warrantedTier ?? 'moderate',
+      recommendationScope: recs.recommendation_scope ?? recs.recommendationScope ?? 'portfolio',
+      newCriticalCount: recs.new_critical_count ?? recs.newCriticalCount,
+      estimatedLossCurrent: recs.estimated_loss_current ?? recs.estimatedLossCurrent,
+      ultraConservative: {
+        reserveIncrease: recs.ultraConservative?.reserveIncrease ?? recs.ultra_conservative?.reserve_increase ?? '',
+        sectorAdjustments: recs.ultraConservative?.sectorAdjustments ?? recs.ultra_conservative?.sector_adjustments ?? [],
+        timeline: recs.ultraConservative?.timeline ?? recs.ultra_conservative?.timeline ?? '30 days',
+        riskMitigation: recs.ultraConservative?.riskMitigation ?? recs.ultra_conservative?.risk_mitigation ?? 'Maximum',
+      },
+      conservative: {
+        reserveIncrease: recs.conservative?.reserveIncrease ?? '',
+        sectorAdjustments: recs.conservative?.sectorAdjustments ?? [],
+        timeline: recs.conservative?.timeline ?? '60 days',
+        riskMitigation: recs.conservative?.riskMitigation ?? 'High',
+      },
+      moderate: {
+        reserveIncrease: recs.moderate?.reserveIncrease ?? '',
+        sectorAdjustments: recs.moderate?.sectorAdjustments ?? [],
+        timeline: recs.moderate?.timeline ?? '90 days',
+        riskMitigation: recs.moderate?.riskMitigation ?? 'Standard',
+      },
+    } : null,
   };
 }
 

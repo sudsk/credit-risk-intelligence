@@ -7,9 +7,51 @@ import math
 import logging
 import pandas as pd
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 
 logger = logging.getLogger(__name__)
+
+# ── Rating / PD helpers ────────────────────────────────────────────────────
+
+# Ordered from lowest risk to highest — used for notch-gap calculation
+RATING_NOTCHES: List[str] = [
+    "AAA", "AA+", "AA", "AA-",
+    "A+",  "A",   "A-",
+    "BBB+","BBB", "BBB-",
+    "BB+", "BB",  "BB-",
+    "B+",  "B",   "B-",
+    "CCC", "CC",  "C",   "D",
+]
+
+# Sentiment signal impact weights (score points added to risk score)
+# Positive = increases risk score (bad).  Used in score delta narrative.
+SIGNAL_WEIGHTS: Dict[str, int] = {
+    # Executive / people signals
+    "ceo_departure":         12,
+    "cfo_departure":         12,
+    "cto_departure":         12,
+    "c_level_departure":     10,
+    "director_change":        6,
+    # Financial signals
+    "payment_delays":         8,
+    "covenant_breach":        9,
+    "cash_reserves_decline":  5,
+    "revenue_decline":        6,
+    "ebitda_compression":     4,
+    # Market / external signals
+    "web_traffic_drop_40":    8,   # >40% drop
+    "web_traffic_drop_25":    5,   # 25-40% drop
+    "sector_headwinds":       4,
+    "regulatory_review":      7,
+    # Positive signals (reduce risk score)
+    "strong_trading":        -3,
+    "cash_improvement":      -2,
+    "sector_recovery":       -1,
+    # Misc
+    "bad_press":              3,
+    "esg_issue":              6,
+    "insolvency_flag":       15,
+}
 
 # Data paths
 DATA_DIR = Path(__file__).parent.parent.parent / "mcp-servers" / "data"
@@ -104,6 +146,20 @@ class RiskEngine:
         risk_category = self._get_risk_category(risk_score)
         pd_12m        = self._calc_default_probability(risk_score, sme)
 
+        # ── Rating & PD overlay fields (from enriched CSV) ─────────────────
+        indicative_grade = self.score_to_indicative_grade(risk_score)
+        bank_rating      = str(sme.get('bank_rating', 'BBB'))
+        gap_notches      = self.rating_gap_notches(indicative_grade, bank_rating)
+        pd_original      = float(sme.get('pd_original', round(pd_12m * 100, 1)))
+        pd_adjusted      = float(sme.get('pd_adjusted', round(pd_12m * 100, 1)))
+        score_previous   = int(sme.get('score_previous', risk_score))
+
+        # ── Score delta narrative ───────────────────────────────────────────
+        active_signals   = self._get_active_signals_for_sme(sme_id, sme)
+        score_narrative  = self._build_score_delta_narrative(
+            sme_id, risk_score, score_previous, active_signals
+        )
+
         return {
             "sme_id":                  sme_id,
             "sme_name":                sme['name'],
@@ -116,9 +172,31 @@ class RiskEngine:
                 "market":           round(market_score, 1),
                 "alternative_data": round(alt_data_score, 1),
             },
-            "exposure":   float(sme['exposure']),
-            "sector":     sme['sector'],
-            "geography":  sme['geography'],
+            # Rating overlay — live score vs bank's static rating
+            "indicative_grade":   indicative_grade,
+            "bank_rating":        bank_rating,
+            "rating_gap_notches": gap_notches,
+            # PD overlay — bank's static PD vs our signal-adjusted PD
+            "pd_original":        pd_original,   # bank's system PD (%)
+            "pd_adjusted":        pd_adjusted,   # our overlay PD (%)
+            # Score delta narrative
+            "score_previous":     score_previous,
+            "score_narrative":    score_narrative,
+            "active_signals":     [
+                {"label": label, "impact": pts}
+                for label, pts in active_signals[:5]
+            ],
+            # Standard fields
+            "exposure":           float(sme['exposure']),
+            "sector":             sme['sector'],
+            "geography":          sme['geography'],
+            # Detail panel fields
+            "bank_rating_stale":  gap_notches >= 2,  # flag for UI warning banner
+            "sector_health":      str(sme.get('sector_health', 'stable')),
+            "geography_risk":     str(sme.get('geography_risk', 'low')),
+            "compliance_status":  str(sme.get('compliance_status', 'compliant')),
+            "net_profit_margin":  float(sme.get('net_profit_margin', 0)),
+            "loan_origination_date": str(sme.get('loan_origination_date', '')),
         }
 
     # ------------------------------------------------------------------
@@ -314,6 +392,150 @@ class RiskEngine:
             news_score            * 0.20 +
             companies_house_score * 0.15
         )
+
+    # ------------------------------------------------------------------
+    # Rating & PD helpers
+    # ------------------------------------------------------------------
+
+    def score_to_indicative_grade(self, score: int) -> str:
+        """
+        Map 0-100 risk score to indicative credit notation.
+        Higher score = higher risk = lower grade.
+        This is our live overlay grade — NOT the bank's official rating.
+        """
+        if score <= 20:  return "AAA"
+        elif score <= 28: return "AA"
+        elif score <= 35: return "A"
+        elif score <= 42: return "BBB+"
+        elif score <= 50: return "BBB"
+        elif score <= 57: return "BB+"
+        elif score <= 63: return "BB"
+        elif score <= 70: return "B"
+        elif score <= 78: return "CCC"
+        elif score <= 88: return "CC"
+        else:             return "C"
+
+    def rating_gap_notches(self, indicative_grade: str, bank_rating: str) -> int:
+        """
+        Calculate how many notches our indicative grade is below the bank's
+        official rating.  Positive = we see MORE risk than the bank's model.
+        e.g. bank says BB+, we say B → gap = 3 notches (flag as stale)
+        """
+        try:
+            our_idx  = RATING_NOTCHES.index(indicative_grade)
+            bank_idx = RATING_NOTCHES.index(bank_rating)
+            return our_idx - bank_idx   # positive = we rate worse than bank
+        except ValueError:
+            logger.warning(
+                f"Unknown rating in gap calc: indicative={indicative_grade} bank={bank_rating}"
+            )
+            return 0
+
+    def _build_score_delta_narrative(
+        self,
+        sme_id: str,
+        score_current: int,
+        score_previous: int,
+        active_signals: List[Tuple[str, int]],
+    ) -> str:
+        """
+        Build a standardised score delta narrative for the UI.
+
+        Format: "Score moved {prev}→{curr} because: (1) Signal A +Xpts, (2) ..."
+        If score hasn't changed materially, returns a stable narrative.
+
+        active_signals: list of (signal_label, point_impact) sorted by abs impact desc
+        """
+        delta = score_current - score_previous
+        if abs(delta) < 2 or not active_signals:
+            return f"Score stable at {score_current} — no significant signal changes in review period"
+
+        direction = "↑" if delta > 0 else "↓"
+        parts = []
+        for i, (label, pts) in enumerate(active_signals[:3], start=1):
+            sign = "+" if pts > 0 else ""
+            parts.append(f"({i}) {label} {sign}{pts}pts")
+
+        return (
+            f"Score moved {score_previous}→{score_current} {direction}{abs(delta)}pts because: "
+            + ", ".join(parts)
+        )
+
+    def _get_active_signals_for_sme(
+        self, sme_id: str, sme: pd.Series
+    ) -> List[Tuple[str, int]]:
+        """
+        Derive which signals are active for this SME based on alt data CSVs.
+        Returns list of (human-readable label, score impact) sorted by abs impact desc.
+        Used to build the score delta narrative.
+        """
+        sme_id_str = str(sme_id)
+        signals: List[Tuple[str, int]] = []
+
+        try:
+            departures = self._departures_df[
+                self._departures_df['sme_id'].astype(str) == sme_id_str
+            ]
+            for _, dep in departures.iterrows():
+                role = str(dep.get('role', '')).upper()
+                name = str(dep.get('name', 'Executive'))
+                if 'CEO' in role:
+                    signals.append((f"CEO departure ({name})", SIGNAL_WEIGHTS["ceo_departure"]))
+                elif 'CFO' in role:
+                    signals.append((f"CFO departure ({name})", SIGNAL_WEIGHTS["cfo_departure"]))
+                elif 'CTO' in role:
+                    signals.append((f"CTO departure ({name})", SIGNAL_WEIGHTS["cto_departure"]))
+                elif dep.get('seniority') == 'C-Level':
+                    signals.append((f"C-level departure ({name})", SIGNAL_WEIGHTS["c_level_departure"]))
+                else:
+                    signals.append((f"Director change ({name})", SIGNAL_WEIGHTS["director_change"]))
+        except Exception as e:
+            logger.warning(f"Signal derivation (departures) failed for {sme_id}: {e}")
+
+        try:
+            traffic_data = self._traffic_df[
+                self._traffic_df['sme_id'].astype(str) == sme_id_str
+            ]
+            if not traffic_data.empty:
+                change = float(traffic_data.iloc[0]['users_change_qoq'])
+                if change < -40:
+                    signals.append((f"Web traffic {change:.0f}% QoQ", SIGNAL_WEIGHTS["web_traffic_drop_40"]))
+                elif change < -25:
+                    signals.append((f"Web traffic {change:.0f}% QoQ", SIGNAL_WEIGHTS["web_traffic_drop_25"]))
+                elif change > 10:
+                    signals.append((f"Web traffic +{change:.0f}% QoQ", SIGNAL_WEIGHTS["strong_trading"]))
+        except Exception as e:
+            logger.warning(f"Signal derivation (traffic) failed for {sme_id}: {e}")
+
+        try:
+            news_data = self._news_df[
+                self._news_df['sme_id'].astype(str) == sme_id_str
+            ]
+            if not news_data.empty:
+                critical = news_data[news_data['severity'] == 'critical']
+                for _, article in critical.iterrows():
+                    headline = str(article.get('headline', 'Critical event'))[:50]
+                    signals.append((headline, SIGNAL_WEIGHTS["bad_press"]))
+        except Exception as e:
+            logger.warning(f"Signal derivation (news) failed for {sme_id}: {e}")
+
+        try:
+            company_data = self._companies_df[
+                self._companies_df['sme_id'].astype(str) == sme_id_str
+            ]
+            if not company_data.empty:
+                row = company_data.iloc[0]
+                if bool(row.get('insolvency_flag', False)):
+                    signals.append(("Insolvency flag raised", SIGNAL_WEIGHTS["insolvency_flag"]))
+                ccj = int(row.get('ccj_count', 0))
+                if ccj > 0:
+                    signals.append((f"{ccj} CCJ(s) registered", SIGNAL_WEIGHTS["payment_delays"]))
+        except Exception as e:
+            logger.warning(f"Signal derivation (companies house) failed for {sme_id}: {e}")
+
+        # Sort by absolute impact descending — biggest movers first
+        signals.sort(key=lambda x: abs(x[1]), reverse=True)
+        return signals
 
     # ------------------------------------------------------------------
     # Scoring helpers
