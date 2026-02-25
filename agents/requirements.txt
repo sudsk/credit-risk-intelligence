@@ -13,7 +13,7 @@ pydantic==2.12.0
 
 # Configuration
 python-dotenv==1.1.0
-pyyaml==6.0.1
+pyyaml==6.0.3
 
 # FastAPI (for agent server)
 fastapi==0.129.0
