@@ -113,7 +113,8 @@ cp .env.example .env   # then edit .env — see Environment Setup below
 
 Start the server:
 ```bash
-python main.py
+cd ..
+python -m agents.interaction.main &
 ```
 
 Expected output:

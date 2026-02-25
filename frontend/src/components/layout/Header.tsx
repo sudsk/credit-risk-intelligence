@@ -21,7 +21,7 @@ const Header = () => {
       {/* Left — logo + title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <img
-          src="https://upload.wikimedia.org/wikipedia/commons/7/72/Effective_Programming_for_America_logo.svg"
+          src="/cymbal.png"
           alt="EPAM"
           style={{ height: '24px', filter: 'brightness(0) invert(1)' }}
         />
