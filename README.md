@@ -16,43 +16,13 @@ ADK Agents Server (8080)
   ├── Scenario Agent  — what-if stress analysis
   └── SME Agent       — deep SME analysis
         │
-MCP Servers (8001–8004)
-  Companies House · Financial · LinkedIn · News
+MCP Data Server (8001)
+  data_server.py      — unified server, all CSV tools
         │
-CSV Data Layer  /mcp-servers/data/
+CSV Data Layer  mcp-servers/data/
 ```
 
----
-
-## Quick Start
-
-**Prerequisites:** Python 3.11+, Node.js 18+
-
-```bash
-# Install dependencies
-cd mcp-servers && pip install -r requirements.txt
-cd ../agents   && pip install -r requirements.txt
-cd ../backend  && pip install -r requirements.txt
-cd ../frontend && npm install
-```
-
-**Run (4 terminals):**
-
-```bash
-# Terminal 1 — MCP Servers (ports 8001–8004)
-cd mcp-servers && python main.py
-
-# Terminal 2 — ADK Agents (port 8080)
-cd agents && python main.py
-
-# Terminal 3 — Backend API (port 8000)
-cd backend && python main.py
-
-# Terminal 4 — Frontend (port 3000)
-cd frontend && npm run dev
-```
-
-Open `http://localhost:3000`
+> **Note:** The six individual MCP servers (companies_house, financial, linkedin, news, payment_data, web_traffic) were consolidated into a single `data_server.py` for the POC. One process, one port, all CSVs loaded at startup.
 
 ---
 
@@ -61,12 +31,9 @@ Open `http://localhost:3000`
 ```
 /
 ├── mcp-servers/
-│   ├── data/                          # 7 CSV datasets
+│   ├── data/                          # CSV datasets (smes, alerts, employees…)
 │   └── data_sources/
-│       ├── companies_house_server.py  (8001)
-│       ├── financial_server.py        (8002)
-│       ├── linkedin_server.py         (8003)
-│       └── news_server.py             (8004)
+│       └── data_server.py             # Unified MCP server (port 8001)
 ├── agents/
 │   ├── interaction/
 │   │   ├── chat_agent.py
@@ -74,27 +41,144 @@ Open `http://localhost:3000`
 │   │   ├── sme_agent.py
 │   │   └── prompts.py
 │   ├── shared/
-│   │   ├── config.py
+│   │   ├── config.py                  # Env-driven config
 │   │   └── mcp_client.py
-│   └── main.py                        # FastAPI server (8080)
+│   ├── requirements.txt
+│   └── main.py                        # FastAPI server (port 8080)
 ├── backend/
+│   ├── data/                          # alerts.csv lives here
 │   ├── services/
 │   │   ├── portfolio_service.py
 │   │   ├── risk_engine.py
 │   │   ├── scenario_job_service.py
 │   │   └── alert_service.py
-│   └── main.py                        # FastAPI server (8000)
+│   ├── requirements.txt
+│   └── main.py                        # FastAPI server (port 8000)
 └── frontend/
-    └── src/
-        ├── components/
-        │   ├── home/
-        │   ├── alerts/                # AlertsTab
-        │   ├── scenarios/
-        │   └── chat/
-        └── services/
-            ├── api.ts
-            └── types.ts
+    ├── src/
+    │   ├── components/
+    │   │   ├── home/
+    │   │   ├── alerts/
+    │   │   ├── scenarios/
+    │   │   └── chat/
+    │   └── services/
+    │       ├── api.ts
+    │       └── types.ts
+    └── package.json
 ```
+
+---
+
+## Prerequisites
+
+| Tool | Version | Check |
+|---|---|---|
+| Python | 3.11+ | `python --version` |
+| Node.js | 18+ | `node --version` |
+| npm | 9+ | `npm --version` |
+
+For the ADK agents you also need a Google Cloud project with Vertex AI or a Gemini API key — see **Environment Setup** below.
+
+---
+
+## Quick Start
+
+Open **four terminals** and run each in order. The MCP data server must be up before the agents start.
+
+### Terminal 1 — MCP Data Server (port 8001)
+
+```bash
+cd mcp-servers
+pip install -r requirements.txt
+python data_sources/data_server.py
+```
+
+Expected output:
+```
+INFO:     Started server process
+INFO:     Uvicorn running on http://0.0.0.0:8001
+```
+
+### Terminal 2 — ADK Agents (port 8080)
+
+```bash
+cd agents
+pip install -r requirements.txt
+```
+
+Copy and fill in the environment file:
+```bash
+cp .env.example .env   # then edit .env — see Environment Setup below
+```
+
+Start the server:
+```bash
+python main.py
+```
+
+Expected output:
+```
+INFO:     Started server process
+INFO:     Uvicorn running on http://0.0.0.0:8080
+```
+
+### Terminal 3 — Backend API (port 8000)
+
+```bash
+cd backend
+pip install -r requirements.txt
+python main.py
+```
+
+Expected output:
+```
+INFO:     Started server process
+INFO:     Uvicorn running on http://0.0.0.0:8000 (reload)
+```
+
+### Terminal 4 — Frontend (port 3000)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open **http://localhost:3000**
+
+---
+
+## Environment Setup
+
+The ADK agents need Google Cloud credentials to call Gemini. Create `agents/.env`:
+
+```dotenv
+# ── Required ────────────────────────────────────────────────────────────────
+
+# Option A: Vertex AI (recommended for production, uses GCP credentials)
+GOOGLE_GENAI_USE_VERTEXAI=true
+GCP_PROJECT_ID=your-gcp-project-id
+VERTEX_AI_LOCATION=europe-west2
+
+# Option B: Gemini API key (simpler for local dev)
+# GOOGLE_GENAI_USE_VERTEXAI=false
+# GOOGLE_GENAI_API_KEY=your-gemini-api-key
+
+# ── Optional overrides (defaults shown) ──────────────────────────────────────
+GEMINI_MODEL=gemini-2.5-flash
+MCP_SERVER_URL=http://localhost:8001
+BACKEND_API_URL=http://localhost:8000
+```
+
+**Option A — Vertex AI:** Make sure you have application default credentials configured:
+```bash
+gcloud auth application-default login
+gcloud config set project your-gcp-project-id
+```
+
+**Option B — Gemini API key:** Get a key from [aistudio.google.com](https://aistudio.google.com/). No GCP project required.
+
+Neither the MCP data server nor the backend need any API keys — they read from CSV only.
 
 ---
 
@@ -173,6 +257,9 @@ POST /api/v1/scenarios/run
 // Interest rate shock
 { "scenario_type": "interest_rate", "parameters": { "rate_increase_bps": 200 } }
 
+// EBA 2025 Adverse scenario
+{ "scenario_type": "eba_2025_adverse", "parameters": {} }
+
 // Sector shock
 { "scenario_type": "sector_shock", "parameters": { "sector": "Retail/Fashion", "revenue_impact_pct": -20 } }
 
@@ -200,19 +287,29 @@ Default probability uses a logistic model with alternative data multipliers:
 - Critical news event → PD × 1.5
 - Late payments >10 → PD × 1.25
 
+Signal impact weights on risk score:
+
+| Signal | Score impact |
+|---|---|
+| CEO / CFO / CTO departure | +12 pts |
+| C-level departure (other) | +10 pts |
+| Web traffic decline >40% | +8 pts |
+| Payment delays detected | +5 pts |
+| Adverse news event | +3 pts |
+
 ---
 
 ## Demo: TechStart Solutions
 
-The POC demo centres on SME `#4567 TechStart Solutions` — risk score escalated from **45 → 68** driven by three simultaneous signals:
+The POC demo centres on SME `#0142 TechStart Solutions` — risk score escalated from **45 → 68** driven by three simultaneous signals:
 
 | Signal | Detail | Risk Contribution |
 |---|---|---|
 | CTO departure (unreplaced) | Co-founder, 4yr tenure | +12 pts |
-| Web traffic −42% QoQ | Bounce rate 38% → 58% | +7 pts |
-| Payment delays increasing | Avg days late: 3 → 12 | +4 pts |
+| Web traffic −42% QoQ | Bounce rate 38% → 58% | +8 pts |
+| Payment delays increasing | Avg days late: 3 → 12 | +5 pts |
 
-Traditional banking detects this at next quarterly review. The platform flags it in real time.
+**Rating gap:** Live indicative grade **B** vs bank's quarterly rating **BB+** (2-notch lag). PD moved from **3.0% → 5.4%** due to these signals. Traditional banking detects this at next quarterly review. The platform flags it in real time.
 
 ---
 
@@ -222,36 +319,56 @@ Traditional banking detects this at next quarterly review. The platform flags it
 |---|---|
 | Frontend | React 18, TypeScript, Recharts, EPAM Loveship Dark |
 | Backend | FastAPI, Python 3.11, Pydantic |
-| Agents | Google ADK 1.25.0, Gemini 2.0 Flash |
+| Agents | Google ADK 1.25.0, Gemini 2.5 Flash |
 | MCP | FastMCP, Streamable HTTP |
-| Data | Pandas, CSV (100 SMEs, 2020–2024) |
+| Data | Pandas, CSV (100 SMEs) |
 
 ---
 
 ## Troubleshooting
 
-**MCP servers not starting**
+**MCP data server not starting**
 ```bash
-pip install pandas==2.2.0
-ls mcp-servers/data/   # verify CSV files exist
+cd mcp-servers
+pip install fastmcp pandas
+ls data/   # verify CSV files exist (smes.csv, employees.csv, etc.)
+python data_sources/data_server.py
 ```
 
-**Agents not responding**
+**Agents not responding / MCP connection error**
 ```bash
-curl http://localhost:8001/   # verify MCP servers are up first
-cat agents/shared/config.py   # check MCP server URLs
+# Verify the MCP server is up first
+curl http://localhost:8001/mcp
+
+# Check agents/.env is populated
+cat agents/.env
+
+# If using Vertex AI, verify GCP credentials
+gcloud auth application-default print-access-token
 ```
 
 **Frontend not loading data**
 ```bash
+# Test backend is healthy
 curl http://localhost:8000/api/v1/portfolio/summary
-# Check browser console for CORS errors
+
+# Check CORS — frontend must be on port 3000
+# Check browser console for errors
+```
+
+**Chat returning errors**
+```bash
+# Test agents server directly
+curl -X POST http://localhost:8080/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "portfolio summary", "session_id": "test"}'
 ```
 
 **Port conflicts**
 ```bash
-lsof -ti:8000 | xargs kill -9   # backend
+lsof -ti:8001 | xargs kill -9   # MCP data server
 lsof -ti:8080 | xargs kill -9   # agents
+lsof -ti:8000 | xargs kill -9   # backend
 lsof -ti:3000 | xargs kill -9   # frontend
 ```
 
@@ -260,15 +377,17 @@ lsof -ti:3000 | xargs kill -9   # frontend
 ## Cloud Run Deployment
 
 ```bash
-# MCP Servers (one per server)
-gcloud run deploy companies-house-server \
-  --source=./mcp-servers/data_sources/companies_house_server.py \
-  --region=europe-west2
+# MCP Data Server
+gcloud run deploy mcp-data-server \
+  --source=./mcp-servers \
+  --region=europe-west2 \
+  --set-env-vars="PORT=8001"
 
 # Agents
 gcloud run deploy agents \
   --source=./agents \
-  --region=europe-west2
+  --region=europe-west2 \
+  --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=true,GCP_PROJECT_ID=your-project-id,VERTEX_AI_LOCATION=europe-west2"
 
 # Backend
 gcloud run deploy backend-api \
@@ -277,4 +396,10 @@ gcloud run deploy backend-api \
 
 # Frontend
 vercel deploy
+```
+
+After deploying, update `agents/.env` (or Cloud Run env vars) with the live URLs:
+```
+MCP_SERVER_URL=https://mcp-data-server-xxx.run.app
+BACKEND_API_URL=https://backend-api-xxx.run.app
 ```
