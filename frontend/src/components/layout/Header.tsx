@@ -23,7 +23,7 @@ const Header = () => {
         <img
           src="/cymbal.png"
           alt="EPAM"
-          style={{ height: '24px', filter: 'brightness(0) invert(1)' }}
+          style={{ height: '48px' }}
         />
         <div>
           <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>
