@@ -166,7 +166,11 @@ class PortfolioService:
                 "trend": row['trend'],
                 "trend_value": float(row['trend_value']),
                 "revenue": float(row['revenue']),
-                "employee_count": int(row['employee_count'])
+                "employee_count": int(row['employee_count']),
+                "drawn_amount": float(row['drawn_amount']) if 'drawn_amount' in self.smes_df.columns else 0.0,
+                "bank_rating": str(row['bank_rating']) if 'bank_rating' in self.smes_df.columns else '',
+                "pd_original": float(row['pd_original']) if 'pd_original' in self.smes_df.columns else 0.0,
+                "pd_adjusted": float(row['pd_adjusted']) if 'pd_adjusted' in self.smes_df.columns else 0.0,               
             })
         
         return {
@@ -188,7 +192,8 @@ class PortfolioService:
             Complete SME profile with risk breakdown
         """
         # Get base SME data
-        sme_row = self.smes_df[self.smes_df['id'] == sme_id]
+        sme_row = self.smes_df[self.smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
+
         if sme_row.empty:
             raise ValueError(f"SME {sme_id} not found")
         

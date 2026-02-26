@@ -149,7 +149,21 @@ export interface ScenarioResults {
   // ── Sector breakdown — richer than before ─────────────────────────────
   sectorImpact: SectorImpact[];
 
+  // ── Geography breakdown ────────────────────────────────────────────────
+  geographyImpact: GeographyImpact[];
+
+  // ── SMEs that crossed medium → critical under this scenario ───────────
+  newCriticalSMEs: TopImpactedSME[];
+
   topImpacted: TopImpactedSME[];
+}
+
+export interface GeographyImpact {
+  geography: string;
+  smes: number;
+  avgChange: number;
+  newCritical: number;
+  estimatedLoss: number;
 }
 
 export interface SectorImpact {

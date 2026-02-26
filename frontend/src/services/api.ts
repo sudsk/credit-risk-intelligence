@@ -283,6 +283,27 @@ function mapJobResultToScenario(description: string, result: any): Scenario {
         estimatedLoss: s.estimatedLoss ?? s.estimated_loss ?? 0,
       })),
 
+      // ── Geography impact ────────────────────────────────────────────
+      geographyImpact: (result.geographyImpact ?? result.geography_impact ?? []).map((g: any) => ({
+        geography: g.geography,
+        smes: g.smes ?? g.count ?? 0,
+        avgChange: g.avgChange ?? g.avg_change ?? 0,
+        newCritical: g.newCritical ?? g.new_critical ?? 0,
+        estimatedLoss: g.estimatedLoss ?? g.estimated_loss ?? 0,
+      })),
+
+      // ── SMEs that tipped medium → critical ───────────────────────────
+      newCriticalSMEs: (result.newCriticalSMEs ?? result.new_critical_smes ?? []).map((s: any) => ({
+        smeId: s.smeId ?? s.sme_id,
+        smeName: s.smeName ?? s.sme_name,
+        scoreBefore: s.scoreBefore ?? s.score_before ?? 0,
+        scoreAfter: s.scoreAfter ?? s.score_after ?? 0,
+        change: s.change ?? 0,
+        reason: s.reason ?? '',
+        sector: s.sector,
+        geography: s.geography,
+      })),
+
       // ── Top impacted SMEs — extended shape ─────────────────────────
       topImpacted: (result.topImpacted ?? result.top_impacted ?? []).map((s: any) => ({
         smeId: s.smeId ?? s.sme_id,

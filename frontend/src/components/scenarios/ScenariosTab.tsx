@@ -10,7 +10,7 @@ const SCENARIO_TEMPLATES = [
   {
     id: 'eba_2025_adverse',
     label: '🏦 EBA 2025 Adverse — Higher for Longer',
-    description: 'Replicates the official EBA 2025 EU-wide banking stress test adverse scenario. Sustained higher rates, GDP contraction of 6% over 3 years, commercial real estate prices down 35%, unemployment +5pp. Published Jan 2025 by ESRB/EBA.',
+    description: 'Replicates the official EBA 2025 EU-wide banking stress test adverse scenario.',
     params: { rate_change: 200, gdp_change: -6.0, unemployment_change: 5.0, real_estate_shock: -35 },
     paramLabels: ['rate_change', 'gdp_change', 'unemployment_change', 'real_estate_shock'],
   },
@@ -26,7 +26,7 @@ const SCENARIO_TEMPLATES = [
     label: '🏭 Sector Shock',
     description: 'A sudden contraction in a specific sector — regulation, demand collapse, supply chain disruption. Impacts all SMEs in the selected sector.',
     params: { rate_change: 0, gdp_change: -2.0, unemployment_change: 1.5, real_estate_shock: 0, severity: 0.7 },
-    paramLabels: ['gdp_change', 'severity'],
+    paramLabels: ['gdp_change', 'unemployment_change', 'severity'],
     hasSector: true,
   },
   {
@@ -34,21 +34,21 @@ const SCENARIO_TEMPLATES = [
     label: '📉 Recession / GDP Contraction',
     description: 'Broad economic downturn affecting all sectors. Models credit deterioration across the portfolio as growth turns negative and unemployment rises.',
     params: { rate_change: 50, gdp_change: -3.5, unemployment_change: 3.0, real_estate_shock: -15 },
-    paramLabels: ['rate_change', 'gdp_change', 'unemployment_change'],
+    paramLabels: ['rate_change', 'gdp_change', 'unemployment_change', 'real_estate_shock'],
   },
   {
     id: 'geopolitical',
     label: '🌍 Geopolitical / Trade Tariffs',
     description: 'Impact of trade disruption, sanctions, or tariff regimes on export-exposed SMEs. Particularly relevant for UK/EU cross-border trade and US tariff scenarios.',
-    params: { rate_change: 25, gdp_change: -2.0, unemployment_change: 1.0, real_estate_shock: 0 },
-    paramLabels: ['gdp_change', 'unemployment_change'],
+    params: { rate_change: 0, gdp_change: -2.0, unemployment_change: 1.0, real_estate_shock: -10 },
+    paramLabels: ['gdp_change', 'unemployment_change', 'real_estate_shock'],
   },
   {
     id: 'climate_transition',
     label: '🌱 Climate Transition Shock (Fit-for-55)',
     description: 'ESRB Fit-for-55 scenario: carbon pricing shock affecting fossil fuel dependent sectors. Construction, logistics and manufacturing most exposed.',
     params: { rate_change: 0, gdp_change: -1.5, unemployment_change: 0.8, real_estate_shock: -10, severity: 0.5 },
-    paramLabels: ['gdp_change', 'severity'],
+    paramLabels: ['gdp_change', 'unemployment_change', 'real_estate_shock', 'severity'],
   },
   {
     id: 'custom',
@@ -144,7 +144,7 @@ const ScenariosTab = () => {
             📊 Run New Stress Test
           </div>
           <div style={{ fontSize: '12px', color: 'var(--uui-text-tertiary)', marginTop: '3px' }}>
-            ESRB / EBA aligned scenarios — models impact across all {scenarios.length > 0 ? '92' : '92'} SMEs in portfolio
+            ESRB / EBA aligned scenarios — models impact across all SMEs in portfolio
           </div>
         </div>
 

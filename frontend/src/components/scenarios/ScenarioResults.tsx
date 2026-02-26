@@ -141,7 +141,6 @@ const ScenarioResults = ({ scenario }: ScenarioResultsProps) => {
                 }}>
                   {years.map(({ label, value }, idx) => {
                     const barPct = Math.round((value / maxVal) * 100)
-                    // Bars deepen in opacity year-on-year — visual cue that risk compounds
                     const opacity = 0.45 + idx * 0.14
                     const showInline = barPct > 28
                     return (
@@ -179,7 +178,7 @@ const ScenarioResults = ({ scenario }: ScenarioResultsProps) => {
             )
           })()}
 
-          {/* ── Sector Impact Bar Chart ───────────────────────────────────────
+          {/* ── Sector Impact ─────────────────────────────────────────────────
               Horizontal bars per sector — sorted worst-first.
               Columns: sector name | score delta bar | new critical count | est. loss.
               Renders only when sectorImpact array is non-empty.               */}
@@ -201,44 +200,23 @@ const ScenarioResults = ({ scenario }: ScenarioResultsProps) => {
                     Estimated — based on historical macro vectors
                   </div>
                 </div>
-                <div style={{
-                  background: 'var(--uui-neutral-70)',
-                  border: '1px solid var(--uui-neutral-60)',
-                  borderRadius: 'var(--uui-border-radius)',
-                  overflow: 'hidden',
-                }}>
-                  {/* Column headers */}
-                  <div style={{
-                    display: 'grid', gridTemplateColumns: '148px 1fr 72px 76px',
-                    padding: '8px 14px',
-                    background: 'var(--uui-neutral-80)',
-                    borderBottom: '1px solid var(--uui-neutral-60)',
-                  }}>
+                <div style={{ background: 'var(--uui-neutral-70)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', overflow: 'hidden' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '148px 1fr 72px 76px', padding: '8px 14px', background: 'var(--uui-neutral-80)', borderBottom: '1px solid var(--uui-neutral-60)' }}>
                     {['Sector', 'Score Δ', 'New Critical', 'Est. Loss'].map((h, i) => (
                       <div key={i} style={{ fontSize: '10px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', textAlign: i >= 2 ? 'right' : 'left' }}>
                         {h}
                       </div>
                     ))}
                   </div>
-
-                  {/* Sector rows */}
                   {sorted.map((s, idx) => {
                     const barPct = Math.round((s.avgChange / maxChange) * 100)
                     const isHigh = s.avgChange >= maxChange * 0.65
                     const barColor = isHigh ? 'var(--uui-critical-60)' : 'var(--uui-warning-60)'
                     return (
-                      <div key={s.sector} style={{
-                        display: 'grid', gridTemplateColumns: '148px 1fr 72px 76px',
-                        padding: '10px 14px', alignItems: 'center',
-                        borderBottom: idx < sorted.length - 1 ? '1px solid var(--uui-neutral-60)' : 'none',
-                        background: isHigh ? 'rgba(239,68,68,0.03)' : 'transparent',
-                      }}>
-                        {/* Sector name */}
+                      <div key={s.sector} style={{ display: 'grid', gridTemplateColumns: '148px 1fr 72px 76px', padding: '10px 14px', alignItems: 'center', borderBottom: idx < sorted.length - 1 ? '1px solid var(--uui-neutral-60)' : 'none', background: isHigh ? 'rgba(239,68,68,0.03)' : 'transparent' }}>
                         <div style={{ fontSize: '12px', color: 'var(--uui-text-secondary)', fontWeight: isHigh ? 600 : 400, paddingRight: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {s.sector}
                         </div>
-
-                        {/* Bar + score delta value */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '8px' }}>
                           <div style={{ flex: 1, height: '14px', background: 'var(--uui-neutral-60)', borderRadius: '2px', overflow: 'hidden' }}>
                             <div style={{ width: `${barPct}%`, height: '100%', background: barColor, opacity: 0.7, borderRadius: '2px' }} />
@@ -247,13 +225,9 @@ const ScenarioResults = ({ scenario }: ScenarioResultsProps) => {
                             +{s.avgChange}
                           </div>
                         </div>
-
-                        {/* New critical */}
                         <div style={{ fontSize: '12px', fontFamily: 'var(--uui-font-mono)', fontWeight: (s.newCritical ?? 0) > 0 ? 700 : 400, color: (s.newCritical ?? 0) > 0 ? 'var(--uui-critical-60)' : 'var(--uui-text-tertiary)', textAlign: 'right' }}>
                           {(s.newCritical ?? 0) > 0 ? `+${s.newCritical}` : '—'}
                         </div>
-
-                        {/* Estimated loss */}
                         <div style={{ fontSize: '11px', fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-secondary)', textAlign: 'right' }}>
                           {fmtGbp(s.estimatedLoss ?? 0)}
                         </div>
@@ -265,18 +239,110 @@ const ScenarioResults = ({ scenario }: ScenarioResultsProps) => {
             )
           })()}
 
+          {/* ── Geography Impact ──────────────────────────────────────────────
+              Same pattern as sector table — sorted worst-first by avgChange.
+              Renders only when geographyImpact is present and non-empty.      */}
+          {results.geographyImpact && results.geographyImpact.length > 0 && (() => {
+            const sorted = [...results.geographyImpact].sort((a, b) => b.avgChange - a.avgChange)
+            const maxChange = Math.max(...sorted.map(g => g.avgChange), 1)
+            const fmtGbp = (v: number) =>
+              v >= 1_000_000 ? `£${(v / 1_000_000).toFixed(1)}M`
+                : v >= 1_000 ? `£${(v / 1_000).toFixed(0)}K`
+                  : v > 0 ? `£${v}` : '—'
+            return (
+              <section>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase' }}>
+                    Geography Impact Breakdown
+                  </div>
+                  <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', fontStyle: 'italic' }}>
+                    Estimated — based on historical macro vectors
+                  </div>
+                </div>
+                <div style={{ background: 'var(--uui-neutral-70)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', overflow: 'hidden' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '148px 1fr 72px 76px', padding: '8px 14px', background: 'var(--uui-neutral-80)', borderBottom: '1px solid var(--uui-neutral-60)' }}>
+                    {['Region', 'Score Δ', 'New Critical', 'Est. Loss'].map((h, i) => (
+                      <div key={i} style={{ fontSize: '10px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', textAlign: i >= 2 ? 'right' : 'left' }}>
+                        {h}
+                      </div>
+                    ))}
+                  </div>
+                  {sorted.map((g, idx) => {
+                    const barPct = Math.round((g.avgChange / maxChange) * 100)
+                    const isHigh = g.avgChange >= maxChange * 0.65
+                    const barColor = isHigh ? 'var(--uui-critical-60)' : 'var(--uui-warning-60)'
+                    return (
+                      <div key={g.geography} style={{ display: 'grid', gridTemplateColumns: '148px 1fr 72px 76px', padding: '10px 14px', alignItems: 'center', borderBottom: idx < sorted.length - 1 ? '1px solid var(--uui-neutral-60)' : 'none', background: isHigh ? 'rgba(239,68,68,0.03)' : 'transparent' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--uui-text-secondary)', fontWeight: isHigh ? 600 : 400, paddingRight: '8px' }}>
+                          {g.geography}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingRight: '8px' }}>
+                          <div style={{ flex: 1, height: '14px', background: 'var(--uui-neutral-60)', borderRadius: '2px', overflow: 'hidden' }}>
+                            <div style={{ width: `${barPct}%`, height: '100%', background: barColor, opacity: 0.7, borderRadius: '2px' }} />
+                          </div>
+                          <div style={{ fontSize: '11px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: barColor, width: '34px', textAlign: 'right', flexShrink: 0 }}>
+                            +{g.avgChange}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '12px', fontFamily: 'var(--uui-font-mono)', fontWeight: (g.newCritical ?? 0) > 0 ? 700 : 400, color: (g.newCritical ?? 0) > 0 ? 'var(--uui-critical-60)' : 'var(--uui-text-tertiary)', textAlign: 'right' }}>
+                          {(g.newCritical ?? 0) > 0 ? `+${g.newCritical}` : '—'}
+                        </div>
+                        <div style={{ fontSize: '11px', fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-secondary)', textAlign: 'right' }}>
+                          {fmtGbp(g.estimatedLoss ?? 0)}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )
+          })()}
+
+          {/* ── Medium → Critical tipping callout ─────────────────────────────
+              SMEs that cross the 60-pt threshold under this scenario.
+              Core "early detection" proof point for the demo.                 */}
+          {results.newCriticalSMEs && results.newCriticalSMEs.length > 0 && (
+            <section>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '12px' }}>
+                🚨 SMEs Crossing to Critical Under This Scenario ({results.newCriticalSMEs.length})
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {results.newCriticalSMEs.map((sme: any, idx: number) => (
+                  <div key={idx} style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)', borderLeft: '3px solid var(--uui-critical-60)', borderRadius: 'var(--uui-border-radius)', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '2px' }}>
+                        {sme.smeId} {sme.smeName}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>
+                        {sme.sector}{sme.geography ? ` · ${sme.geography}` : ''} · {sme.reason}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: '12px' }}>
+                      <div style={{ fontSize: '13px', fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-secondary)' }}>
+                        {sme.scoreBefore} → <span style={{ color: 'var(--uui-critical-60)', fontWeight: 700 }}>{sme.scoreAfter}</span>
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--uui-critical-60)', fontWeight: 600 }}>
+                        MEDIUM → CRITICAL
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Recommendations */}
           {scenario.recommendations && (
             <RecommendationsTabs recommendations={scenario.recommendations} scenarioName={scenario.name} />
           )}
 
-          {/* Top Impacted SMEs */}
+          {/* Top 10 Impacted SMEs */}
           <section>
             <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '12px' }}>
-              Top Impacted SMEs
+              Top 10 Impacted SMEs
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {results.topImpacted.map((sme: any, idx: number) => (
+              {results.topImpacted.slice(0, 10).map((sme: any, idx: number) => (
                 <div key={idx} style={{ background: 'var(--uui-neutral-70)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '3px' }}>

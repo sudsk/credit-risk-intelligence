@@ -230,7 +230,15 @@ async def get_sme_peers(sme_id: str):
 # ---------------------------------------------------------------------------
 # Scenarios — async job pattern (Change 7)
 # ---------------------------------------------------------------------------
-
+@app.get("/api/v1/scenarios")
+async def get_all_scenarios():
+    """List all scenario jobs (running + completed)."""
+    try:
+        return get_scenario_job_service().get_all_jobs()
+    except Exception as e:
+        logger.error(f"Get scenarios error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+        
 @app.post("/api/v1/scenarios/run")
 async def run_scenario(request: ScenarioRequest):
     """

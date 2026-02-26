@@ -86,6 +86,13 @@ class ScenarioJobService:
             return None
         return job["result"]
 
+    def get_all_jobs(self) -> list:
+            """Return all jobs sorted newest first — used by GET /api/v1/scenarios."""
+            return sorted(
+                _jobs.values(),
+                key=lambda j: j["created_at"],
+                reverse=True,
+            )
 
 _scenario_job_service = None
 

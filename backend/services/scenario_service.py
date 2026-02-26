@@ -135,7 +135,7 @@ class ScenarioService:
         else:
             base_pd_increase = 5.0 + 3.0 * ((rate_bps - 200) / 100)
 
-        impacted, new_critical, sector_map = self._apply_vectors(
+        impacted, new_critical, sector_map, geography_map = self._apply_vectors(
             base_pd_increase, SECTOR_MULTIPLIERS
         )
 
@@ -149,6 +149,7 @@ class ScenarioService:
             impacted=impacted,
             new_critical=new_critical,
             sector_map=sector_map,
+            geography_map=geography_map,
             params=params,
         )
 
@@ -169,9 +170,9 @@ class ScenarioService:
         re_shock   = float(params.get("real_estate_shock", -35))
 
         # Combine macro vectors
-        pd_from_rates   = 5.0 * (rate_bps / 200)
-        pd_from_gdp     = abs(gdp_change) * GDP_PD_FACTOR
-        pd_from_unemp   = unemp * UNEMPLOYMENT_PD_FACTOR
+        pd_from_rates    = 5.0 * (rate_bps / 200)
+        pd_from_gdp      = abs(gdp_change) * GDP_PD_FACTOR
+        pd_from_unemp    = unemp * UNEMPLOYMENT_PD_FACTOR
         base_pd_increase = pd_from_rates + pd_from_gdp + pd_from_unemp
 
         # Real estate shock adds extra PD for exposed sectors
@@ -180,7 +181,7 @@ class ScenarioService:
         for sector in REAL_ESTATE_SECTORS:
             re_multipliers[sector] = re_multipliers.get(sector, 1.0) + re_extra * 0.1
 
-        impacted, new_critical, sector_map = self._apply_vectors(
+        impacted, new_critical, sector_map, geography_map = self._apply_vectors(
             base_pd_increase, re_multipliers
         )
 
@@ -201,15 +202,16 @@ class ScenarioService:
             impacted=impacted,
             new_critical=new_critical,
             sector_map=sector_map,
+            geography_map=geography_map,
             params=params,
         )
 
     async def _simulate_recession(
         self, params: Dict[str, Any]
     ) -> Dict[str, Any]:
-        gdp_change  = float(params.get("gdp_change", -3.5))
-        unemp       = float(params.get("unemployment_change", 3.0))
-        severity    = params.get("severity", "moderate")
+        gdp_change = float(params.get("gdp_change", -3.5))
+        unemp      = float(params.get("unemployment_change", 3.0))
+        severity   = params.get("severity", "moderate")
 
         # Use explicit GDP/unemployment params if provided, else fall back to severity vector
         if gdp_change != 0 or unemp != 0:
@@ -221,7 +223,7 @@ class ScenarioService:
             vector_map = {"mild": 3.0, "moderate": 7.0, "severe": 12.0}
             base_pd_increase = vector_map.get(severity, 7.0)
 
-        impacted, new_critical, sector_map = self._apply_vectors(
+        impacted, new_critical, sector_map, geography_map = self._apply_vectors(
             base_pd_increase, SECTOR_MULTIPLIERS
         )
 
@@ -240,6 +242,7 @@ class ScenarioService:
             impacted=impacted,
             new_critical=new_critical,
             sector_map=sector_map,
+            geography_map=geography_map,
             params=params,
         )
 
@@ -256,7 +259,7 @@ class ScenarioService:
 
         base_pd_increase = abs(gdp_drag) * GDP_PD_FACTOR + (severity * 5)
 
-        impacted, new_critical, sector_map = self._apply_vectors(
+        impacted, new_critical, sector_map, geography_map = self._apply_vectors(
             base_pd_increase, targeted_multipliers
         )
 
@@ -271,6 +274,7 @@ class ScenarioService:
             impacted=impacted,
             new_critical=new_critical,
             sector_map=sector_map,
+            geography_map=geography_map,
             params=params,
         )
 
@@ -278,9 +282,9 @@ class ScenarioService:
         self, params: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Generic handler for geopolitical, climate, regulation scenarios."""
-        gdp_change  = float(params.get("gdp_change", -2.0))
-        unemp       = float(params.get("unemployment_change", 1.0))
-        severity    = float(params.get("severity", 0.5))
+        gdp_change    = float(params.get("gdp_change", -2.0))
+        unemp         = float(params.get("unemployment_change", 1.0))
+        severity      = float(params.get("severity", 0.5))
         scenario_name = params.get("scenario_name", "Macro Shock")
 
         base_pd_increase = (
@@ -289,7 +293,7 @@ class ScenarioService:
             severity * 3
         )
 
-        impacted, new_critical, sector_map = self._apply_vectors(
+        impacted, new_critical, sector_map, geography_map = self._apply_vectors(
             base_pd_increase, SECTOR_MULTIPLIERS
         )
 
@@ -303,6 +307,7 @@ class ScenarioService:
             impacted=impacted,
             new_critical=new_critical,
             sector_map=sector_map,
+            geography_map=geography_map,
             params=params,
         )
 
@@ -312,25 +317,29 @@ class ScenarioService:
         self,
         base_pd_increase: float,
         sector_multipliers: Dict[str, float],
-    ) -> Tuple[List[Dict], List[Dict], Dict[str, Dict]]:
+    ) -> Tuple[List[Dict], List[Dict], Dict[str, Dict], Dict[str, Dict]]:
         """
         Apply macro→PD vectors to every SME in portfolio.
 
         Returns:
-            impacted     — all SMEs with material risk increase
-            new_critical — SMEs that cross the critical threshold
-            sector_map   — per-sector aggregated impact
+            impacted      — all SMEs with material risk increase (change >= 2.0)
+            new_critical  — SMEs that tipped medium → critical (crossed 60-pt threshold)
+            sector_map    — per-sector aggregated impact
+            geography_map — per-geography aggregated impact
         """
-        impacted: List[Dict] = []
-        new_critical: List[Dict] = []
-        sector_map: Dict[str, Dict] = {}
+        impacted: List[Dict]      = []
+        new_critical: List[Dict]  = []
+        sector_map: Dict[str, Dict]    = {}
+        geography_map: Dict[str, Dict] = {}
 
         for _, sme in self.smes_df.iterrows():
             sector       = str(sme['sector'])
+            geography    = str(sme.get('geography', 'UK'))
             current_risk = int(sme['risk_score'])
+            current_cat  = str(sme['risk_category'])
             exposure     = float(sme['exposure'])
 
-            multiplier   = sector_multipliers.get(sector, 1.0)
+            multiplier    = sector_multipliers.get(sector, 1.0)
             risk_increase = base_pd_increase * multiplier
             new_risk      = min(current_risk + risk_increase, 100)
 
@@ -338,7 +347,7 @@ class ScenarioService:
                 "smeId":       str(sme['id']),
                 "smeName":     str(sme['name']),
                 "sector":      sector,
-                "geography":   str(sme.get('geography', 'UK')),
+                "geography":   geography,
                 "scoreBefore": current_risk,
                 "scoreAfter":  round(new_risk, 1),
                 "change":      round(risk_increase, 1),
@@ -349,19 +358,16 @@ class ScenarioService:
             if risk_increase >= 2.0:
                 impacted.append(sme_record)
 
-            went_critical = current_risk < 60 and new_risk >= 60
+            # Only medium SMEs can tip to critical — already-critical ones are excluded
+            went_critical = current_cat == 'medium' and new_risk >= 60
             if went_critical:
                 new_critical.append(sme_record)
 
-            # Aggregate per sector
+            # ── Aggregate per sector ───────────────────────────────────────
             if sector not in sector_map:
                 sector_map[sector] = {
-                    "sector": sector,
-                    "smes": 0,
-                    "avgChange": 0.0,
-                    "totalExposure": 0.0,
-                    "newCritical": 0,
-                    "_total_change": 0.0,
+                    "sector": sector, "smes": 0, "avgChange": 0.0,
+                    "totalExposure": 0.0, "newCritical": 0, "_total_change": 0.0,
                 }
             sm = sector_map[sector]
             sm["smes"]          += 1
@@ -370,12 +376,29 @@ class ScenarioService:
             if went_critical:
                 sm["newCritical"] += 1
 
-        # Finalise sector averages
+            # ── Aggregate per geography ────────────────────────────────────
+            if geography not in geography_map:
+                geography_map[geography] = {
+                    "geography": geography, "smes": 0, "avgChange": 0.0,
+                    "totalExposure": 0.0, "newCritical": 0, "_total_change": 0.0,
+                }
+            gm = geography_map[geography]
+            gm["smes"]          += 1
+            gm["totalExposure"] += exposure
+            gm["_total_change"] += risk_increase
+            if went_critical:
+                gm["newCritical"] += 1
+
+        # Finalise averages and remove working accumulator
         for sm in sector_map.values():
             sm["avgChange"] = round(sm["_total_change"] / sm["smes"], 1) if sm["smes"] else 0
             del sm["_total_change"]
 
-        return impacted, new_critical, sector_map
+        for gm in geography_map.values():
+            gm["avgChange"] = round(gm["_total_change"] / gm["smes"], 1) if gm["smes"] else 0
+            del gm["_total_change"]
+
+        return impacted, new_critical, sector_map, geography_map
 
     # ── Result builder ─────────────────────────────────────────────────────
 
@@ -387,19 +410,22 @@ class ScenarioService:
         impacted: List[Dict],
         new_critical: List[Dict],
         sector_map: Dict[str, Dict],
+        geography_map: Dict[str, Dict],
         params: Dict[str, Any],
     ) -> Dict[str, Any]:
         """
         Assemble the full scenario result payload including:
         - Portfolio impact summary (before/after)
         - Sector breakdown with loss per sector
+        - Geography breakdown with loss per region
+        - SMEs that tipped medium → critical
         - 3-year loss projections
         - 3-tier recommendations
         """
-        all_smes         = self.smes_df
-        total_smes       = len(all_smes)
-        critical_before  = int((all_smes['risk_category'] == 'critical').sum())
-        critical_after   = critical_before + len(new_critical)
+        all_smes        = self.smes_df
+        total_smes      = len(all_smes)
+        critical_before = int((all_smes['risk_category'] == 'critical').sum())
+        critical_after  = critical_before + len(new_critical)
 
         avg_score_before = round(float(all_smes['risk_score'].mean()), 1)
         avg_score_after  = round(
@@ -418,18 +444,16 @@ class ScenarioService:
         new_critical_exposure = sum(s['exposure'] for s in new_critical)
         pd_uplift             = len(new_critical) / max(total_smes, 1)
 
-        # EAD = Exposure at Default; EL = PD × LGD × EAD
         additional_el_year0 = new_critical_exposure * pd_uplift * LGD
-        # Years 1-3: compounding deterioration at 15% / 10% / 5% increment
         additional_el_year1 = additional_el_year0 * 1.15
         additional_el_year2 = additional_el_year0 * 1.25
         additional_el_year3 = additional_el_year0 * 1.30
 
         estimated_loss = {
-            "current":   round(additional_el_year0),
-            "year1":     round(additional_el_year1),
-            "year2":     round(additional_el_year2),
-            "year3":     round(additional_el_year3),
+            "current":        round(additional_el_year0),
+            "year1":          round(additional_el_year1),
+            "year2":          round(additional_el_year2),
+            "year3":          round(additional_el_year3),
             "lgd_assumption": LGD,
             "note": "Estimated — based on EAD × PD uplift × LGD. Not a full Basel stress model.",
         }
@@ -439,23 +463,36 @@ class ScenarioService:
         for sm in sorted(sector_map.values(), key=lambda x: x['avgChange'], reverse=True):
             sector_el = sm['totalExposure'] * (sm['newCritical'] / max(sm['smes'], 1)) * pd_uplift * LGD
             sector_impact.append({
-                "sector":          sm['sector'],
-                "smes":            sm['smes'],
-                "avgChange":       sm['avgChange'],
-                "newCritical":     sm['newCritical'],
-                "totalExposure":   round(sm['totalExposure']),
-                "estimatedLoss":   round(sector_el),
+                "sector":        sm['sector'],
+                "smes":          sm['smes'],
+                "avgChange":     sm['avgChange'],
+                "newCritical":   sm['newCritical'],
+                "totalExposure": round(sm['totalExposure']),
+                "estimatedLoss": round(sector_el),
+            })
+
+        # ── Geography breakdown ────────────────────────────────────────────
+        geography_impact = []
+        for gm in sorted(geography_map.values(), key=lambda x: x['avgChange'], reverse=True):
+            geo_el = gm['totalExposure'] * (gm['newCritical'] / max(gm['smes'], 1)) * pd_uplift * LGD
+            geography_impact.append({
+                "geography":     gm['geography'],
+                "smes":          gm['smes'],
+                "avgChange":     gm['avgChange'],
+                "newCritical":   gm['newCritical'],
+                "totalExposure": round(gm['totalExposure']),
+                "estimatedLoss": round(geo_el),
             })
 
         # ── Portfolio impact summary ───────────────────────────────────────
         portfolio_impact = {
-            "criticalBefore":    critical_before,
-            "criticalAfter":     critical_after,
-            "avgScoreBefore":    avg_score_before,
-            "avgScoreAfter":     avg_score_after,
-            "defaultProbBefore": pd_before,
-            "defaultProbAfter":  pd_after,
-            "totalExposure":     round(float(all_smes['exposure'].sum())),
+            "criticalBefore":      critical_before,
+            "criticalAfter":       critical_after,
+            "avgScoreBefore":      avg_score_before,
+            "avgScoreAfter":       avg_score_after,
+            "defaultProbBefore":   pd_before,
+            "defaultProbAfter":    pd_after,
+            "totalExposure":       round(float(all_smes['exposure'].sum())),
             "newCriticalExposure": round(new_critical_exposure),
         }
 
@@ -468,24 +505,25 @@ class ScenarioService:
             params=params,
         )
 
-        # ── Top impacted SMEs ──────────────────────────────────────────────
+        # ── Top impacted SMEs (sorted by score change, capped at 10) ──────
         top_impacted = sorted(impacted, key=lambda x: x['change'], reverse=True)[:10]
 
         return {
-            "scenario":        scenario_name,
-            "parameters":      parameters,
-            "methodology":     methodology,
-            "disclaimer":      (
+            "scenario":       scenario_name,
+            "parameters":     parameters,
+            "methodology":    methodology,
+            "disclaimer": (
                 "⚠️ ESTIMATED IMPACT — uses pre-calibrated macro→PD vectors aligned to "
                 "EBA/ESRB adverse scenario methodology. Does not re-run the bank's full "
                 "CCAR/ICAAP stress model. Results indicative only."
             ),
-            "portfolioImpact": portfolio_impact,
-            "estimatedLoss":   estimated_loss,
-            "sectorImpact":    sector_impact,
-            "topImpacted":     top_impacted,
-            "newCriticalSMEs": new_critical[:20],
-            "recommendations": recommendations,
+            "portfolioImpact":  portfolio_impact,
+            "estimatedLoss":    estimated_loss,
+            "sectorImpact":     sector_impact,
+            "geographyImpact":  geography_impact,           # NEW — per-region breakdown
+            "newCriticalSMEs":  new_critical,               # NEW — medium → critical tippers
+            "topImpacted":      top_impacted,               # top 10 by score delta
+            "recommendations":  recommendations,
         }
 
     # ── Recommendation builder ─────────────────────────────────────────────
@@ -508,7 +546,6 @@ class ScenarioService:
 
         Reserve formula: 1.5 × additional expected loss
         """
-        # Determine warranted tier
         if (new_critical_count > TIER_THRESHOLDS["ultra_conservative"]["min_new_critical"]
                 or estimated_loss_current > TIER_THRESHOLDS["ultra_conservative"]["min_loss_gbp"]):
             warranted_tier = "ultra_conservative"
@@ -518,14 +555,12 @@ class ScenarioService:
         else:
             warranted_tier = "moderate"
 
-        # Top 2 most impacted sectors for sector-specific actions
-        top_sectors = [s['sector'] for s in sector_impact if s['newCritical'] > 0][:2]
+        top_sectors    = [s['sector'] for s in sector_impact if s['newCritical'] > 0][:2]
         top_sector_str = " and ".join(top_sectors) if top_sectors else "most exposed sectors"
 
-        # Reserve calculations
-        reserve_ultra  = round(estimated_loss_current * RESERVE_MULTIPLIER * 1.5)
-        reserve_cons   = round(estimated_loss_current * RESERVE_MULTIPLIER)
-        reserve_mod    = round(estimated_loss_current * RESERVE_MULTIPLIER * 0.5)
+        reserve_ultra = round(estimated_loss_current * RESERVE_MULTIPLIER * 1.5)
+        reserve_cons  = round(estimated_loss_current * RESERVE_MULTIPLIER)
+        reserve_mod   = round(estimated_loss_current * RESERVE_MULTIPLIER * 0.5)
 
         def fmt_gbp(v: float) -> str:
             if v >= 1_000_000:
@@ -568,11 +603,11 @@ class ScenarioService:
         }
 
         return {
-            "warranted_tier":    warranted_tier,
-            "ultraConservative": ultra,
-            "conservative":      conservative,
-            "moderate":          moderate,
-            "new_critical_count": new_critical_count,
+            "warranted_tier":         warranted_tier,
+            "ultraConservative":      ultra,
+            "conservative":           conservative,
+            "moderate":               moderate,
+            "new_critical_count":     new_critical_count,
             "estimated_loss_current": round(estimated_loss_current),
         }
 
@@ -592,7 +627,7 @@ class ScenarioService:
 
     def _get_vulnerable_sectors(self, critical_smes: List[Dict]) -> List[Dict]:
         """Get sectors most vulnerable in scenario — legacy helper kept for compatibility."""
-        sector_counts: Dict[str, int]   = {}
+        sector_counts: Dict[str, int]      = {}
         sector_exposures: Dict[str, float] = {}
         for sme in critical_smes:
             s = sme['sector']
