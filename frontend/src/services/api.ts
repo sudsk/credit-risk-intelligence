@@ -396,9 +396,8 @@ function mapAlertResponse(raw: any): Alert {
     affected_count: a.affected_count ?? 1,
     smeId: a.sme_id ?? '',
     smeName: a.sme_name ?? '',
-    exposure: typeof a.exposure === 'number'
-      ? formatExposure(a.exposure)
-      : (a.exposure ?? '€0'),
+    exposure: formatExposure(sme.exposure),
+    drawnAmount: formatExposure(sme.drawn_amount ?? 0),
     title: a.title ?? a.event_type ?? 'Alert',
     summary: a.summary ?? a.event_summary ?? '',
     signals,

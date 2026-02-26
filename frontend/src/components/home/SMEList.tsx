@@ -98,22 +98,26 @@ const SMEList = () => {
                   <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', fontFamily: 'var(--uui-font-mono)' }}>{sme.id}</div>
                   <div style={{ fontWeight: 600, fontSize: '13px', margin: '3px 0', color: 'var(--uui-text-primary)' }}>{sme.name}</div>
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: scoreColors[sme.riskCategory] }}>
-                  {sme.riskScore}
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', fontWeight: 400, marginBottom: '2px' }}>Risk Score</div>
+                  <div style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: scoreColors[sme.riskCategory] }}>
+                    {sme.riskScore}
+                  </div>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '9px', fontSize: '11px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '9px', fontSize: '11px' }}>
                 <div>
                   <div style={{ color: 'var(--uui-text-tertiary)' }}>Credit Line</div>
                   <div style={{ fontWeight: 600, color: 'var(--uui-text-primary)' }}>{sme.exposure}</div>
                 </div>
                 <div>
+                  <div style={{ color: 'var(--uui-text-tertiary)' }}>Drawn Credit</div>
+                  <div style={{ fontWeight: 600, color: 'var(--uui-text-primary)' }}>{sme.drawnAmount}</div>
+                </div>
+                <div>
                   <div style={{ color: 'var(--uui-text-tertiary)' }}>Sector</div>
                   <div style={{ fontWeight: 600, color: 'var(--uui-text-primary)' }}>{sme.sector}</div>
                 </div>
-              </div>
-              <div style={{ height: '4px', background: 'var(--uui-neutral-60)', borderRadius: '2px', marginTop: '9px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${sme.riskScore}%`, background: riskColors[sme.riskCategory], transition: 'width 0.3s' }} />
               </div>
             </div>
           ))

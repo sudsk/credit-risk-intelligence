@@ -5,6 +5,7 @@ export interface SME {
   riskScore: number;
   riskCategory: 'critical' | 'medium' | 'stable';
   exposure: string;
+  drawnAmount: string;
   sector: string;
   geography: string;
   trend: 'up' | 'down' | 'stable';
