@@ -72,6 +72,7 @@ function mapSMEResponse(sme: any): any {
     riskScore: sme.risk_score,
     riskCategory: sme.risk_category,
     exposure: formatExposure(sme.exposure),
+    drawnAmount: formatExposure(sme.drawn_amount ?? 0),
     sector: sme.sector,
     geography: sme.geography,
     trend: sme.trend,
@@ -351,7 +352,7 @@ export const scenariosAPI = {
   getScenarios: async (): Promise<Scenario[]> => {
     try {
       const { data } = await api.get('/api/v1/scenarios');
-      return (data.scenarios ?? []).map((s: any) =>
+      return (Array.isArray(data) ? data : (data.scenarios ?? [])).map((s: any) =>
         mapJobResultToScenario(s.name ?? s.description ?? 'Scenario', s.result ?? s)
       );
     } catch {
@@ -417,8 +418,7 @@ function mapAlertResponse(raw: any): Alert {
     affected_count: a.affected_count ?? 1,
     smeId: a.sme_id ?? '',
     smeName: a.sme_name ?? '',
-    exposure: formatExposure(sme.exposure),
-    drawnAmount: formatExposure(sme.drawn_amount ?? 0),
+    exposure: formatExposure(a.exposure ?? 0),
     title: a.title ?? a.event_type ?? 'Alert',
     summary: a.summary ?? a.event_summary ?? '',
     signals,
