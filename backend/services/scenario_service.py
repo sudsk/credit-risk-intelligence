@@ -116,7 +116,7 @@ class ScenarioService:
         elif scenario_type in ("eba_2025_adverse", "eba_adverse"):
             return await self._simulate_eba_2025_adverse(parameters)
         elif scenario_type in ("geopolitical", "climate_transition", "regulation"):
-            return await self._simulate_macro_shock(parameters)
+            return await self._simulate_macro_shock(parameters, scenario_type=scenario_type)
         else:
             raise ValueError(f"Unknown scenario type: {scenario_type}")
 
@@ -279,13 +279,19 @@ class ScenarioService:
         )
 
     async def _simulate_macro_shock(
-        self, params: Dict[str, Any]
+        self, params: Dict[str, Any], scenario_type: str = "geopolitical"
     ) -> Dict[str, Any]:
         """Generic handler for geopolitical, climate, regulation scenarios."""
         gdp_change    = float(params.get("gdp_change", -2.0))
         unemp         = float(params.get("unemployment_change", 1.0))
         severity      = float(params.get("severity", 0.5))
-        scenario_name = params.get("scenario_name", "Macro Shock")
+
+        name_map = {
+            "geopolitical":       "Geopolitical / Trade Tariffs",
+            "climate_transition": "Climate Transition Shock (Fit-for-55)",
+            "regulation":         "Regulatory Shock",
+        }        
+        scenario_name = params.get("scenario_name", name_map.get(scenario_type, "Macro Shock"))
 
         base_pd_increase = (
             abs(gdp_change) * GDP_PD_FACTOR +
@@ -454,7 +460,7 @@ class ScenarioService:
             "year1":          round(additional_el_year1),
             "year2":          round(additional_el_year2),
             "year3":          round(additional_el_year3),
-            "lgd_assumption": LGD,
+            "lgdAssumption": LGD,
             "note": "Estimated — based on EAD × PD uplift × LGD. Not a full Basel stress model.",
         }
 

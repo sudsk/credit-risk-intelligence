@@ -261,7 +261,6 @@ async def run_scenario(request: ScenarioRequest):
         logger.error(f"Scenario start error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/api/v1/scenarios/{job_id}/status")
 async def get_scenario_status(job_id: str):
     """Poll scenario job status. When status == 'completed', result is included."""
@@ -269,64 +268,6 @@ async def get_scenario_status(job_id: str):
     if job is None:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
     return job
-
-
-@app.get("/api/v1/scenarios/templates")
-async def get_scenario_templates():
-    """Available scenario templates with parameter descriptions."""
-    return {
-        "templates": [
-            {
-                "scenario_type": "interest_rate",
-                "name": "Interest Rate Shock",
-                "description": "Apply bank's interest rate stress vectors to portfolio",
-                "parameters": {
-                    "rate_increase_bps": {
-                        "type": "number",
-                        "description": "Rate increase in basis points",
-                        "default": 200,
-                        "options": [100, 200, 300],
-                    }
-                },
-            },
-            {
-                "scenario_type": "sector_shock",
-                "name": "Sector-Specific Shock",
-                "description": "Simulate downturn in a specific sector",
-                "parameters": {
-                    "sector": {
-                        "type": "string",
-                        "options": ["Retail/Fashion", "Construction", "Food/Hospitality", "Manufacturing", "Software/Technology"],
-                        "example": "Retail/Fashion",
-                    },
-                    "revenue_impact_pct": {"type": "number", "default": -20},
-                },
-            },
-            {
-                "scenario_type": "recession",
-                "name": "Economic Recession",
-                "description": "Apply bank's recession stress vectors",
-                "parameters": {
-                    "severity": {
-                        "type": "string",
-                        "options": ["mild", "moderate", "severe"],
-                        "default": "moderate",
-                    },
-                    "duration_months": {"type": "number", "default": 12},
-                },
-            },
-            {
-                "scenario_type": "regulation",
-                "name": "Regulatory Change",
-                "description": "Simulate impact of new regulation on affected sectors",
-                "parameters": {
-                    "regulation": {"type": "string", "example": "Hemp Products Ban"},
-                    "affected_sectors": {"type": "array", "example": ["Food/Hospitality"]},
-                    "revenue_at_risk_pct": {"type": "number", "default": 30},
-                },
-            },
-        ]
-    }
 
 
 # ---------------------------------------------------------------------------
@@ -379,7 +320,7 @@ async def calculate_scenario_impact(request: Dict[str, Any]):
             scenario_type, parameters
         )
         # Filter to only the requested SME IDs
-        all_impacted = result.get("top_impacted_smes", result.get("impacted_smes", []))
+        all_impacted = result.get("topImpacted", result.get("top_impacted", []))
         filtered = [s for s in all_impacted if s.get("id") in set(sme_ids)]
         result["sme_impacts"] = filtered
         return result

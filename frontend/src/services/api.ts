@@ -364,12 +364,36 @@ export const scenariosAPI = {
    * POST /api/v1/scenarios/run  { description }  → { job_id }
    * then poll GET /api/v1/scenarios/:job_id/status until status === 'completed'
    */
-  createScenario: async (description: string): Promise<Scenario> => {
-    const { data } = await api.post('/api/v1/scenarios/run', { description });
-    const jobId = data.job_id;
-    if (!jobId) throw new Error('Backend did not return a job_id');
-    const result = await pollScenarioJob(jobId);
-    return mapJobResultToScenario(description, result);
+  createScenario: async (
+    description: string,
+    scenarioType?: string,
+    parameters?: Record<string, any>
+  ): Promise<Scenario> => {
+    if (scenarioType) {
+      // ── Structured path: templates ─────────────────────────────────
+      // We already have type + params — hit the scenario service directly
+      const { data } = await api.post('/api/v1/scenarios/run', {
+        scenario_type: scenarioType,
+        parameters: parameters ?? {},
+      });
+      const jobId = data.job_id;
+      if (!jobId) throw new Error('Backend did not return a job_id');
+      const result = await pollScenarioJob(jobId);
+      return mapJobResultToScenario(description, result);
+
+    } else {
+      // ── NL path: custom scenario ───────────────────────────────────
+      // Let the agent parse the intent, run the scenario, return job_id
+      const { data } = await api.post('/api/v1/chat', {
+        query: `Run stress test scenario: ${description}`,
+        session_id: `scenario_${Date.now()}`,
+      });
+      // Agent returns job_id in its response
+      const jobId = data.job_id ?? data.answer?.match(/[0-9a-f-]{36}/)?.[0];
+      if (!jobId) throw new Error('Agent did not return a job_id');
+      const result = await pollScenarioJob(jobId);
+      return mapJobResultToScenario(description, result);
+    }
   },
 
   getScenarioById: async (id: string): Promise<Scenario> => {
@@ -386,11 +410,11 @@ export const scenariosAPI = {
 // POST /api/v1/chat  (backend proxies to agents:8081/chat)
 export const chatAPI = {
   sendMessage: async (message: string, sessionId: string = 'default') => {
-    const { data } = await api.post('/api/v1/chat', { message, session_id: sessionId });
+    const { data } = await api.post('/api/v1/chat', { query: message, session_id: sessionId });
     return {
       id: `msg_${Date.now()}`,
       role: 'assistant' as const,
-      content: data.response,
+      content: data.answer ?? data.response ?? '',
       timestamp: new Date().toISOString(),
     };
   },

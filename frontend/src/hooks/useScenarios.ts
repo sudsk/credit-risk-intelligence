@@ -20,7 +20,11 @@ export const useScenarios = () => {
 
   // Create scenario mutation
   const createMutation = useMutation({
-    mutationFn: scenariosAPI.createScenario,
+    mutationFn: ({ description, scenarioType, parameters }: {
+      description: string;
+      scenarioType?: string;
+      parameters?: Record<string, any>;
+    }) => scenariosAPI.createScenario(description, scenarioType, parameters),
     onSuccess: (newScenario) => {
       dispatch(addScenario(newScenario));
     },
@@ -36,14 +40,19 @@ export const useScenarios = () => {
     dispatch(setLoading(isLoading));
   }, [isLoading, dispatch]);
 
-  const createScenario = (description: string) => {
-    return createMutation.mutateAsync(description);
+  const createScenario = (
+    description: string,
+    scenarioType?: string,
+    parameters?: Record<string, any>,
+  ) => {
+    return createMutation.mutateAsync({ description, scenarioType, parameters });
   };
 
   return {
     scenarios,
     selectedScenario,
     isLoading,
+    isRunning: createMutation.isPending,
     createScenario,
   };
 };

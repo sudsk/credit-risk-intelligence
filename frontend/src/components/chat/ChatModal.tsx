@@ -16,10 +16,13 @@ const ChatModal = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isTyping])
 
+  const welcomeSentRef = useRef(false)
+
   useEffect(() => {
-    if (messages.length === 0) {
+    if (!welcomeSentRef.current && messages.length === 0) {
+      welcomeSentRef.current = true
       dispatch(addMessage({
-        id: 'initial',
+        id: 'welcome_msg',          // renamed — 'initial' was colliding
         role: 'assistant',
         content: `Hello! I'm your Credit Risk AI Assistant. I have access to your portfolio of 1,284 SMEs and can help you with:\n\n- Analyzing specific SME health and risk factors\n- Running what-if scenarios on your portfolio\n- Collecting news and sentiment for any SME\n- Creating tasks and investigations\n- Answering questions about your portfolio metrics\n\nWhat would you like to know?`,
         timestamp: new Date().toISOString(),
@@ -76,7 +79,7 @@ const ChatModal = () => {
             <div style={{ padding: '10px 14px', background: 'var(--uui-neutral-70)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)' }}>
               <div style={{ display: 'flex', gap: '4px' }}>
                 {[0, 150, 300].map((delay) => (
-                  <span key={delay} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--uui-text-tertiary)', display: 'inline-block', animation: 'bounce 1.4s infinite', animationDelay: `${delay}ms` }} />
+                  <span key={`dot_${delay}`} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--uui-text-tertiary)', display: 'inline-block', animation: 'bounce 1.4s infinite', animationDelay: `${delay}ms` }} />
                 ))}
               </div>
             </div>

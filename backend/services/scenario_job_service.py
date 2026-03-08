@@ -55,8 +55,14 @@ class ScenarioJobService:
         try:
             _jobs[job_id]["progress"] = 10
             logger.info(f"Running scenario job {job_id}")
-
+            # Small yield so the 10% registers in a poll before calc starts
+            await asyncio.sleep(0)
+            
             result = await self.scenario_service.run_scenario(scenario_type, parameters)
+
+            # Sanitise any residual numpy types via JSON round-trip
+            result = json.loads(json.dumps(result, default=str))
+            _jobs[job_id]["progress"] = 90  
 
             _jobs[job_id].update({
                 "status": "completed",
@@ -87,12 +93,12 @@ class ScenarioJobService:
         return job["result"]
 
     def get_all_jobs(self) -> list:
-            """Return all jobs sorted newest first — used by GET /api/v1/scenarios."""
-            return sorted(
-                _jobs.values(),
-                key=lambda j: j["created_at"],
-                reverse=True,
-            )
+        """Return all jobs sorted newest first — used by GET /api/v1/scenarios."""
+        return sorted(
+            list(_jobs.values()),
+            key=lambda j: j["created_at"],
+            reverse=True,
+        )
 
 _scenario_job_service = None
 

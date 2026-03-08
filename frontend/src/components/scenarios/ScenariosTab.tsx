@@ -88,13 +88,12 @@ function buildDescription(template: typeof SCENARIO_TEMPLATES[0], params: Record
 
 // ── Component ──────────────────────────────────────────────────────────────
 const ScenariosTab = () => {
-  const { scenarios, isLoading, createScenario } = useScenarios()
+  const { scenarios, isLoading, createScenario, isRunning } = useScenarios()
 
   const [selectedTemplateId, setSelectedTemplateId] = useState('eba_2025_adverse')
   const [params, setParams] = useState<Record<string, number>>(SCENARIO_TEMPLATES[0].params)
   const [sector, setSector] = useState(SECTORS[0])
   const [customText, setCustomText] = useState('')
-  const [isRunning, setIsRunning] = useState(false)
 
   const template = SCENARIO_TEMPLATES.find(t => t.id === selectedTemplateId)!
 
@@ -113,13 +112,15 @@ const ScenariosTab = () => {
       ? (customText.trim() || buildDescription(template, params, template.hasSector ? sector : undefined))
       : buildDescription(template, params, template.hasSector ? sector : undefined)
     if (!description.trim()) return
-    setIsRunning(true)
+
     try {
-      await createScenario(description)
+      await createScenario(
+        description,
+        template.isCustom ? undefined : template.id,
+        template.isCustom ? undefined : params,
+      )
     } catch (e) {
       console.error('Scenario failed:', e)
-    } finally {
-      setIsRunning(false)
     }
   }
 
