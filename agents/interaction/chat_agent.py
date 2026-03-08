@@ -63,16 +63,6 @@ def make_chat_tools(config):
     return [run_scenario, get_portfolio_summary]
 
 
-async def inject_context(callback_context, **kwargs):
-    """Before-agent callback: inject current timestamp into session state."""
-    logger.info("inject_context callback fired")
-    now = datetime.now()
-    callback_context.state["current_time"] = now.strftime("%A, %Y-%m-%d %H:%M")
-    callback_context.state["analysis_date"] = now.strftime("%Y-%m-%d")
-    logger.info(f"inject_context state set: {callback_context.state}")
-    return None
-
-
 class ChatAgent:
     """Credit Risk Chat Assistant Agent using ADK with MCPToolset"""
 
@@ -96,7 +86,6 @@ class ChatAgent:
             description="Credit Risk AI Assistant for SME portfolio analysis",
             instruction=CHAT_SYSTEM_INSTRUCTION,
             tools=[mcp_toolset, *extra_tools],
-            before_agent_callback=[inject_context],
         )
 
         self.session_service = InMemorySessionService()
