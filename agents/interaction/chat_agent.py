@@ -134,6 +134,7 @@ class ChatAgent:
                 session_id=session_id,
                 new_message=content,
             ):
+                logger.info(f"ADK event: author={event.author}, is_final={event.is_final_response()}, has_content={event.content is not None}, type={type(event).__name__}")
                 if event.is_final_response():
                     if event.content and event.content.parts:
                         final_response = event.content.parts[0].text
