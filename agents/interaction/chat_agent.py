@@ -37,7 +37,7 @@ def make_chat_tools(config):
         async with httpx.AsyncClient(timeout=60.0) as http:
             try:
                 response = await http.post(
-                    f"{config.backend_api_url}/api/v1/scenarios",
+                    f"{config.backend_api_url}/api/v1/scenarios/run",
                     json={"description": description},
                 )
                 response.raise_for_status()
@@ -110,11 +110,15 @@ class ChatAgent:
         logger.info(f"Processing query for session {session_id}: {user_query}")
 
         try:
-            session = await self.session_service.get_session(
-                app_name="credit_risk_chat",
-                user_id="user",
-                session_id=session_id,
-            )
+            try:
+                session = await self.session_service.get_session(
+                    app_name="credit_risk_chat",
+                    user_id="user",
+                    session_id=session_id,
+                )
+            except Exception:
+                session = None    
+
             if session is None:
                 await self.session_service.create_session(
                     app_name="credit_risk_chat",
@@ -131,7 +135,8 @@ class ChatAgent:
                 new_message=content,
             ):
                 if event.is_final_response():
-                    final_response = event.content.parts[0].text
+                    if event.content and event.content.parts:
+                        final_response = event.content.parts[0].text
                     break
 
             return final_response or "No response generated"
