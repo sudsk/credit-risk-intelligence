@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Any, Dict
 
 import httpx
+import vertexai  
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -68,6 +69,12 @@ class ChatAgent:
 
     def __init__(self):
         self.config = get_config()
+
+        vertexai.init(
+            project=self.config.project_id,
+            location=self.config.location,
+        )
+        logger.info(f"Vertex AI initialised: project={self.config.project_id}, location={self.config.location}")
 
         # MCPToolset gives the agent direct access to all 24 data_server tools.
         # No MCPClient wrapper needed — ADK handles discovery and invocation.

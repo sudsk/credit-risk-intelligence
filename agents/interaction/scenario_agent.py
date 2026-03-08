@@ -7,6 +7,7 @@ import logging
 from typing import Any, Dict, List
 
 import httpx
+import vertexai
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -155,6 +156,12 @@ class ScenarioAgent:
 
     def __init__(self):
         self.config = get_config()
+
+        vertexai.init(
+            project=self.config.project_id,
+            location=self.config.location,
+        )
+        logger.info(f"Vertex AI initialised: project={self.config.project_id}, location={self.config.location}")
 
         mcp_toolset = MCPToolset(
             connection_params=StreamableHTTPConnectionParams(

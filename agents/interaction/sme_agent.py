@@ -7,6 +7,7 @@ import logging
 from typing import Any, Dict
 
 import httpx
+import vertexai
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -77,6 +78,13 @@ class SMEAnalysisAgent:
 
     def __init__(self):
         self.config = get_config()
+
+        vertexai.init(
+            project=self.config.project_id,
+            location=self.config.location,
+        )
+        logger.info(f"Vertex AI initialised: project={self.config.project_id}, location={self.config.location}")
+        
 
         # MCPToolset gives the agent direct access to all 24 data_server tools:
         # assess_financial_health, get_revenue_trend, get_liquidity_analysis,
