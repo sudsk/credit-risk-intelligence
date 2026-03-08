@@ -372,6 +372,11 @@ export const scenariosAPI = {
     if (scenarioType) {
       // ── Structured path: templates ─────────────────────────────────
       // We already have type + params — hit the scenario service directly
+      console.log('POST /api/v1/scenarios/run payload:', {
+        scenario_type: scenarioType,
+        parameters: parameters ?? {},
+      });
+
       const { data } = await api.post('/api/v1/scenarios/run', {
         scenario_type: scenarioType,
         parameters: parameters ?? {},
