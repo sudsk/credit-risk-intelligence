@@ -28,21 +28,30 @@ def make_chat_tools(config):
     assess_financial_health, get_recent_events, assess_news_risk, etc. natively.
     """
 
-    async def run_scenario(description: str) -> Dict[str, Any]:
-        """Run what-if scenario analysis on the SME portfolio.
+    async def run_scenario(
+        scenario_type: str,
+        parameters: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """Run a stress test scenario on the SME portfolio.
 
         Args:
-            description: Scenario description (e.g. 'What if interest rates rise 1%?')
+            scenario_type: One of: interest_rate, sector_shock, recession,
+                        eba_2025_adverse, geopolitical, climate_transition
+            parameters: Dict of scenario parameters e.g.
+                        {"rate_change": 50} for interest_rate
+                        {"gdp_change": -3.5, "unemployment_change": 3.0} for recession
+                        {"sector": "Retail/Fashion", "severity": 0.7} for sector_shock
         """
-        logger.info(f"Running scenario: {description}")
+        logger.info(f"Running scenario: {scenario_type} {parameters}")
         async with httpx.AsyncClient(timeout=60.0) as http:
             try:
                 response = await http.post(
                     f"{config.backend_api_url}/api/v1/scenarios/run",
-                    json={"description": description},
+                    json={"scenario_type": scenario_type, "parameters": parameters},
                 )
                 response.raise_for_status()
-                return response.json()
+                data = response.json()
+                return {"job_id": data.get("job_id"), "status": data.get("status")}
             except Exception as e:
                 logger.error(f"Scenario creation failed: {e}")
                 return {"error": str(e)}
