@@ -58,7 +58,7 @@ DATA_DIR = Path(__file__).parent.parent.parent / "mcp-servers" / "data"
 SMES_CSV = DATA_DIR / "smes.csv"
 
 # Load SME data once at module level
-smes_df = pd.read_csv(SMES_CSV)
+smes_df = pd.read_csv(SMES_CSV, dtype={'id': str})
 
 
 class RiskEngine:

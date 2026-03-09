@@ -16,7 +16,7 @@ class PortfolioService:
     """Service for portfolio-level operations and SME queries."""
     
     def __init__(self):
-        self.smes_df = pd.read_csv(SMES_CSV)
+        self.smes_df = pd.read_csv(SMES_CSV, dtype={'id': str})
         self.risk_engine = get_risk_engine()
     
     async def get_portfolio_summary(self) -> Dict[str, Any]:
@@ -156,7 +156,7 @@ class PortfolioService:
         smes = []
         for _, row in df.iterrows():
             smes.append({
-                "id": row['id'],
+                "id": str(row['id']),
                 "name": row['name'],
                 "risk_score": int(row['risk_score']),
                 "risk_category": row['risk_category'],

@@ -15,7 +15,6 @@ export const useScenarios = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['scenarios'],
     queryFn: scenariosAPI.getScenarios,
-    refetchInterval: 5000, // Refresh every 5 seconds to catch progress updates
   });
 
   // Create scenario mutation

@@ -96,7 +96,7 @@ class ScenarioService:
     """
 
     def __init__(self):
-        self.smes_df = pd.read_csv(SMES_CSV)
+        self.smes_df = pd.read_csv(SMES_CSV, dtype={'id': str})
         logger.info(f"ScenarioService initialised — {len(self.smes_df)} SMEs loaded")
 
     async def run_scenario(
