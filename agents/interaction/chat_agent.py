@@ -117,36 +117,27 @@ class ChatAgent:
                 )
             except Exception:
                 session = None    
-            logger.info(f"Session lookup result: {session}")
+
             if session is None:
-                logger.info(f"Session not found, creating new session")
                 await self.session_service.create_session(
                     app_name="credit_risk_chat",
                     user_id="user",
                     session_id=session_id,
                 )
-                logger.info(f"Session created: {session_id}")
 
             content = Content(parts=[Part(text=user_query)], role="user")
-            logger.info(f"Content created, starting runner.run_async")
             final_response = None
 
-            event_count = 0
             async for event in self.runner.run_async(
                 user_id="user",
                 session_id=session_id,
                 new_message=content,
             ):
-                event_count += 1
-                logger.info(f"ADK event: author={event.author}, is_final={event.is_final_response()}, has_content={event.content is not None}, type={type(event).__name__}")
-                logger.info(f"ADK event raw: {vars(event)}")
-
                 if event.is_final_response():
                     if event.content and event.content.parts:
                         final_response = event.content.parts[0].text
                     break
 
-            logger.info(f"Runner finished — total events: {event_count}, final_response set: {final_response is not None}")
             return final_response or "No response generated"
 
         except Exception as e:
