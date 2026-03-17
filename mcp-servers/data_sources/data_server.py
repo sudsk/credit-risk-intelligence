@@ -20,13 +20,13 @@ from fastmcp import FastMCP
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 # Load all CSVs once at startup
-companies_df  = pd.read_csv(DATA_DIR / "company_info.csv")
-financial_df  = pd.read_csv(DATA_DIR / "financial_data.csv")
-employees_df  = pd.read_csv(DATA_DIR / "employees.csv")
-departures_df = pd.read_csv(DATA_DIR / "departures.csv")
-news_df       = pd.read_csv(DATA_DIR / "news_events.csv")
-traffic_df    = pd.read_csv(DATA_DIR / "web_traffic.csv")
-smes_df       = pd.read_csv(DATA_DIR / "smes.csv", dtype={'id': str})
+companies_df  = pd.read_csv(DATA_DIR / "company_info.csv",   dtype={'sme_id': str})
+financial_df  = pd.read_csv(DATA_DIR / "financial_data.csv", dtype={'sme_id': str})
+employees_df  = pd.read_csv(DATA_DIR / "employees.csv",      dtype={'sme_id': str})
+departures_df = pd.read_csv(DATA_DIR / "departures.csv",     dtype={'sme_id': str})
+news_df       = pd.read_csv(DATA_DIR / "news_events.csv",    dtype={'sme_id': str})
+traffic_df    = pd.read_csv(DATA_DIR / "web_traffic.csv",    dtype={'sme_id': str})
+smes_df       = pd.read_csv(DATA_DIR / "smes.csv",           dtype={'id': str})
 
 # Parse date columns once
 news_df['event_date']      = pd.to_datetime(news_df['event_date'])

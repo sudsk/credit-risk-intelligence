@@ -192,7 +192,7 @@ class PortfolioService:
             Complete SME profile with risk breakdown
         """
         # Get base SME data
-        sme_row = self.smes_df[self.smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
+        sme_row = self.smes_df[self.smes_df['id'] == sme_id]
 
         if sme_row.empty:
             raise ValueError(f"SME {sme_id} not found")
