@@ -1,3 +1,4 @@
+import ReactMarkdown from 'react-markdown'
 import { formatRelativeTime } from '@/utils/formatters'
 import type { ChatMessage as ChatMessageType } from '@/services/types'
 
@@ -29,9 +30,25 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           color: 'var(--uui-text-primary)',
           fontSize: '13px',
           lineHeight: 1.5,
-          whiteSpace: 'pre-wrap',
         }}>
-          {message.content}
+          {isUser ? (
+            message.content
+          ) : (
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p style={{ margin: '0 0 8px 0' }}>{children}</p>,
+                ul: ({ children }) => <ul style={{ margin: '4px 0', paddingLeft: '18px' }}>{children}</ul>,
+                ol: ({ children }) => <ol style={{ margin: '4px 0', paddingLeft: '18px' }}>{children}</ol>,
+                li: ({ children }) => <li style={{ margin: '2px 0' }}>{children}</li>,
+                strong: ({ children }) => <strong style={{ color: 'var(--uui-text-primary)', fontWeight: 600 }}>{children}</strong>,
+                h3: ({ children }) => <h3 style={{ fontSize: '13px', fontWeight: 700, margin: '8px 0 4px 0' }}>{children}</h3>,
+                h4: ({ children }) => <h4 style={{ fontSize: '13px', fontWeight: 600, margin: '6px 0 4px 0' }}>{children}</h4>,
+                code: ({ children }) => <code style={{ fontFamily: 'var(--uui-font-mono)', fontSize: '12px', background: 'var(--uui-neutral-80)', padding: '1px 4px', borderRadius: '3px' }}>{children}</code>,
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          )}
         </div>
         <span style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)', marginTop: '4px' }}>
           {formatRelativeTime(message.timestamp)}
