@@ -163,7 +163,7 @@ def get_financial_metrics(sme_id: str) -> dict:
         "net_margin": f"{float(data['net_margin']) * 100:.1f}%",
         "revenue_growth_yoy": f"{float(data['revenue_growth_yoy']):.1f}%",
         "revenue_growth_qoq": f"{float(data['revenue_growth_qoq']):.1f}%",
-        "current_ratio": round(float(data['current_ratio']), 2),
+        "current_ratio": round(float(data['quick_ratio']), 2),
         "debt_to_equity": round(float(data['debt_to_equity']), 2),
         "interest_coverage": round(float(data['interest_coverage']), 2),
         "roa": f"{float(data['roa']) * 100:.1f}%",
@@ -202,7 +202,7 @@ def get_liquidity_analysis(sme_id: str) -> dict:
         return {"error": f"No liquidity data found for SME {sme_id}"}
     data = row.iloc[0]
 
-    current_ratio = float(data['current_ratio'])
+    current_ratio = float(data['quick_ratio'])
     cash_runway   = float(data['cash_runway_months'])
 
     return {
@@ -253,7 +253,7 @@ def assess_financial_health(sme_id: str) -> dict:
         "health_rating": _rate_financial_health(health_score),
         "revenue_growth_yoy": f"{float(data['revenue_growth_yoy']):.1f}%",
         "ebitda_margin": f"{float(data['ebitda_margin']) * 100:.1f}%",
-        "current_ratio": round(float(data['current_ratio']), 2),
+        "current_ratio": round(float(data['quick_ratio']), 2),
         "debt_to_equity": round(float(data['debt_to_equity']), 2),
         "cash_runway_months": round(float(data['cash_runway_months']), 1),
         "key_concerns": concerns,
@@ -796,7 +796,7 @@ def _calculate_financial_health_score(data: pd.Series) -> float:
     score          = 10
     growth_yoy     = float(data['revenue_growth_yoy'])
     ebitda_margin  = float(data['ebitda_margin']) * 100
-    current_ratio  = float(data['current_ratio'])
+    current_ratio  = float(data['quick_ratio'])
     cash_runway    = float(data['cash_runway_months'])
     debt_to_equity = float(data['debt_to_equity'])
     interest_cov   = float(data['interest_coverage'])
@@ -837,7 +837,7 @@ def _identify_financial_concerns(data: pd.Series) -> list:
     concerns       = []
     growth_yoy     = float(data['revenue_growth_yoy'])
     ebitda_margin  = float(data['ebitda_margin']) * 100
-    current_ratio  = float(data['current_ratio'])
+    current_ratio  = float(data['quick_ratio'])
     cash_runway    = float(data['cash_runway_months'])
     interest_cov   = float(data['interest_coverage'])
     debt_to_equity = float(data['debt_to_equity'])
