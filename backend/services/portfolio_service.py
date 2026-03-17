@@ -208,7 +208,7 @@ class PortfolioService:
             "employee_count": int(sme['employee_count']),
             "revenue": float(sme['revenue']),
             "ebitda": float(sme['ebitda']),
-            "debt": float(sme['debt']),
+            "debt": float(sme['total_debt']) if 'total_debt' in sme.index else 0.0,
             "cash_reserves": float(sme['cash_reserves']),
             "current_ratio": float(sme['current_ratio']),
             "debt_service_coverage": float(sme['debt_service_coverage'])

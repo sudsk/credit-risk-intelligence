@@ -26,7 +26,7 @@ employees_df  = pd.read_csv(DATA_DIR / "employees.csv")
 departures_df = pd.read_csv(DATA_DIR / "departures.csv")
 news_df       = pd.read_csv(DATA_DIR / "news_events.csv")
 traffic_df    = pd.read_csv(DATA_DIR / "web_traffic.csv")
-smes_df       = pd.read_csv(DATA_DIR / "smes.csv")
+smes_df       = pd.read_csv(DATA_DIR / "smes.csv", dtype={'id': str})
 
 # Parse date columns once
 news_df['event_date']      = pd.to_datetime(news_df['event_date'])
@@ -474,7 +474,7 @@ def assess_news_risk(sme_id: str) -> dict:
 @mcp.tool()
 def get_payment_behavior(sme_id: str) -> dict:
     """Get payment behavior and late payment trends"""
-    row = smes_df[smes_df['sme_id'] == sme_id]
+    row = smes_df[smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
     if row.empty:
         return {"error": f"No payment data found for SME {sme_id}"}
     data = row.iloc[0]
@@ -495,7 +495,7 @@ def get_payment_behavior(sme_id: str) -> dict:
 @mcp.tool()
 def get_transaction_volume(sme_id: str) -> dict:
     """Get transaction volume trends"""
-    row = smes_df[smes_df['sme_id'] == sme_id]
+    row = smes_df[smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
     if row.empty:
         return {"error": f"No transaction data found for SME {sme_id}"}
     data = row.iloc[0]
@@ -519,7 +519,7 @@ def get_transaction_volume(sme_id: str) -> dict:
 @mcp.tool()
 def get_payment_health(sme_id: str) -> dict:
     """Overall payment health assessment"""
-    row = smes_df[smes_df['sme_id'] == sme_id]
+    row = smes_df[smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
     if row.empty:
         return {"error": f"No payment health data found for SME {sme_id}"}
     data = row.iloc[0]
@@ -545,7 +545,7 @@ def get_payment_health(sme_id: str) -> dict:
 @mcp.tool()
 def check_payment_stress_signals(sme_id: str) -> dict:
     """Detect payment stress signals (extending payment terms, late patterns)"""
-    row = smes_df[smes_df['sme_id'] == sme_id]
+    row = smes_df[smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
     if row.empty:
         return {"error": f"No payment stress data found for SME {sme_id}"}
     data = row.iloc[0]
@@ -663,7 +663,26 @@ def assess_digital_presence(sme_id: str) -> dict:
         "risk_contribution": f"Adds {_digital_risk_points(presence_score)} points to overall risk score",
     }
 
-
+@mcp.tool()
+def find_sme_by_name(name: str) -> dict:
+    """Find SME ID and basic info by company name (case-insensitive partial match).
+    Always call this first when a user refers to an SME by name rather than ID.
+    
+    Args:
+        name: Company name or partial name e.g. 'TechStart' or 'TechStart Solutions'
+    """
+    matches = smes_df[smes_df['name'].str.contains(name, case=False, na=False)]
+    if matches.empty:
+        return {"error": f"No SME found matching '{name}'"}
+    row = matches.iloc[0]
+    return {
+        "sme_id": str(row['id']),
+        "name": str(row['name']),
+        "risk_score": int(row['risk_score']),
+        "risk_category": str(row['risk_category']),
+        "sector": str(row['sector']),
+    }
+    
 # ===========================================================================
 # HELPER FUNCTIONS — Companies House
 # ===========================================================================
