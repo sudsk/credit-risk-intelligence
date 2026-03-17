@@ -474,103 +474,74 @@ def assess_news_risk(sme_id: str) -> dict:
 @mcp.tool()
 def get_payment_behavior(sme_id: str) -> dict:
     """Get payment behavior and late payment trends"""
-    row = smes_df[smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
+    row = financial_df[financial_df['sme_id'] == sme_id]
     if row.empty:
         return {"error": f"No payment data found for SME {sme_id}"}
     data = row.iloc[0]
-
-    late_payments = int(data['late_payments_6m'])
-    avg_days_late = int(data['avg_days_late'])
-
     return {
         "sme_id": sme_id,
-        "days_payable_outstanding": int(data['days_payable_outstanding']),
-        "late_payments_6m": late_payments,
-        "avg_days_late": avg_days_late,
-        "payment_behavior_rating": _rate_payment_behavior(late_payments, avg_days_late),
-        "payment_risk_level": _assess_payment_risk(late_payments, avg_days_late),
+        "payment_days_avg": int(data['payment_days_avg']),
+        "payment_days_trend": str(data['payment_days_trend']),
+        "payment_behavior_rating": _rate_payment_days(int(data['payment_days_avg'])),
     }
 
 
 @mcp.tool()
 def get_transaction_volume(sme_id: str) -> dict:
-    """Get transaction volume trends"""
-    row = smes_df[smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
+    """Get transaction volume trends from quarterly revenue"""
+    row = financial_df[financial_df['sme_id'] == sme_id]
     if row.empty:
         return {"error": f"No transaction data found for SME {sme_id}"}
     data = row.iloc[0]
-
-    current_monthly  = int(data['transaction_volume_q4']) / 3
-    previous_monthly = int(data['transaction_volume_q3']) / 3
-    pct_change = ((current_monthly - previous_monthly) / previous_monthly * 100) if previous_monthly > 0 else 0
-
+    q3 = int(data['revenue_q3'])
+    q4 = int(data['revenue_q4'])
+    pct_change = ((q4 - q3) / q3 * 100) if q3 > 0 else 0
     return {
         "sme_id": sme_id,
-        "transaction_volume_q4": int(data['transaction_volume_q4']),
-        "transaction_volume_q3": int(data['transaction_volume_q3']),
-        "avg_monthly_current": round(current_monthly),
-        "avg_monthly_previous": round(previous_monthly),
+        "revenue_q3": f"€{q3:,}",
+        "revenue_q4": f"€{q4:,}",
         "pct_change_qoq": round(pct_change, 1),
         "volume_trend": _assess_volume_trend(pct_change),
-        "velocity_rating": _rate_transaction_velocity(current_monthly, pct_change),
     }
 
 
 @mcp.tool()
 def get_payment_health(sme_id: str) -> dict:
     """Overall payment health assessment"""
-    row = smes_df[smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
+    row = financial_df[financial_df['sme_id'] == sme_id]
     if row.empty:
         return {"error": f"No payment health data found for SME {sme_id}"}
     data = row.iloc[0]
-
-    late_payments = int(data['late_payments_6m'])
-    avg_days_late = int(data['avg_days_late'])
-    dpo           = int(data['days_payable_outstanding'])
-    health_score  = _calculate_payment_health_score(late_payments, avg_days_late, dpo)
-    concerns      = _identify_payment_concerns(late_payments, avg_days_late, dpo)
-
+    avg_days = int(data['payment_days_avg'])
+    trend    = str(data['payment_days_trend'])
     return {
         "sme_id": sme_id,
-        "payment_health_score": round(health_score, 1),
-        "health_rating": _rate_payment_health(health_score),
-        "late_payments_6m": late_payments,
-        "avg_days_late": avg_days_late,
-        "days_payable_outstanding": dpo,
-        "key_concerns": concerns,
-        "risk_contribution": f"Adds {_payment_risk_points(health_score)} points to overall risk score",
+        "payment_days_avg": avg_days,
+        "payment_days_trend": trend,
+        "payment_health_rating": _rate_payment_days(avg_days),
+        "trend_signal": "⚠️ Payment terms extending" if trend == "increasing" else "✅ Payment terms stable or improving",
     }
 
 
 @mcp.tool()
 def check_payment_stress_signals(sme_id: str) -> dict:
-    """Detect payment stress signals (extending payment terms, late patterns)"""
-    row = smes_df[smes_df['id'].astype(str).str.zfill(4) == str(sme_id).zfill(4)]
+    """Detect payment stress signals"""
+    row = financial_df[financial_df['sme_id'] == sme_id]
     if row.empty:
         return {"error": f"No payment stress data found for SME {sme_id}"}
     data = row.iloc[0]
-
-    late_payments = int(data['late_payments_6m'])
-    avg_days_late = int(data['avg_days_late'])
-    dpo           = int(data['days_payable_outstanding'])
-
-    stress_signals = []
-    if late_payments >= 5:
-        stress_signals.append(f"Frequent late payments: {late_payments} in 6 months")
-    if avg_days_late > 15:
-        stress_signals.append(f"Significantly late on average: {avg_days_late} days")
-    if dpo > 60:
-        stress_signals.append(f"Extended payment terms: DPO {dpo} days")
-
-    stress_level = "HIGH" if len(stress_signals) >= 2 else ("MEDIUM" if stress_signals else "LOW")
-
+    avg_days = int(data['payment_days_avg'])
+    trend    = str(data['payment_days_trend'])
+    signals  = []
+    if avg_days > 60:   signals.append(f"Extended payment days: {avg_days} days average")
+    if avg_days > 45:   signals.append(f"Above standard payment terms: {avg_days} days")
+    if trend == "increasing": signals.append("Payment terms are extending — deterioration signal")
     return {
         "sme_id": sme_id,
-        "stress_level": stress_level,
-        "stress_signals": stress_signals,
-        "late_payments_6m": late_payments,
-        "avg_days_late": avg_days_late,
-        "days_payable_outstanding": dpo,
+        "stress_level": "HIGH" if len(signals) >= 2 else ("MEDIUM" if signals else "LOW"),
+        "stress_signals": signals,
+        "payment_days_avg": avg_days,
+        "payment_days_trend": trend,
     }
 
 
@@ -998,12 +969,12 @@ def _news_risk_points(score: float) -> str:
 # HELPER FUNCTIONS — Payment
 # ===========================================================================
 
-def _rate_payment_behavior(late_payments: int, avg_days_late: int) -> str:
-    if late_payments == 0:                           return "Excellent"
-    elif late_payments <= 1 and avg_days_late <= 5:  return "Good"
-    elif late_payments <= 3 and avg_days_late <= 10: return "Fair"
-    elif late_payments <= 5 and avg_days_late <= 15: return "Poor"
-    return "Critical"
+def _rate_payment_days(avg_days: int) -> str:
+    if avg_days <= 30:  return "Excellent (prompt payer)"
+    elif avg_days <= 45: return "Good (within standard terms)"
+    elif avg_days <= 60: return "Fair (slightly extended)"
+    elif avg_days <= 90: return "Poor (significantly extended)"
+    return "Critical (severely overdue)"
 
 
 def _assess_payment_risk(late_payments: int, avg_days_late: int) -> str:
