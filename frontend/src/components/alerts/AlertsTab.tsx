@@ -860,7 +860,7 @@ const AlertsTab = () => {
                         >
                           {riskAssessments[alert.id]?.isAssessing
                             ? <><Loader size={11} style={{ animation: 'spin 1s linear infinite' }} /> Assessing...</>
-                            : riskAssessments[alert.id]?.scoreBefore !== null
+                            : riskAssessments[alert.id]?.scoreBefore != null
                               ? '✓ Risk Assessed'
                               : '🤖 Assess Risk Impact'
                           }
