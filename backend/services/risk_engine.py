@@ -216,7 +216,8 @@ class RiskEngine:
         """
         dscr           = float(sme['debt_service_coverage'])
         current_ratio  = float(sme['current_ratio'])
-        debt_to_equity = float(sme['debt']) / max(float(sme['revenue']) - float(sme['debt']), 1)
+        debt_to_equity = float(sme['total_debt']) / max(float(sme['revenue']) - float(sme['total_debt']), 1)
+
 
         monthly_revenue  = float(sme['revenue']) / 12
         monthly_expenses = monthly_revenue * 0.85  # assume 15% margin
