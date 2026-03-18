@@ -89,7 +89,7 @@ function mapSMEResponse(sme: any): any {
 
     // ── Score delta ─────────────────────────────────────────────────────
     scorePrevious: sme.score_previous ?? sme.risk_score ?? 0,
-    scoreNarrative: sme.score_change_reason ?? sme.score_narrative ?? '',
+    scoreNarrative: sme.score_narrative ?? sme.score_change_reason ?? '',
     activeSignals: (sme.active_signals ?? []).map((s: any) => ({
       label: s.label ?? '',
       impact: s.impact ?? 0,

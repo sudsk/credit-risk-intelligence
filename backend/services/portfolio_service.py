@@ -203,22 +203,24 @@ class PortfolioService:
         risk_analysis = await self.risk_engine.calculate_risk_score(sme_id)
         
         # Add additional SME details
-        risk_analysis["details"] = {
-            "incorporation_date":    str(sme['incorporation_date'])       if 'incorporation_date'    in sme.index else '',
-            "employee_count":        int(sme['employee_count'])           if 'employee_count'        in sme.index else 0,
-            "revenue":               float(sme['revenue']),
-            "ebitda":                float(sme['ebitda']),
-            "debt":                  float(sme['total_debt']),
-            "cash_reserves":         float(sme['cash_reserves']),
-            "current_ratio":         float(sme['current_ratio']),
-            "debt_service_coverage": float(sme['debt_service_coverage']),
-        }
+        risk_analysis["revenue"]               = float(sme['revenue'])
+        risk_analysis["ebitda"]                = float(sme['ebitda'])
+        risk_analysis["employee_count"]        = int(sme['employee_count'])   if 'employee_count'        in sme.index else 0
+        risk_analysis["debt_service_coverage"] = float(sme['debt_service_coverage'])
+        risk_analysis["current_ratio"]         = float(sme['current_ratio'])
+        risk_analysis["cash_reserves"]         = float(sme['cash_reserves'])
+        risk_analysis["total_debt"]            = float(sme['total_debt'])
+        risk_analysis["incorporation_date"]    = str(sme['incorporation_date']) if 'incorporation_date'   in sme.index else ''
+        risk_analysis["last_review_date"]      = str(sme['last_review_date'])   if 'last_review_date'     in sme.index else ''
+
         
-        # Add trend information
-        risk_analysis["trend"] = {
-            "direction": sme['trend'],
-            "value": float(sme['trend_value'])
-        }
+        # Flatten component scores and trend 
+        risk_analysis["score_financial"]   = risk_analysis.get("components", {}).get("financial", 0)
+        risk_analysis["score_operational"] = risk_analysis.get("components", {}).get("operational", 0)
+        risk_analysis["score_market"]      = risk_analysis.get("components", {}).get("market", 0)
+        risk_analysis["score_altdata"]     = risk_analysis.get("components", {}).get("alternative_data", 0)
+        risk_analysis["trend"]             = str(sme['trend'])
+        risk_analysis["trend_value"]       = float(sme['trend_value'])
         
         return risk_analysis
     
