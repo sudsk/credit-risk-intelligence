@@ -38,10 +38,43 @@ departures_df['left_date'] = pd.to_datetime(departures_df['left_date'])
 
 mcp = FastMCP("credit-data")
 
+# ===========================================================================
+# STRESS TEST TOOLS
+# ===========================================================================
+
+@mcp.tool()
+def get_stress_vectors(scenario_type: str, parameter: str = None) -> dict:
+    """
+    Retrieve calibrated stress test vectors from the bank's published stress test library.
+    These vectors are updated annually following EBA/PRA stress test publications.
+    
+    Args:
+        scenario_type: interest_rate | recession | eba_2025_adverse | sector_shock | geopolitical | climate_transition
+        parameter: specific parameter e.g. rate_100bps, rate_200bps, moderate, severe
+    """
+    mask = vectors_df['scenario_type'] == scenario_type
+    if parameter:
+        mask = mask & (vectors_df['parameter'] == parameter)
+    rows = vectors_df[mask]
+    if rows.empty:
+        return {"error": f"No vectors found for {scenario_type} / {parameter}"}
+    return {
+        "scenario_type": scenario_type,
+        "source": rows.iloc[0]['source'],
+        "published_date": rows.iloc[0]['published_date'],
+        "vectors": rows[['sector', 'pd_increase_pct', 'multiplier']].to_dict('records'),
+    }
+
+@mcp.tool()
+def list_available_scenarios() -> dict:
+    """List all available stress test scenarios and their sources"""
+    summary = vectors_df.groupby(['scenario_type', 'scenario_name', 'source', 'published_date']).size().reset_index()
+    return {
+        "available_scenarios": summary[['scenario_type', 'scenario_name', 'source', 'published_date']].to_dict('records')
+    }
 
 # ===========================================================================
 # COMPANIES HOUSE TOOLS
-# (from companies_house_server.py — port 8001)
 # ===========================================================================
 
 @mcp.tool()

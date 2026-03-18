@@ -1,0 +1,122 @@
+scenario_type,scenario_name,source,published_date,parameter,sector,base_pd_increase_pct,multiplier,notes
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Construction,2.5,1.5,High sensitivity — variable rate debt exposure
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Retail/Fashion,2.5,1.3,Moderate-high — consumer credit dependent
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Food/Hospitality,2.5,1.25,Moderate — lease and working capital exposure
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Manufacturing,2.5,1.1,Moderate — capex financing dependent
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Marketing Services,2.5,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Transportation,2.5,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Logistics,2.5,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Software/Technology,2.5,0.8,Lower sensitivity — asset-light model
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Professional Services,2.5,0.7,Low sensitivity — low debt dependency
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Energy/Utilities,2.5,0.85,Moderate-low — regulated revenue streams
+interest_rate,Interest Rate Shock +100bps,EBA 2025 Adverse Scenario,2025-01-15,rate_100bps,Healthcare,2.5,0.6,Low sensitivity — defensive sector
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Construction,5.0,1.5,High sensitivity — variable rate debt exposure
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Retail/Fashion,5.0,1.3,Moderate-high — consumer credit dependent
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Food/Hospitality,5.0,1.25,Moderate — lease and working capital exposure
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Manufacturing,5.0,1.1,Moderate — capex financing dependent
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Marketing Services,5.0,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Transportation,5.0,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Logistics,5.0,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Software/Technology,5.0,0.8,Lower sensitivity — asset-light model
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Professional Services,5.0,0.7,Low sensitivity — low debt dependency
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Energy/Utilities,5.0,0.85,Moderate-low — regulated revenue streams
+interest_rate,Interest Rate Shock +200bps,EBA 2025 Adverse Scenario,2025-01-15,rate_200bps,Healthcare,5.0,0.6,Low sensitivity — defensive sector
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Construction,8.0,1.5,High sensitivity — variable rate debt exposure
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Retail/Fashion,8.0,1.3,Moderate-high — consumer credit dependent
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Food/Hospitality,8.0,1.25,Moderate — lease and working capital exposure
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Manufacturing,8.0,1.1,Moderate — capex financing dependent
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Marketing Services,8.0,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Transportation,8.0,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Logistics,8.0,1.0,Average sensitivity
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Software/Technology,8.0,0.8,Lower sensitivity — asset-light model
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Professional Services,8.0,0.7,Low sensitivity — low debt dependency
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Energy/Utilities,8.0,0.85,Moderate-low — regulated revenue streams
+interest_rate,Interest Rate Shock +300bps,EBA 2025 Adverse Scenario,2025-01-15,rate_300bps,Healthcare,8.0,0.6,Low sensitivity — defensive sector
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Construction,4.5,1.5,Highly cyclical — first to contract
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Retail/Fashion,3.9,1.3,Consumer discretionary — early demand drop
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Food/Hospitality,3.75,1.25,Discretionary spend reduction
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Manufacturing,3.3,1.1,Supply chain and demand sensitivity
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Marketing Services,3.0,1.0,Budget cuts in downturn
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Transportation,3.0,1.0,Linked to trade volumes
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Logistics,3.0,1.0,Linked to trade volumes
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Software/Technology,2.4,0.8,Resilient — enterprise contracts
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Professional Services,2.1,0.7,Relatively defensive
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Energy/Utilities,2.55,0.85,Regulated — partially insulated
+recession,Recession Mild,PRA 2025 Annual Cyclical Scenario,2025-03-01,mild,Healthcare,1.8,0.6,Defensive — non-discretionary
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Construction,10.5,1.5,Highly cyclical — first to contract
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Retail/Fashion,9.1,1.3,Consumer discretionary — early demand drop
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Food/Hospitality,8.75,1.25,Discretionary spend reduction
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Manufacturing,7.7,1.1,Supply chain and demand sensitivity
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Marketing Services,7.0,1.0,Budget cuts in downturn
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Transportation,7.0,1.0,Linked to trade volumes
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Logistics,7.0,1.0,Linked to trade volumes
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Software/Technology,5.6,0.8,Resilient — enterprise contracts
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Professional Services,4.9,0.7,Relatively defensive
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Energy/Utilities,5.95,0.85,Regulated — partially insulated
+recession,Recession Moderate,PRA 2025 Annual Cyclical Scenario,2025-03-01,moderate,Healthcare,4.2,0.6,Defensive — non-discretionary
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Construction,18.0,1.5,Highly cyclical — first to contract
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Retail/Fashion,15.6,1.3,Consumer discretionary — early demand drop
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Food/Hospitality,15.0,1.25,Discretionary spend reduction
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Manufacturing,13.2,1.1,Supply chain and demand sensitivity
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Marketing Services,12.0,1.0,Budget cuts in downturn
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Transportation,12.0,1.0,Linked to trade volumes
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Logistics,12.0,1.0,Linked to trade volumes
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Software/Technology,9.6,0.8,Resilient — enterprise contracts
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Professional Services,8.4,0.7,Relatively defensive
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Energy/Utilities,10.2,0.85,Regulated — partially insulated
+recession,Recession Severe,PRA 2025 Annual Cyclical Scenario,2025-03-01,severe,Healthcare,7.2,0.6,Defensive — non-discretionary
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Construction,28.5,1.6,Real estate shock amplifies construction exposure
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Retail/Fashion,23.4,1.3,Consumer demand collapse + rate pressure
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Food/Hospitality,25.0,1.4,Real estate + consumer spending double hit
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Manufacturing,19.8,1.1,Supply chain disruption + rate pressure
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Marketing Services,18.0,1.0,Discretionary budget cuts
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Transportation,18.0,1.0,Trade volume decline
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Logistics,18.0,1.0,Trade volume decline
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Software/Technology,14.4,0.8,Resilient — recurring revenue model
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Professional Services,12.6,0.7,Partially defensive
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Energy/Utilities,15.3,0.85,Regulated but macro-exposed
+eba_2025_adverse,EBA 2025 Adverse — Higher for Longer,EBA 2025 EU-Wide Stress Test,2025-01-15,combined,Healthcare,10.8,0.6,Most defensive — non-discretionary demand
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Construction,9.0,1.5,Import cost inflation on materials
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Retail/Fashion,10.4,1.3,Supply chain disruption — import dependent
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Food/Hospitality,8.75,1.25,Food import costs and consumer squeeze
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Manufacturing,11.0,1.1,Export markets and input cost exposure
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Marketing Services,7.0,1.0,Reduced corporate spending
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Transportation,9.5,1.0,Trade route disruption
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Logistics,9.5,1.0,Trade route disruption
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Software/Technology,5.6,0.8,Relatively insulated — digital services
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Professional Services,4.9,0.7,Low trade exposure
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Energy/Utilities,8.5,0.85,Energy price volatility
+geopolitical,Geopolitical / Trade Tariffs,ESRB Geopolitical Risk Scenario 2025,2025-02-01,combined,Healthcare,4.2,0.6,Defensive — domestic demand
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Construction,9.0,1.5,Carbon cost on materials and energy
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Retail/Fashion,5.2,0.8,Fast fashion carbon liability
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Food/Hospitality,7.5,1.4,Food production carbon costs + energy
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Manufacturing,9.9,1.1,Carbon pricing on heavy processes
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Marketing Services,3.5,0.7,Low carbon intensity
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Transportation,10.5,1.5,Fleet transition costs — highest exposure
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Logistics,10.5,1.5,Fleet transition costs — highest exposure
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Software/Technology,2.8,0.4,Low carbon intensity — digital
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Professional Services,2.1,0.3,Minimal physical asset base
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Energy/Utilities,12.75,1.5,Direct carbon pricing — stranded asset risk
+climate_transition,Climate Transition Shock — Fit-for-55,ESRB Climate Transition Risk Scenario 2025,2025-02-15,combined,Healthcare,2.8,0.4,Low carbon intensity
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Construction,21.0,3.0,Targeted — direct sector shock
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Retail/Fashion,1.3,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Food/Hospitality,1.25,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Manufacturing,1.1,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Marketing Services,1.0,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Transportation,1.0,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Logistics,1.0,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Software/Technology,0.8,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Professional Services,0.7,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Energy/Utilities,0.85,0.3,Spill-over only
+sector_shock,Sector Shock — Construction,Internal Sector Stress Analysis,2025-01-01,construction,Healthcare,0.6,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Construction,1.5,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Retail/Fashion,18.2,3.0,Targeted — direct sector shock
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Food/Hospitality,1.25,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Manufacturing,1.1,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Marketing Services,1.0,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Transportation,1.0,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Logistics,1.0,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Software/Technology,0.8,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Professional Services,0.7,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Energy/Utilities,0.85,0.3,Spill-over only
+sector_shock,Sector Shock — Retail/Fashion,Internal Sector Stress Analysis,2025-01-01,retail,Healthcare,0.6,0.3,Spill-over only

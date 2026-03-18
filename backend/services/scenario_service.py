@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # Data paths
 DATA_DIR = Path(__file__).parent.parent.parent / "mcp-servers" / "data"
 SMES_CSV = DATA_DIR / "smes.csv"
+VECTORS_CSV = DATA_DIR / "stress_vectors.csv"
 
 # Loss Given Default assumption for SME unsecured lending
 LGD = 0.45
@@ -97,7 +98,28 @@ class ScenarioService:
 
     def __init__(self):
         self.smes_df = pd.read_csv(SMES_CSV, dtype={'id': str})
-        logger.info(f"ScenarioService initialised — {len(self.smes_df)} SMEs loaded")
+        self.vectors_df = pd.read_csv(VECTORS_CSV)
+        logger.info(f"ScenarioService initialised — {len(self.smes_df)} SMEs loaded, "
+                    f"{len(self.vectors_df)} stress vectors loaded")
+
+    def _load_multipliers(self, scenario_type: str, parameter: str = None) -> Dict[str, float]:
+        """
+        Load sector multipliers from published stress test vectors CSV.
+        Falls back to hardcoded SECTOR_MULTIPLIERS if no match found.
+        Source: EBA/ESRB/PRA published stress test disclosures.
+        """
+        mask = self.vectors_df['scenario_type'] == scenario_type
+        if parameter:
+            mask = mask & (self.vectors_df['parameter'] == parameter)
+        rows = self.vectors_df[mask]
+        if rows.empty:
+            logger.warning(f"No vectors found for {scenario_type}/{parameter} — using defaults")
+            return SECTOR_MULTIPLIERS
+        multipliers = dict(zip(rows['sector'], rows['multiplier']))
+        source      = rows.iloc[0]['source']
+        published   = rows.iloc[0]['published_date']
+        logger.info(f"Loaded {len(multipliers)} sector multipliers from '{source}' ({published})")
+        return multipliers
 
     async def run_scenario(
         self, scenario_type: str, parameters: Dict[str, Any]
@@ -135,16 +157,24 @@ class ScenarioService:
         else:
             base_pd_increase = 5.0 + 3.0 * ((rate_bps - 200) / 100)
 
+        if rate_bps <= 100:
+            param = "rate_100bps"
+        elif rate_bps <= 200:
+            param = "rate_200bps"
+        else:
+            param = "rate_300bps"
+
+        multipliers = self._load_multipliers("interest_rate", param)
         impacted, new_critical, sector_map, geography_map = self._apply_vectors(
-            base_pd_increase, SECTOR_MULTIPLIERS
-        )
+            base_pd_increase, multipliers
+        )   
 
         return self._build_result(
             scenario_name=f"Interest Rate Shock +{rate_bps}bps",
             parameters={"rate_change_bps": rate_bps},
             methodology=(
-                f"EBA vector: +{rate_bps}bps sustained → estimated portfolio PD "
-                f"+{base_pd_increase:.1f}% average. Sector multipliers applied."
+                f"EBA 2025 Adverse Scenario vectors: +{rate_bps}bps sustained → estimated portfolio PD "
+                f"+{base_pd_increase:.1f}% average. Sector multipliers sourced from published EBA stress test disclosures."
             ),
             impacted=impacted,
             new_critical=new_critical,
@@ -176,13 +206,9 @@ class ScenarioService:
         base_pd_increase = pd_from_rates + pd_from_gdp + pd_from_unemp
 
         # Real estate shock adds extra PD for exposed sectors
-        re_multipliers = dict(SECTOR_MULTIPLIERS)
-        re_extra = abs(re_shock) / 100 / REAL_ESTATE_PD_FACTOR
-        for sector in REAL_ESTATE_SECTORS:
-            re_multipliers[sector] = re_multipliers.get(sector, 1.0) + re_extra * 0.1
-
+        multipliers = self._load_multipliers("eba_2025_adverse", "combined")
         impacted, new_critical, sector_map, geography_map = self._apply_vectors(
-            base_pd_increase, re_multipliers
+            base_pd_increase, multipliers
         )
 
         return self._build_result(
@@ -194,10 +220,10 @@ class ScenarioService:
                 "real_estate_shock_pct": re_shock,
             },
             methodology=(
-                f"EBA 2025 adverse scenario. Combined PD impact: "
+                f"EBA 2025 EU-Wide Stress Test vectors (published 2025-01-15). Combined PD impact: "
                 f"+{pd_from_rates:.1f}% (rates) + {pd_from_gdp:.1f}% (GDP) "
                 f"+ {pd_from_unemp:.1f}% (unemployment) = {base_pd_increase:.1f}% base. "
-                f"Real estate shock adds additional stress to Construction and Food/Hospitality."
+                f"Sector multipliers from EBA published disclosures."
             ),
             impacted=impacted,
             new_critical=new_critical,
@@ -223,8 +249,9 @@ class ScenarioService:
             vector_map = {"mild": 3.0, "moderate": 7.0, "severe": 12.0}
             base_pd_increase = vector_map.get(severity, 7.0)
 
+        multipliers = self._load_multipliers("recession", str(severity))
         impacted, new_critical, sector_map, geography_map = self._apply_vectors(
-            base_pd_increase, SECTOR_MULTIPLIERS
+            base_pd_increase, multipliers
         )
 
         return self._build_result(
@@ -235,6 +262,7 @@ class ScenarioService:
                 "severity": severity,
             },
             methodology=(
+                f"PRA 2025 Annual Cyclical Scenario vectors ({severity}). "
                 f"GDP contraction {gdp_change}% → PD +{abs(gdp_change)*GDP_PD_FACTOR:.1f}%; "
                 f"unemployment +{unemp}pp → PD +{unemp*UNEMPLOYMENT_PD_FACTOR:.1f}%. "
                 f"Combined base PD increase: +{base_pd_increase:.1f}%."
@@ -254,8 +282,12 @@ class ScenarioService:
         gdp_drag = float(params.get("gdp_change", -2.0))
 
         # Sector shock: targeted high impact on affected sector, mild on rest
-        targeted_multipliers = {s: 0.3 for s in SECTOR_MULTIPLIERS}
-        targeted_multipliers[sector] = 3.0 * severity
+        sector_key = sector.lower().split('/')[0]  # e.g. "retail" from "Retail/Fashion"
+        csv_multipliers = self._load_multipliers("sector_shock", sector_key)
+        # Scale the targeted sector by severity (CSV has severity=1.0 baseline)
+        targeted_multipliers = dict(csv_multipliers)
+        if sector in targeted_multipliers:
+            targeted_multipliers[sector] = targeted_multipliers[sector] * severity
 
         base_pd_increase = abs(gdp_drag) * GDP_PD_FACTOR + (severity * 5)
 
@@ -299,16 +331,24 @@ class ScenarioService:
             severity * 3
         )
 
+        multipliers = self._load_multipliers(scenario_type, "combined")
         impacted, new_critical, sector_map, geography_map = self._apply_vectors(
-            base_pd_increase, SECTOR_MULTIPLIERS
+            base_pd_increase, multipliers
         )
+
+        source_map = {
+            "geopolitical":       "ESRB Geopolitical Risk Scenario 2025",
+            "climate_transition": "ESRB Climate Transition Risk Scenario 2025",
+            "regulation":         "Internal Sector Stress Analysis",
+        }
+        source = source_map.get(scenario_type, "EBA-aligned vectors")
 
         return self._build_result(
             scenario_name=scenario_name,
             parameters=params,
             methodology=(
-                f"Macro shock scenario. Estimated combined PD increase: "
-                f"+{base_pd_increase:.1f}% using EBA-aligned sector vectors."
+                f"{source}. Estimated combined PD increase: "
+                f"+{base_pd_increase:.1f}% using published sector stress vectors."
             ),
             impacted=impacted,
             new_critical=new_critical,
