@@ -62,12 +62,12 @@ class AlertService:
     """Loads historic alerts from CSV; simulate() fires the TechStart demo alert."""
 
     def __init__(self):
-        self._historic: List[Dict[str, Any]] = _load_from_csv()
-        self._fired:    List[Dict[str, Any]] = []
-        if not self._historic:
-            logger.warning("No alerts loaded from CSV — alerts.csv may be missing or empty")
-        else:
-            logger.info(f"AlertService: loaded {len(self._historic)} historic alerts from CSV")
+        self._all_alerts: List[Dict[str, Any]] = _load_from_csv()  # unfiltered
+        # Historic excludes TechStart — only surfaces via simulate
+        self._historic: List[Dict[str, Any]] = [
+            a for a in self._all_alerts if a["sme_id"] != "0142"
+        ]
+        self._fired: List[Dict[str, Any]] = []
     
     # ------------------------------------------------------------------
     # Public API
