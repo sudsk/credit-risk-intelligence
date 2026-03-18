@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '@/store'
 import { setActiveTab } from '@/store/uiSlice'
 import { addTask } from '@/store/tasksSlice'
-import { addScenario } from '@/store/scenariosSlice'
+import { useScenarios } from '@/hooks/useScenarios'
 import { Badge } from '../common/Badge'
 import { Button } from '../common/Button'
 import { portfolioAPI } from '@/services/api'
@@ -117,11 +117,9 @@ const SMEDetailPanel = () => {
   )
 
   // Derived from API response with safe fallbacks
-  const riskDrivers = smeDetail?.risk_drivers ?? []
-  const financials = smeDetail?.details ?? {}
-  const externalFactors = smeDetail?.external_factors ?? {}
-  const trendDirection = smeDetail?.trend?.direction ?? selectedSME.trend
-  const trendValue = smeDetail?.trend?.value ?? selectedSME.trendValue
+  const riskDrivers = smeDetail?.activeSignals ?? selectedSME.activeSignals ?? []
+  const trendDirection = smeDetail?.trend ?? selectedSME.trend
+  const trendValue = smeDetail?.trendValue ?? selectedSME.trendValue
 
   // ── Rating overlay — pulled from enriched SME (via mapSMEResponse) ───────
   const indicativeGrade = selectedSME.indicativeGrade ?? smeDetail?.indicative_grade ?? '—'
@@ -156,15 +154,19 @@ const SMEDetailPanel = () => {
     dispatch(setActiveTab('tasks'))
   }
 
-  const handleRunScenario = () => {
-    dispatch(addScenario({
-      id: `scenario_${Date.now()}`,
-      name: `${selectedSME.name} — Impact Analysis`,
-      status: 'in_progress',
-      progress: 0,
-      createdAt: new Date().toISOString(),
-    }))
+  const { createScenario } = useScenarios()
+
+  const handleRunScenario = async () => {
     dispatch(setActiveTab('scenarios'))
+    try {
+      await createScenario(
+        `${selectedSME.name} — Sector Impact Analysis`,
+        'sector_shock',
+        { sector: selectedSME.sector, severity: 0.6, gdp_change: -2.0 }
+      )
+    } catch (e) {
+      console.error('Scenario failed:', e)
+    }
   }
 
   return (
@@ -406,7 +408,8 @@ const SMEDetailPanel = () => {
             {riskDrivers.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
                 {riskDrivers.map((driver: any, idx: number) => {
-                  const isNegative = (driver.direction ?? 'increase') === 'increase'
+                  const impact = driver.impact ?? 0
+                  const isNegative = impact > 0
                   const accentColor = isNegative ? 'var(--uui-critical-60)' : 'var(--uui-success-60)'
                   return (
                     <div key={idx} style={{
@@ -418,15 +421,15 @@ const SMEDetailPanel = () => {
                     }}>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--uui-text-primary)', marginBottom: '3px' }}>
-                          {driver.factor ?? driver.label}
+                          {driver.factor ?? driver.label ?? 'Signal'}
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>
-                          Source: {driver.source}
+                          {driver.source ?? 'Alternative data'}
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <div style={{ fontSize: '18px', fontWeight: 700, color: accentColor }}>
-                          {isNegative ? '+' : '-'}{Math.abs(driver.impact ?? 0)}
+                          {impact > 0 ? '+' : ''}{impact}
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--uui-text-tertiary)' }}>points</div>
                       </div>
@@ -439,16 +442,17 @@ const SMEDetailPanel = () => {
                 No risk drivers available
               </div>
             )}
+            )}
           </section>
 
           {/* Financial Metrics */}
           <section>
             {sectionTitle('Financial Metrics')}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {infoBox('Annual Revenue', formatCurrency(financials.revenue))}
-              {infoBox('EBITDA', formatCurrency(financials.ebitda))}
-              {infoBox('Debt Service Coverage', financials.debt_service_coverage ? `${financials.debt_service_coverage.toFixed(2)}x` : 'N/A')}
-              {infoBox('Cash Reserves', formatCurrency(financials.cash_reserves))}
+              {infoBox('Annual Revenue', formatCurrency(smeDetail?.revenue ?? 0))}
+              {infoBox('EBITDA', formatCurrency(smeDetail?.ebitda ?? 0))}
+              {infoBox('Debt Service Coverage', smeDetail?.debtServiceCoverage ? `${smeDetail.debtServiceCoverage.toFixed(2)}x` : 'N/A')}
+              {infoBox('Cash Reserves', formatCurrency(smeDetail?.cashReserves ?? 0))}
             </div>
           </section>
 
@@ -457,9 +461,9 @@ const SMEDetailPanel = () => {
             {sectionTitle('External Risk Factors')}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
               {[
-                { label: 'Sector Health', value: externalFactors.sector_health ?? externalFactors.sectorHealth ?? '—' },
-                { label: 'Geography Risk', value: externalFactors.geography_risk ?? externalFactors.geographyRisk ?? '—' },
-                { label: 'Compliance Status', value: externalFactors.compliance_status ?? externalFactors.compliance ?? '—' },
+                { label: 'Sector Health', value: smeDetail?.sectorHealth ?? selectedSME.sectorHealth ?? '—' },
+                { label: 'Geography Risk', value: smeDetail?.geographyRisk ?? selectedSME.geographyRisk ?? '—' },
+                { label: 'Compliance Status', value: smeDetail?.complianceStatus ?? selectedSME.complianceStatus ?? '—' },
               ].map((item, idx) => (
                 <div key={idx} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
