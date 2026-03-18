@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { setActiveTab } from '@/store/uiSlice'
 import { setSelectedSME } from '@/store/portfolioSlice'
-import { addScenario } from '@/store/scenariosSlice'
 import { addTask } from '@/store/tasksSlice'
 import { Button } from '../common/Button'
 import { Card, CardHeader, CardTitle, CardContent } from '../common/Card'
@@ -330,7 +329,14 @@ const AlertsTab = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [affectedOpenId, setAffectedOpenId] = useState<string | null>(null)
   const { createScenario, isRunning: isScenarioRunning } = useScenarios()
-
+  const [riskAssessments, setRiskAssessments] = useState<Record<string, {
+    isAssessing: boolean
+    scoreBefore: number | null
+    scoreAfter: number | null
+    delta: number | null
+    summary: string | null
+    error: string | null
+  }>>({})
 
   // Per-alert task draft state — persists while panel is open
   const [taskDrafts, setTaskDrafts] = useState<Record<string, TaskDraft>>({})
@@ -368,24 +374,28 @@ const AlertsTab = () => {
   }
 
   const handleRunScenario = async (alert: Alert) => {
-    // Infer scenario type and parameters from alert context
     let scenarioType: string
     let parameters: Record<string, any>
+    let description: string
 
-    if (alert.scope === 'sme') {
-      // SME-level alert — run interest rate shock as default single-SME stress
-      scenarioType = 'interest_rate'
-      parameters = { rate_change: 150 }
-    } else if (alert.scope === 'sector') {
+    if (alert.scope === 'sector') {
       scenarioType = 'sector_shock'
-      parameters = { sector: alert.smeName, severity: alert.severity === 'critical' ? 0.8 : 0.5 }
-    } else {
-      // geography or macro — run recession
+      parameters = {
+        sector: alert.smeName.replace(' Sector', '').trim(),
+        severity: alert.severity === 'critical' ? 0.8 : 0.5,
+        gdp_change: -2.0,
+      }
+      description = `Sector shock: ${alert.smeName}`
+    } else if (alert.scope === 'macro') {
       scenarioType = 'recession'
       parameters = { gdp_change: -3.5, unemployment_change: 3.0 }
+      description = `Portfolio stress triggered by: ${alert.title}`
+    } else {
+      // geography
+      scenarioType = 'recession'
+      parameters = { gdp_change: -2.5, unemployment_change: 2.0 }
+      description = `Geographic stress: ${alert.title}`
     }
-
-    const description = `${alert.smeName} — ${alert.title}`
 
     try {
       dispatch(setActiveTab('scenarios'))
@@ -441,6 +451,83 @@ const AlertsTab = () => {
         trendValue: 0,
       } as any))
       dispatch(setActiveTab('home'))
+    }
+  }
+
+  const handleAssessRisk = async (alert: Alert) => {
+    setRiskAssessments(prev => ({
+      ...prev,
+      [alert.id]: { isAssessing: true, scoreBefore: null, scoreAfter: null, delta: null, summary: null, error: null }
+    }))
+
+    // Expand the alert card so the result is visible
+    setExpandedId(alert.id)
+
+    try {
+      const response = await chatAPI.sendMessage(
+        `You are assessing the credit risk impact for ${alert.smeName} (SME ID: ${alert.smeId}).
+
+  Alert: ${alert.title}
+  Summary: ${alert.summary}
+  Signals detected:
+  ${alert.signals.map(s => `- ${s.source}: ${s.detail}`).join('\n')}
+
+  Please:
+  1. Use find_sme_by_name to get the current risk score for ${alert.smeName}
+  2. Use the available data tools to assess the impact of these signals
+  3. Estimate the risk score change these signals would cause
+  4. Respond in this exact JSON format with no other text:
+  {
+    "score_before": <current risk score as number>,
+    "score_after": <estimated new risk score as number>,
+    "delta": <difference as number>,
+    "summary": "<2-3 sentence explanation of why the score changed>"
+  }`,
+        `risk_assessment_${alert.id}`
+      )
+
+      // Parse JSON from agent response
+      try {
+        const jsonMatch = response.content.match(/\{[\s\S]*\}/)
+        if (!jsonMatch) throw new Error('No JSON found in response')
+        const result = JSON.parse(jsonMatch[0])
+        setRiskAssessments(prev => ({
+          ...prev,
+          [alert.id]: {
+            isAssessing: false,
+            scoreBefore: result.score_before,
+            scoreAfter: result.score_after,
+            delta: result.delta,
+            summary: result.summary,
+            error: null,
+          }
+        }))
+      } catch {
+        // Agent responded but not in JSON — show raw response
+        setRiskAssessments(prev => ({
+          ...prev,
+          [alert.id]: {
+            isAssessing: false,
+            scoreBefore: null,
+            scoreAfter: null,
+            delta: null,
+            summary: response.content,
+            error: null,
+          }
+        }))
+      }
+    } catch (e: any) {
+      setRiskAssessments(prev => ({
+        ...prev,
+        [alert.id]: {
+          isAssessing: false,
+          scoreBefore: null,
+          scoreAfter: null,
+          delta: null,
+          summary: null,
+          error: 'Assessment failed — please try again.',
+        }
+      }))
     }
   }
 
@@ -627,6 +714,63 @@ const AlertsTab = () => {
                         )}
                       </div>
                     )}
+                    {/* ── Risk Impact Assessment Result ─────────────────────────────── */}
+                    {isExpanded && alert.scope === 'sme' && riskAssessments[alert.id] && (
+                      <div style={{ marginBottom: '12px', paddingTop: '12px', borderTop: '1px solid var(--uui-neutral-60)' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '9px' }}>
+                          🤖 AI Risk Impact Assessment
+                        </div>
+
+                        {riskAssessments[alert.id].isAssessing && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--uui-text-tertiary)', padding: '12px', background: 'var(--uui-neutral-80)', borderRadius: 'var(--uui-border-radius)' }}>
+                            <Loader size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                            Agent is analysing signals and recalculating risk score...
+                          </div>
+                        )}
+
+                        {!riskAssessments[alert.id].isAssessing && riskAssessments[alert.id].error && (
+                          <div style={{ padding: '10px 12px', background: 'rgba(229,98,72,0.1)', border: '1px solid var(--uui-critical-60)', borderRadius: 'var(--uui-border-radius)', fontSize: '12px', color: 'var(--uui-critical-60)' }}>
+                            {riskAssessments[alert.id].error}
+                          </div>
+                        )}
+
+                        {!riskAssessments[alert.id].isAssessing && !riskAssessments[alert.id].error && (
+                          <div style={{ background: 'var(--uui-neutral-80)', border: '1px solid var(--uui-neutral-60)', borderRadius: 'var(--uui-border-radius)', overflow: 'hidden' }}>
+
+                            {/* Score before/after — only show if we got structured data */}
+                            {riskAssessments[alert.id].scoreBefore !== null && (
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: '1px solid var(--uui-neutral-60)' }}>
+                                <div style={{ padding: '12px', textAlign: 'center', borderRight: '1px solid var(--uui-neutral-60)' }}>
+                                  <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '4px' }}>Score Before</div>
+                                  <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-text-primary)' }}>
+                                    {riskAssessments[alert.id].scoreBefore}
+                                  </div>
+                                </div>
+                                <div style={{ padding: '12px', textAlign: 'center', borderRight: '1px solid var(--uui-neutral-60)', background: 'rgba(229,98,72,0.05)' }}>
+                                  <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '4px' }}>Score After</div>
+                                  <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-critical-60)' }}>
+                                    {riskAssessments[alert.id].scoreAfter}
+                                  </div>
+                                </div>
+                                <div style={{ padding: '12px', textAlign: 'center' }}>
+                                  <div style={{ fontSize: '10px', color: 'var(--uui-text-tertiary)', textTransform: 'uppercase', marginBottom: '4px' }}>Delta</div>
+                                  <div style={{ fontSize: '24px', fontWeight: 700, fontFamily: 'var(--uui-font-mono)', color: 'var(--uui-critical-60)' }}>
+                                    +{riskAssessments[alert.id].delta}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Summary */}
+                            {riskAssessments[alert.id].summary && (
+                              <div style={{ padding: '12px', fontSize: '12px', color: 'var(--uui-text-secondary)', lineHeight: 1.6 }}>
+                                {riskAssessments[alert.id].summary}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Expanded — fully-wired task creation panel */}
                     {isExpanded && (
@@ -706,14 +850,40 @@ const AlertsTab = () => {
                       <Button variant="secondary" size="sm" onClick={() => handleCreateTask(alert)}>
                         📋 Create Task
                       </Button>
-                      <Button variant="secondary" size="sm" onClick={() => handleRunScenario(alert)} disabled={isScenarioRunning}>
-                        {isScenarioRunning ? '⏳ Running...' : '🎯 Run Scenario'}
-                      </Button>
+
+                      {/* SME-level: Assess Risk Impact */}
+                      {alert.scope === 'sme' && (
+                        <Button
+                          variant="secondary" size="sm"
+                          onClick={() => handleAssessRisk(alert)}
+                          disabled={riskAssessments[alert.id]?.isAssessing}
+                        >
+                          {riskAssessments[alert.id]?.isAssessing
+                            ? <><Loader size={11} style={{ animation: 'spin 1s linear infinite' }} /> Assessing...</>
+                            : riskAssessments[alert.id]?.scoreBefore !== null
+                              ? '✓ Risk Assessed'
+                              : '🤖 Assess Risk Impact'
+                          }
+                        </Button>
+                      )}
+
+                      {/* Sector/Geo/Macro: Run Scenario */}
+                      {alert.scope !== 'sme' && (
+                        <Button
+                          variant="secondary" size="sm"
+                          onClick={() => handleRunScenario(alert)}
+                          disabled={isScenarioRunning}
+                        >
+                          {isScenarioRunning ? '⏳ Running...' : '🎯 Run Scenario'}
+                        </Button>
+                      )}
+
                       {alert.scope === 'sme' && (
                         <Button variant="secondary" size="sm" onClick={() => handleViewSME(alert)}>
                           👁️ View SME
                         </Button>
                       )}
+
                       {isIndustry && (
                         <Button
                           variant="secondary" size="sm"
@@ -726,6 +896,7 @@ const AlertsTab = () => {
                           Affected SMEs
                         </Button>
                       )}
+
                       <Button variant="secondary" size="sm" onClick={() => setExpandedId(isExpanded ? null : alert.id)}>
                         {isExpanded ? 'Less' : 'Details'}
                       </Button>
