@@ -79,7 +79,7 @@ class AlertService:
         Appended to _fired so it immediately appears in get_alert_history().
         """
         base = next(
-            (a for a in self._historic if a["sme_id"] == "0142"),
+            (a for a in self._all_alerts if a["sme_id"] == "0142"),
             None,
         )
         if base is None:
