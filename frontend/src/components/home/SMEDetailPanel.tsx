@@ -122,14 +122,14 @@ const SMEDetailPanel = () => {
   const trendValue = smeDetail?.trendValue ?? selectedSME.trendValue
 
   // ── Rating overlay — pulled from enriched SME (via mapSMEResponse) ───────
-  const indicativeGrade = selectedSME.indicativeGrade ?? smeDetail?.indicative_grade ?? '—'
-  const bankRating = selectedSME.bankRating ?? smeDetail?.bank_rating ?? '—'
-  const ratingGapNotches = selectedSME.ratingGapNotches ?? smeDetail?.rating_gap_notches ?? 0
+  const indicativeGrade = smeDetail?.indicativeGrade ?? selectedSME.indicativeGrade ?? '—'
+  const bankRating = smeDetail?.bankRating ?? selectedSME.bankRating ?? '—'
+  const ratingGapNotches = smeDetail?.ratingGapNotches ?? selectedSME.ratingGapNotches ?? 0
   const bankRatingStale = ratingGapNotches >= 2
 
   // ── PD overlay ────────────────────────────────────────────────────────────
-  const pdOriginal = selectedSME.pdOriginal ?? smeDetail?.pd_original ?? null
-  const pdAdjusted = selectedSME.pdAdjusted ?? smeDetail?.pd_adjusted ?? null
+  const pdOriginal = smeDetail?.pdOriginal ?? selectedSME.pdOriginal ?? null
+  const pdAdjusted = smeDetail?.pdAdjusted ?? selectedSME.pdAdjusted ?? null
   const pdDelta = (pdOriginal !== null && pdAdjusted !== null)
     ? Math.round((pdAdjusted - pdOriginal) * 10) / 10
     : null
