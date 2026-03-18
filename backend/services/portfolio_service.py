@@ -204,14 +204,14 @@ class PortfolioService:
         
         # Add additional SME details
         risk_analysis["details"] = {
-            "founded_year": int(sme['founded_year']),
-            "employee_count": int(sme['employee_count']),
-            "revenue": float(sme['revenue']),
-            "ebitda": float(sme['ebitda']),
-            "debt": float(sme['total_debt']) if 'total_debt' in sme.index else 0.0,
-            "cash_reserves": float(sme['cash_reserves']),
-            "current_ratio": float(sme['current_ratio']),
-            "debt_service_coverage": float(sme['debt_service_coverage'])
+            "incorporation_date":    str(sme['incorporation_date'])       if 'incorporation_date'    in sme.index else '',
+            "employee_count":        int(sme['employee_count'])           if 'employee_count'        in sme.index else 0,
+            "revenue":               float(sme['revenue']),
+            "ebitda":                float(sme['ebitda']),
+            "debt":                  float(sme['total_debt']),
+            "cash_reserves":         float(sme['cash_reserves']),
+            "current_ratio":         float(sme['current_ratio']),
+            "debt_service_coverage": float(sme['debt_service_coverage']),
         }
         
         # Add trend information

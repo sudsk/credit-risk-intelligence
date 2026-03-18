@@ -83,7 +83,9 @@ const SMEList = () => {
               onClick={() => dispatch(setSelectedSME(sme))}
               style={{
                 background: 'var(--uui-neutral-70)',
-                border: `1px solid ${selectedSME?.id === sme.id ? 'var(--uui-primary-60)' : 'var(--uui-neutral-60)'}`,
+                borderTop: `1px solid ${selectedSME?.id === sme.id ? 'var(--uui-primary-60)' : 'var(--uui-neutral-60)'}`,
+                borderRight: `1px solid ${selectedSME?.id === sme.id ? 'var(--uui-primary-60)' : 'var(--uui-neutral-60)'}`,
+                borderBottom: `1px solid ${selectedSME?.id === sme.id ? 'var(--uui-primary-60)' : 'var(--uui-neutral-60)'}`,
                 borderLeft: `3px solid ${riskColors[sme.riskCategory]}`,
                 borderRadius: 'var(--uui-border-radius)',
                 padding: '12px',
