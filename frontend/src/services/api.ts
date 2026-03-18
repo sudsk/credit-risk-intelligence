@@ -67,8 +67,8 @@ function formatExposure(value: number): string {
 function mapSMEResponse(sme: any): any {
   return {
     // Core fields (always present)
-    id: sme.id,
-    name: sme.name,
+    id: sme.id ?? sme.sme_id,
+    name: sme.name ?? sme.sme_name,
     riskScore: sme.risk_score,
     riskCategory: sme.risk_category,
     exposure: formatExposure(sme.exposure),

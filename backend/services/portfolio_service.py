@@ -212,7 +212,10 @@ class PortfolioService:
         risk_analysis["total_debt"]            = float(sme['total_debt'])
         risk_analysis["incorporation_date"]    = str(sme['incorporation_date']) if 'incorporation_date'   in sme.index else ''
         risk_analysis["last_review_date"]      = str(sme['last_review_date'])   if 'last_review_date'     in sme.index else ''
-
+        risk_analysis["drawn_amount"]          = float(sme['drawn_amount']) if 'drawn_amount' in sme.index else 0.0
+        risk_analysis["bank_rating"]           = str(sme['bank_rating']) if 'bank_rating' in sme.index else ''
+        risk_analysis["pd_original"]           = float(sme['pd_original']) if 'pd_original' in sme.index else 0.0
+        risk_analysis["pd_adjusted"]           = float(sme['pd_adjusted']) if 'pd_adjusted' in sme.index else 0.0
         
         # Flatten component scores and trend 
         risk_analysis["score_financial"]   = risk_analysis.get("components", {}).get("financial", 0)
@@ -221,7 +224,7 @@ class PortfolioService:
         risk_analysis["score_altdata"]     = risk_analysis.get("components", {}).get("alternative_data", 0)
         risk_analysis["trend"]             = str(sme['trend'])
         risk_analysis["trend_value"]       = float(sme['trend_value'])
-        
+        risk_analysis["score_change_reason"] = risk_analysis.get("score_change_reason", "")
         return risk_analysis
     
     async def get_critical_smes(self, limit: int = 20) -> List[Dict[str, Any]]:
