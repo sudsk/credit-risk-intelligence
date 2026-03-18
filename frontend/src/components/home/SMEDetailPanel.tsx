@@ -442,7 +442,6 @@ const SMEDetailPanel = () => {
                 No risk drivers available
               </div>
             )}
-            )}
           </section>
 
           {/* Financial Metrics */}
