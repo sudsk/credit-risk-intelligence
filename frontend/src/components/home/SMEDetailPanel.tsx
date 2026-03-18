@@ -12,7 +12,7 @@ import { portfolioAPI } from '@/services/api'
 const SMEDetailPanel = () => {
   const dispatch = useDispatch()
   const selectedSME = useSelector((state: RootState) => state.portfolio.selectedSME)
-
+  const { createScenario } = useScenarios()
   const [smeDetail, setSmeDetail] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -153,8 +153,6 @@ const SMEDetailPanel = () => {
     }))
     dispatch(setActiveTab('tasks'))
   }
-
-  const { createScenario } = useScenarios()
 
   const handleRunScenario = async () => {
     dispatch(setActiveTab('scenarios'))
