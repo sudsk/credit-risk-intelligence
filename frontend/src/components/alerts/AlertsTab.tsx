@@ -10,6 +10,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '../common/Card'
 import { Badge } from '../common/Badge'
 import { formatRelativeTime } from '@/utils/formatters'
 import { alertAPI, portfolioAPI } from '@/services/api'
+import { useScenarios } from '@/hooks/useScenarios'
+import { chatAPI } from '@/services/api'
 import type { Alert, SME } from '@/services/types'
 
 // ── Credit officer roster ─────────────────────────────────────────────────────
@@ -118,21 +120,21 @@ const AffectedSMEList = ({ alert, accentColor }: AffectedSMEListProps) => {
   // Simulate per-SME agent analysis — in production this calls the SME agent
   const analyseOne = async (idx: number) => {
     setRows(prev => prev.map((r, i) => i === idx ? { ...r, isAnalysing: true } : r))
-    await new Promise(res => setTimeout(res, 900 + Math.random() * 600))
     const sme = rows[idx].sme
-    const impact = rows[idx].estimatedImpact
-    const analysis = [
-      `Risk score estimated to increase by +${impact}pts based on ${alert.scope} signal.`,
-      sme.riskCategory === 'critical'
-        ? `Already critical — expedite credit review.`
-        : sme.riskCategory === 'medium'
-          ? `Approaching critical threshold. Monitor closely.`
-          : `Currently stable — monitor for secondary effects.`,
-      alert.recommendation
-        ? `Recommended action: ${alert.recommendation}`
-        : `Review latest financials and covenant compliance.`,
-    ].join(' ')
-    setRows(prev => prev.map((r, i) => i === idx ? { ...r, isAnalysing: false, agentAnalysis: analysis } : r))
+    try {
+      const response = await chatAPI.sendMessage(
+        `Briefly assess the credit risk impact on ${sme.name} (ID: ${sme.id}, sector: ${sme.sector}, current risk score: ${sme.riskScore}) ` +
+        `given this alert: ${alert.title}. ${alert.summary} Keep response to 2-3 sentences.`,
+        `alert_analysis_${alert.id}_${sme.id}`
+      )
+      setRows(prev => prev.map((r, i) =>
+        i === idx ? { ...r, isAnalysing: false, agentAnalysis: response.content } : r
+      ))
+    } catch {
+      setRows(prev => prev.map((r, i) =>
+        i === idx ? { ...r, isAnalysing: false, agentAnalysis: 'Analysis unavailable — please try again.' } : r
+      ))
+    }
   }
 
   const analyseAll = async () => {
@@ -327,6 +329,8 @@ const AlertsTab = () => {
   const [error, setError] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [affectedOpenId, setAffectedOpenId] = useState<string | null>(null)
+  const { createScenario, isRunning: isScenarioRunning } = useScenarios()
+
 
   // Per-alert task draft state — persists while panel is open
   const [taskDrafts, setTaskDrafts] = useState<Record<string, TaskDraft>>({})
@@ -363,15 +367,32 @@ const AlertsTab = () => {
     }
   }
 
-  const handleRunScenario = (alert: Alert) => {
-    dispatch(addScenario({
-      id: `scenario_${Date.now()}`,
-      name: `${alert.smeName} — ${alert.title}`,
-      status: 'in_progress',
-      progress: 0,
-      createdAt: new Date().toISOString(),
-    }))
-    dispatch(setActiveTab('scenarios'))
+  const handleRunScenario = async (alert: Alert) => {
+    // Infer scenario type and parameters from alert context
+    let scenarioType: string
+    let parameters: Record<string, any>
+
+    if (alert.scope === 'sme') {
+      // SME-level alert — run interest rate shock as default single-SME stress
+      scenarioType = 'interest_rate'
+      parameters = { rate_change: 150 }
+    } else if (alert.scope === 'sector') {
+      scenarioType = 'sector_shock'
+      parameters = { sector: alert.smeName, severity: alert.severity === 'critical' ? 0.8 : 0.5 }
+    } else {
+      // geography or macro — run recession
+      scenarioType = 'recession'
+      parameters = { gdp_change: -3.5, unemployment_change: 3.0 }
+    }
+
+    const description = `${alert.smeName} — ${alert.title}`
+
+    try {
+      dispatch(setActiveTab('scenarios'))
+      await createScenario(description, scenarioType, parameters)
+    } catch (e) {
+      console.error('Scenario failed:', e)
+    }
   }
 
   // ── Fully-wired task creation ─────────────────────────────────────────────
@@ -401,19 +422,26 @@ const AlertsTab = () => {
     dispatch(setActiveTab('tasks'))
   }
 
-  const handleViewSME = (alert: Alert) => {
-    dispatch(setSelectedSME({
-      id: alert.smeId,
-      name: alert.smeName,
-      riskScore: 68,
-      riskCategory: 'critical',
-      exposure: alert.exposure,
-      sector: 'Software/Technology',
-      geography: 'UK',
-      trend: 'up',
-      trendValue: 14,
-    } as any))
-    dispatch(setActiveTab('home'))
+  const handleViewSME = async (alert: Alert) => {
+    try {
+      const sme = await portfolioAPI.getSMEById(alert.smeId)
+      dispatch(setSelectedSME(sme))
+      dispatch(setActiveTab('home'))
+    } catch {
+      // Fallback — navigate anyway with partial data
+      dispatch(setSelectedSME({
+        id: alert.smeId,
+        name: alert.smeName,
+        riskScore: 0,
+        riskCategory: 'critical',
+        exposure: alert.exposure,
+        sector: '',
+        geography: 'UK',
+        trend: 'up',
+        trendValue: 0,
+      } as any))
+      dispatch(setActiveTab('home'))
+    }
   }
 
   const selectStyle: React.CSSProperties = {
@@ -678,8 +706,8 @@ const AlertsTab = () => {
                       <Button variant="secondary" size="sm" onClick={() => handleCreateTask(alert)}>
                         📋 Create Task
                       </Button>
-                      <Button variant="secondary" size="sm" onClick={() => handleRunScenario(alert)}>
-                        🎯 Run Scenario
+                      <Button variant="secondary" size="sm" onClick={() => handleRunScenario(alert)} disabled={isScenarioRunning}>
+                        {isScenarioRunning ? '⏳ Running...' : '🎯 Run Scenario'}
                       </Button>
                       {alert.scope === 'sme' && (
                         <Button variant="secondary" size="sm" onClick={() => handleViewSME(alert)}>

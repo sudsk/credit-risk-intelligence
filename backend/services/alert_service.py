@@ -64,8 +64,11 @@ class AlertService:
     def __init__(self):
         self._historic: List[Dict[str, Any]] = _load_from_csv()
         self._fired:    List[Dict[str, Any]] = []
-        logger.info(f"AlertService: loaded {len(self._historic)} historic alerts from CSV")
-
+        if not self._historic:
+            logger.warning("No alerts loaded from CSV — alerts.csv may be missing or empty")
+        else:
+            logger.info(f"AlertService: loaded {len(self._historic)} historic alerts from CSV")
+    
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -76,9 +79,14 @@ class AlertService:
         Appended to _fired so it immediately appears in get_alert_history().
         """
         base = next(
-            (a for a in self._historic if a["sme_id"] == "4567"),
-            self._techstart_fallback(),
+            (a for a in self._historic if a["sme_id"] == "0142"),
+            None,
         )
+        if base is None:
+            raise ValueError(
+                "TechStart Solutions alert not found in alerts.csv. "
+                "Ensure sme_id=0142 exists in backend/data/alerts.csv."
+            )
         alert = dict(base)
         alert["id"]        = f"alert_techstart_{int(datetime.now().timestamp())}"
         alert["timestamp"] = datetime.now().isoformat() + "Z"
@@ -133,33 +141,6 @@ class AlertService:
                 seen.add(alert["id"])
                 unique.append(alert)
         return sorted(unique, key=lambda a: a.get("timestamp", ""), reverse=True)
-
-    def _techstart_fallback(self) -> Dict[str, Any]:
-        """Fallback if CSV is missing — keeps the demo working regardless."""
-        return {
-            "id":             "alert_techstart_fallback",
-            "sme_id":         "4567",
-            "sme_name":       "TechStart Solutions",
-            "timestamp":      datetime.now().isoformat() + "Z",
-            "severity":       "critical",
-            "title":          "Multi-Signal Risk Escalation — Immediate Review Required",
-            "summary":        (
-                "Three concurrent adverse signals detected. Risk score escalated "
-                "from 45 (Stable) to 68 (Critical) in 30 days."
-            ),
-            "exposure":       2_850_000,
-            "recommendation": (
-                "Schedule urgent review call with CEO within 48 hours. "
-                "Request updated management accounts."
-            ),
-            "signals": [
-                {"source": "LinkedIn / Companies House", "detail": "CTO departed 18 days ago — unreplaced. Co-founder, 4-year tenure."},
-                {"source": "Web Analytics",             "detail": "Monthly visitors −42% QoQ. Bounce rate 38%→58%."},
-                {"source": "Payment Data",              "detail": "Late payments: 5 in 6m (up from 1). Avg days late: 3→12."},
-            ],
-            "dismissed": False,
-        }
-
 
 _alert_service: Optional[AlertService] = None
 
