@@ -1,7 +1,6 @@
 import PortfolioMetrics from './PortfolioMetrics'
 import SMEList from './SMEList'
 import SMEDetailPanel from './SMEDetailPanel'
-import SimulateFeedButton from './SimulateFeedButton'
 import AlertToast from '../common/AlertToast'
 
 const HomeTab = () => {
@@ -10,12 +9,11 @@ const HomeTab = () => {
       {/* Alert Toast - Global */}
       <AlertToast /> {/* ADD */}
 
-      {/* Portfolio Header with Simulate Button */}
+      {/* Portfolio Header */}
       <div className="flex items-center justify-between">
         <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--uui-text-primary)' }}>
           Portfolio Overview
         </h2>
-        <SimulateFeedButton /> {/* ADD */}
       </div>
 
       {/* Portfolio Metrics Cards */}
