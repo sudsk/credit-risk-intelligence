@@ -2,9 +2,9 @@
 # Deploy the SME Credit Intelligence Platform to Cloud Run behind an HTTPS load
 # balancer with IAP.
 #
-#   bash deploy/deploy.sh                    # setup + all services + load balancer
-#   bash deploy/deploy.sh backend frontend   # rebuild/redeploy only these
-#   bash deploy/deploy.sh lb                 # (re)apply load balancer + IAP only
+#   source deploy/deploy.env && bash deploy/deploy.sh      # setup + all services + LB
+#   bash deploy/deploy.sh backend frontend                 # rebuild/redeploy only these
+#   bash deploy/deploy.sh lb                               # (re)apply LB + IAP only
 #
 # Traffic:
 #   browser ──HTTPS──▶ LB + IAP ──▶ frontend   (everything except /api/*)
@@ -15,17 +15,20 @@
 # frontend/backend only accept traffic from the LB, so the run.app URLs can't bypass IAP.
 set -euo pipefail
 
-PROJECT_ID="${PROJECT_ID:-or2-msq-epmc-acm-de-t1iylu}"
+# Required (set in your shell, never committed): PROJECT_ID, NETWORK, SUBNET, IAP_MEMBERS
+PROJECT_ID="${PROJECT_ID:-}"
 REGION="${REGION:-europe-west2}"
 REPO="${REPO:-credit-risk}"
-GEMINI_MODEL="${GEMINI_MODEL:-gemini-2.5-flash}"
-NETWORK="${NETWORK:-cr-vpc}"
-SUBNET="${SUBNET:-cr-subnet}"
-SUBNET_RANGE="${SUBNET_RANGE:-10.10.0.0/24}"
+GEMINI_MODEL="${GEMINI_MODEL:-gemini-3.7-flash}"
+# Vertex AI location for the model; may differ from REGION (e.g. "global" for newer models)
+GEMINI_LOCATION="${GEMINI_LOCATION:-$REGION}"
+# Existing VPC network + subnet (in REGION) used for the agents' egress
+NETWORK="${NETWORK:-}"
+SUBNET="${SUBNET:-}"
 # DOMAIN: optional hostname. Unset = <ip>.nip.io (HTTPS without owning a domain; IAP needs HTTPS)
 DOMAIN="${DOMAIN:-}"
-# IAP_MEMBERS: who can open the app (comma-separated IAM members). Default: all of EPAM.
-IAP_MEMBERS="${IAP_MEMBERS:-domain:epam.com}"
+# IAP_MEMBERS: who can open the app, comma-separated IAM members (e.g. "domain:example.com")
+IAP_MEMBERS="${IAP_MEMBERS:-}"
 
 if [[ $# -gt 0 ]]; then
   STEPS=("$@"); FULL_DEPLOY=false
@@ -34,6 +37,23 @@ else
 fi
 
 cd "$(dirname "$0")/.."
+
+if [[ -z "$PROJECT_ID" ]]; then
+  echo "Set PROJECT_ID (see deploy/deploy.env.example)" >&2; exit 1
+fi
+if [[ " ${STEPS[*]} " == *" lb "* && -z "$IAP_MEMBERS" ]]; then
+  echo "Set IAP_MEMBERS, e.g. IAP_MEMBERS=domain:example.com (see deploy/deploy.env.example)" >&2; exit 1
+fi
+# Only setup and the agents step use the network
+needs_network=$FULL_DEPLOY
+[[ " ${STEPS[*]} " == *" agents "* ]] && needs_network=true
+if $needs_network && [[ -z "$NETWORK" || -z "$SUBNET" ]]; then
+  echo "Set NETWORK and SUBNET to an existing VPC network/subnet in ${REGION}. Available:" >&2
+  gcloud compute networks subnets list --project "$PROJECT_ID" --filter "region:${REGION}" \
+    --format "table(name, network.basename(), ipCidrRange, privateIpGoogleAccess)" >&2
+  exit 1
+fi
+echo "Project: ${PROJECT_ID}  Region: ${REGION}  Model: ${GEMINI_MODEL} (${GEMINI_LOCATION})"
 
 PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
 # Cloud Run deterministic URLs: https://<service>-<project-number>.<region>.run.app
@@ -70,18 +90,40 @@ setup() {
   gc projects add-iam-policy-binding "$PROJECT_ID" \
     --member "serviceAccount:${SA_AGENTS}" --role roles/aiplatform.user --condition None >/dev/null
 
-  echo "==> VPC for agents egress (Private Google Access for Vertex AI)"
-  exists gc compute networks describe "$NETWORK" ||
-    gc compute networks create "$NETWORK" --subnet-mode custom
-  exists gc compute networks subnets describe "$SUBNET" --region "$REGION" ||
-    gc compute networks subnets create "$SUBNET" --network "$NETWORK" --region "$REGION" \
-      --range "$SUBNET_RANGE"
-  gc compute networks subnets update "$SUBNET" --region "$REGION" \
-    --enable-private-ip-google-access
+  echo "==> Subnet ${SUBNET} (agents egress)"
+  # Agents send all egress through the VPC, so the subnet needs Private Google
+  # Access to reach Vertex AI
+  pga=$(gc compute networks subnets describe "$SUBNET" --region "$REGION" \
+    --format 'value(privateIpGoogleAccess)')
+  if [[ "$pga" != "True" ]]; then
+    echo "    Enabling Private Google Access on ${SUBNET}"
+    gc compute networks subnets update "$SUBNET" --region "$REGION" \
+      --enable-private-ip-google-access
+  fi
 
+  # One reserved IP shared by the HTTPS and HTTP-redirect rules; also keeps the
+  # <ip>.nip.io hostname (and its cert) stable across redeploys
   echo "==> Static IP"
   exists gc compute addresses describe cr-ip --global ||
     gc compute addresses create cr-ip --global --ip-version IPV4
+}
+
+check_model() {
+  echo "==> Checking ${GEMINI_MODEL} is available in ${GEMINI_LOCATION}"
+  local host="${GEMINI_LOCATION}-aiplatform.googleapis.com"
+  [[ "$GEMINI_LOCATION" == "global" ]] && host="aiplatform.googleapis.com"
+  local status
+  status=$(curl -s -o /tmp/gemini-check.json -w '%{http_code}' -X POST \
+    -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+    -H "Content-Type: application/json" \
+    "https://${host}/v1/projects/${PROJECT_ID}/locations/${GEMINI_LOCATION}/publishers/google/models/${GEMINI_MODEL}:generateContent" \
+    -d '{"contents":[{"role":"user","parts":[{"text":"ping"}]}]}')
+  if [[ "$status" != "200" ]]; then
+    echo "Model ${GEMINI_MODEL} not usable in ${GEMINI_LOCATION} (HTTP ${status}):" >&2
+    head -c 500 /tmp/gemini-check.json >&2; echo >&2
+    echo "Try GEMINI_LOCATION=global or a different GEMINI_MODEL." >&2
+    exit 1
+  fi
 }
 
 lb_ip() { gc compute addresses describe cr-ip --global --format='value(address)'; }
@@ -101,6 +143,7 @@ deploy_mcp() {
 }
 
 deploy_agents() {
+  check_model
   build agents agents/Dockerfile
   # max-instances 1: chat sessions live in memory (InMemorySessionService)
   # all-traffic VPC egress so calls to mcp-server/backend count as internal
@@ -108,7 +151,7 @@ deploy_agents() {
     --service-account "$SA_AGENTS" --no-allow-unauthenticated \
     --network "$NETWORK" --subnet "$SUBNET" --vpc-egress all-traffic \
     --memory 1Gi --max-instances 1 --timeout 300 \
-    --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${REGION},GOOGLE_GENAI_USE_VERTEXAI=TRUE,GEMINI_MODEL=${GEMINI_MODEL},MCP_SERVER_URL=${MCP_URL},BACKEND_API_URL=${BACKEND_URL}"
+    --set-env-vars "GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${GEMINI_LOCATION},GOOGLE_GENAI_USE_VERTEXAI=TRUE,GEMINI_MODEL=${GEMINI_MODEL},MCP_SERVER_URL=${MCP_URL},BACKEND_API_URL=${BACKEND_URL}"
   gc run services add-iam-policy-binding agents --region "$REGION" \
     --member "serviceAccount:${SA_BACKEND}" --role roles/run.invoker >/dev/null
 }
