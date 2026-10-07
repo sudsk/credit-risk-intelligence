@@ -2,12 +2,16 @@
 FastAPI Main Application
 SME Credit Intelligence Platform API
 """
+import asyncio
 import logging
+import os
 import uvicorn
 import httpx
 from contextlib import asynccontextmanager
 from typing import Optional, Dict, Any, List
 
+import google.auth.transport.requests
+from google.oauth2 import id_token
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -20,6 +24,20 @@ from services.alert_service import get_alert_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Local default; on Cloud Run set AGENTS_URL to the agents service URL
+AGENTS_URL = os.getenv("AGENTS_URL", "http://localhost:8080")
+CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
+
+
+async def _agents_auth_headers() -> Dict[str, str]:
+    """ID token for calling the private agents service on Cloud Run. Skipped locally (plain http)."""
+    if not AGENTS_URL.startswith("https://"):
+        return {}
+    token = await asyncio.to_thread(
+        id_token.fetch_id_token, google.auth.transport.requests.Request(), AGENTS_URL
+    )
+    return {"Authorization": f"Bearer {token}"}
 
 
 @asynccontextmanager
@@ -45,7 +63,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -340,10 +358,11 @@ async def chat(request: ChatRequest):
     Agents expose POST /chat (not /orchestrate — orchestrator removed).
     """
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             response = await client.post(
-                "http://localhost:8080/chat",
+                f"{AGENTS_URL}/chat",
                 json={"message": request.query, "session_id": request.session_id},
+                headers=await _agents_auth_headers(),
             )
             response.raise_for_status()
             data = response.json()
@@ -355,7 +374,7 @@ async def chat(request: ChatRequest):
     except httpx.ConnectError:
         raise HTTPException(
             status_code=503,
-            detail="Cannot connect to agent service. Ensure ADK agents are running on port 8080.",
+            detail=f"Cannot connect to agent service at {AGENTS_URL}.",
         )
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=503, detail=f"Agent service error: {e.response.status_code}")
@@ -434,4 +453,4 @@ async def get_active_alerts(limit: int = Query(10, ge=1, le=50)):
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=True, log_level="info")

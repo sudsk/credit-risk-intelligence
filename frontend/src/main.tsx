@@ -4,7 +4,6 @@ import { Provider } from 'react-redux'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import { store } from './store'
-import { wsService } from './services/websocket'
 import './index.css'
 
 // Create React Query client

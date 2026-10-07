@@ -6,6 +6,7 @@ Implements the credit risk calculation methodology from CREDIT_RISK_METHODOLOGY.
 import math
 import logging
 import pandas as pd
+import os
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 
@@ -54,7 +55,7 @@ SIGNAL_WEIGHTS: Dict[str, int] = {
 }
 
 # Data paths
-DATA_DIR = Path(__file__).parent.parent.parent / "mcp-servers" / "data"
+DATA_DIR = Path(os.getenv("DATA_DIR", Path(__file__).parent.parent.parent / "mcp-servers" / "data"))
 SMES_CSV = DATA_DIR / "smes.csv"
 
 # Load SME data once at module level

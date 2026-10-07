@@ -1,19 +1,17 @@
-# Backend API
+# Backend API — build from repo root: docker build -f backend/Dockerfile .
 FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+COPY backend/ /app/
+# Shared SME CSVs used by the risk engine and scenario service
+COPY mcp-servers/data/ /app/mcp-data/
 
-ENV PYTHONPATH=/app
-ENV PORT=8000
+ENV DATA_DIR=/app/mcp-data
+ENV PYTHONUNBUFFERED=1
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8000/health || exit 1
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Cloud Run sets $PORT (default 8080)
+CMD exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}

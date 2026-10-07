@@ -1,19 +1,14 @@
-# ADK Orchestrator
+# ADK agents — build from repo root: docker build -f agents/Dockerfile .
 FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
+COPY agents/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/
+# Keep the agents/ package path so "agents.interaction..." imports resolve
+COPY agents/ /app/agents/
 
-ENV PYTHONPATH=/app
-ENV PORT=8080
+ENV PYTHONUNBUFFERED=1
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8080/health || exit 1
-
-CMD ["python", "interaction/main.py"]
+CMD ["python", "-m", "agents.interaction.main"]

@@ -4,12 +4,13 @@ Aggregates portfolio data and provides SME list/detail views.
 """
 
 import pandas as pd
+import os
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from .risk_engine import get_risk_engine
 
 # Data paths
-DATA_DIR = Path(__file__).parent.parent.parent / "mcp-servers" / "data"
+DATA_DIR = Path(os.getenv("DATA_DIR", Path(__file__).parent.parent.parent / "mcp-servers" / "data"))
 SMES_CSV = DATA_DIR / "smes.csv"
 
 class PortfolioService:

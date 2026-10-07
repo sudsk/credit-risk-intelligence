@@ -1,20 +1,15 @@
-# Unified Data MCP Server 
+# Unified MCP data server — build from repo root: docker build -f mcp-servers/Dockerfile .
 FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
+COPY mcp-servers/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY data/ /app/data/
-COPY data_sources/data_server.py /app/
+# Keep data/ and data_sources/ side by side — data_server.py reads ../data
+COPY mcp-servers/data/ /app/data/
+COPY mcp-servers/data_sources/ /app/data_sources/
 
-ENV PYTHONPATH=/app
-ENV PORT=8001
+ENV PYTHONUNBUFFERED=1
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8001/ || exit 1
-
-CMD ["python", "data_server.py"]
+CMD ["python", "data_sources/data_server.py"]

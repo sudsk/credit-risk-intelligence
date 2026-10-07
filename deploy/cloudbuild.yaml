@@ -1,0 +1,18 @@
+# Generic image build used by deploy.sh — builds one service from the repo root.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - ${_DOCKERFILE}
+      - -t
+      - ${_IMAGE}
+      - --build-arg
+      - VITE_API_URL=${_VITE_API_URL}
+      - .
+images:
+  - ${_IMAGE}
+substitutions:
+  _VITE_API_URL: ""
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,4 +1,5 @@
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Empty VITE_API_URL = same origin (behind the load balancer); unset = local backend
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 export const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
 
 export const RISK_CATEGORIES = {

@@ -11,13 +11,14 @@ Methodology (aligned to ESRB/EBA adverse scenario framework):
 
 import logging
 import pandas as pd
+import os
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 
 logger = logging.getLogger(__name__)
 
 # Data paths
-DATA_DIR = Path(__file__).parent.parent.parent / "mcp-servers" / "data"
+DATA_DIR = Path(os.getenv("DATA_DIR", Path(__file__).parent.parent.parent / "mcp-servers" / "data"))
 SMES_CSV = DATA_DIR / "smes.csv"
 VECTORS_CSV = DATA_DIR / "stress_vectors.csv"
 
